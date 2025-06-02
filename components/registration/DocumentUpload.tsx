@@ -1,0 +1,211 @@
+"use client"
+
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { Select } from "@/components/ui/select"
+import { Upload, X } from "lucide-react"
+
+interface DocumentUploadProps {
+  onNext: () => void
+  onBack: () => void
+}
+
+export default function DocumentUpload({ onNext, onBack }: DocumentUploadProps) {
+  const [selectedId, setSelectedId] = useState("")
+  const [frontImage, setFrontImage] = useState<File | null>(null)
+  const [backImage, setBackImage] = useState<File | null>(null)
+  const [supportingDocs, setSupportingDocs] = useState<File[]>([])
+
+  const validIds = [
+    "PhilSys ID/National ID",
+    "Driver's License",
+    "Passport",
+    "Voter's ID",
+    "SSS ID",
+    "GSIS ID",
+    "TIN ID",
+    "Senior Citizen ID",
+    "PWD ID"
+  ]
+
+  const handleFileUpload = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: "front" | "back" | "supporting"
+  ) => {
+    const files = e.target.files
+    if (!files) return
+
+    if (type === "front") {
+      setFrontImage(files[0])
+    } else if (type === "back") {
+      setBackImage(files[0])
+    } else {
+      setSupportingDocs([...supportingDocs, ...Array.from(files)])
+    }
+  }
+
+  const removeFile = (index: number) => {
+    setSupportingDocs(supportingDocs.filter((_, i) => i !== index))
+  }
+
+  return (
+    <div className="bg-white rounded-[2px] shadow-sm p-6">
+      <h2 className="text-2xl font-semibold text-gray-900 mb-6">Document Upload</h2>
+      
+      <form className="space-y-8">
+        {/* ID Selection */}
+        <div className="space-y-4">
+          <Label htmlFor="idType">Select Valid Government ID</Label>
+          <Select 
+            id="idType"
+            value={selectedId}
+            onChange={(e) => setSelectedId(e.target.value)}
+            className="mt-1"
+          >
+            <option value="">Select ID Type</option>
+            {validIds.map((id) => (
+              <option key={id} value={id}>{id}</option>
+            ))}
+          </Select>
+        </div>
+
+        {/* ID Upload */}
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Front ID */}
+            <div>
+              <Label htmlFor="frontId">Front of ID</Label>
+              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-[2px]">
+                <div className="space-y-2 text-center">
+                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                  <div className="text-sm text-gray-600">
+                    <label
+                      htmlFor="frontId"
+                      className="relative cursor-pointer rounded-md font-medium text-[#23479A] focus-within:outline-none focus-within:ring-2 focus-within:ring-[#23479A]/20"
+                    >
+                      <span>Upload front of ID</span>
+                      <input
+                        id="frontId"
+                        name="frontId"
+                        type="file"
+                        accept="image/*"
+                        className="sr-only"
+                        onChange={(e) => handleFileUpload(e, "front")}
+                      />
+                    </label>
+                  </div>
+                  <p className="text-xs text-gray-500">PNG, JPG up to 5MB</p>
+                </div>
+              </div>
+              {frontImage && (
+                <p className="mt-2 text-sm text-gray-600">{frontImage.name}</p>
+              )}
+            </div>
+
+            {/* Back ID */}
+            <div>
+              <Label htmlFor="backId">Back of ID</Label>
+              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-[2px]">
+                <div className="space-y-2 text-center">
+                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                  <div className="text-sm text-gray-600">
+                    <label
+                      htmlFor="backId"
+                      className="relative cursor-pointer rounded-md font-medium text-[#23479A] focus-within:outline-none focus-within:ring-2 focus-within:ring-[#23479A]/20"
+                    >
+                      <span>Upload back of ID</span>
+                      <input
+                        id="backId"
+                        name="backId"
+                        type="file"
+                        accept="image/*"
+                        className="sr-only"
+                        onChange={(e) => handleFileUpload(e, "back")}
+                      />
+                    </label>
+                  </div>
+                  <p className="text-xs text-gray-500">PNG, JPG up to 5MB</p>
+                </div>
+              </div>
+              {backImage && (
+                <p className="mt-2 text-sm text-gray-600">{backImage.name}</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Supporting Documents */}
+        <div className="space-y-4">
+          <Label htmlFor="supporting">Supporting Documents</Label>
+          <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-[2px]">
+            <div className="space-y-2 text-center">
+              <Upload className="mx-auto h-12 w-12 text-gray-400" />
+              <div className="text-sm text-gray-600">
+                <label
+                  htmlFor="supporting"
+                  className="relative cursor-pointer rounded-md font-medium text-[#23479A] focus-within:outline-none focus-within:ring-2 focus-within:ring-[#23479A]/20"
+                >
+                  <span>Upload supporting documents</span>
+                  <input
+                    id="supporting"
+                    name="supporting"
+                    type="file"
+                    multiple
+                    accept=".pdf,image/*"
+                    className="sr-only"
+                    onChange={(e) => handleFileUpload(e, "supporting")}
+                  />
+                </label>
+              </div>
+              <p className="text-xs text-gray-500">PDF, PNG, JPG up to 10MB</p>
+            </div>
+          </div>
+
+          {/* Supporting Documents List */}
+          {supportingDocs.length > 0 && (
+            <div className="mt-4 space-y-2">
+              {supportingDocs.map((file, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-2 bg-gray-50 rounded-[2px]"
+                >
+                  <span className="text-sm text-gray-600">{file.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeFile(index)}
+                    className="text-gray-400 hover:text-gray-500"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Navigation Buttons */}
+        <div className="flex justify-between space-x-4 pt-6 border-t">
+          <Button
+            type="button"
+            onClick={onBack}
+            variant="outline"
+            className="border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10 rounded-[2px]"
+          >
+            Previous Step
+          </Button>
+          <Button
+            type="submit"
+            onClick={(e) => {
+              e.preventDefault()
+              onNext()
+            }}
+            className="bg-[#23479A] hover:bg-[#23479A]/90 text-white rounded-[2px]"
+          >
+            Next Step
+          </Button>
+        </div>
+      </form>
+    </div>
+  )
+} 
