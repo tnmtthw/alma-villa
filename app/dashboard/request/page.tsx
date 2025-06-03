@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -13,12 +14,12 @@ import {
   Building,
   Search,
   Clock,
-  Check,
   ArrowRight,
   Info
 } from "lucide-react"
 
 export default function DocumentRequestPage() {
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
 
@@ -104,7 +105,8 @@ export default function DocumentRequestPage() {
       icon: FileText,
       fee: "Free",
       processingTime: "Same day",
-      requirements: ["Valid ID", "Detailed Statement"]
+      requirements: ["Valid ID", "Detailed Statement"],
+      popular: false
     }
   ]
 
@@ -123,9 +125,8 @@ export default function DocumentRequestPage() {
   })
 
   const handleDocumentSelect = (documentId: string) => {
-    // Navigate to the specific document request form
-    console.log(`Requesting document: ${documentId}`)
-    // You would typically use router.push() here
+    // Navigate to the specific document form
+    router.push(`/dashboard/request-form?type=${documentId}`)
   }
 
   return (
@@ -139,7 +140,7 @@ export default function DocumentRequestPage() {
             </h1>
             <p className="text-lg text-gray-600">
               Select the type of document you need from Barangay Alma Villa. 
-              All requests are processed securely and efficiently.
+              All requests are processed securely and efficiently with automated PDF generation.
             </p>
           </div>
         </div>
@@ -298,7 +299,7 @@ export default function DocumentRequestPage() {
                         onClick={() => handleDocumentSelect(doc.id)}
                         className="w-full bg-[#23479A] hover:bg-[#23479A]/90 group-hover:scale-[1.02] transition-transform"
                       >
-                        Request Document
+                        Fill Out Form
                         <ArrowRight className="h-4 w-4 ml-2" />
                       </Button>
                     </div>
@@ -333,7 +334,7 @@ export default function DocumentRequestPage() {
                   <p className="text-blue-800 text-sm">
                     If you can't find the document you're looking for or need assistance with requirements, 
                     please contact the Barangay Office at <strong>almavilla.gloria@gmail.com</strong> or 
-                    visit us during office hours.
+                    visit us during office hours. All forms automatically generate PDF documents for admin processing.
                   </p>
                 </div>
               </div>
