@@ -29,6 +29,9 @@ import {
   Newspaper, 
   Settings, 
   User2,
+  HelpCircle,
+  Moon,
+  ChevronDown
 } from "lucide-react"
 import { useState, useEffect } from "react"
 
@@ -67,8 +70,8 @@ const navigationItems: NavigationItem[] = [
 ]
 
 export function MainNav() {
-  const userName = "Juan Dela Cruz" // This should come from your auth state
-  const userRole = "Resident"
+  const userName = "Juan Dela Cruz"
+  const userEmail = "juan.delacruz@email.com"
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -76,7 +79,7 @@ export function MainNav() {
   }, [])
 
   return (
-    <nav className="w-full border-b bg-white">
+    <nav className="w-full border-b bg-white sticky top-0 z-50">
       <div className="flex h-16 items-center max-w-7xl mx-auto px-8">
         {/* Mobile Menu Button */}
         <Sheet>
@@ -86,17 +89,20 @@ export function MainNav() {
               <span className="sr-only">Toggle menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-64 p-0">
-            <SheetHeader className="p-8 border-b">
-              <SheetTitle>Navigation</SheetTitle>
+          <SheetContent 
+            side="left" 
+            className="w-64 p-0 bg-white border-r border-gray-200 shadow-lg"
+          >
+            <SheetHeader className="p-8 border-b border-gray-200 bg-white">
+              <SheetTitle className="text-gray-900">Alma Villa</SheetTitle>
             </SheetHeader>
-            <ScrollArea className="h-[calc(100vh-4rem)]">
-              <div className="p-8 space-y-1">
+            <ScrollArea className="h-[calc(100vh-4rem)] bg-white">
+              <div className="p-8 space-y-1 bg-white">
                 {navigationItems.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50"
+                    className="flex items-center px-3 py-3 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-[#23479A] transition-colors duration-200"
                   >
                     <item.icon className="mr-3 h-5 w-5" />
                     {item.label}
@@ -127,7 +133,7 @@ export function MainNav() {
             <Link
               key={item.href}
               href={item.href}
-              className="flex items-center text-sm font-medium text-gray-600 hover:text-[#23479A]"
+              className="flex items-center text-sm font-medium text-gray-600 hover:text-[#23479A] transition-colors duration-200"
             >
               <item.icon className="mr-2 h-4 w-4" />
               {item.label}
@@ -136,45 +142,80 @@ export function MainNav() {
         </div>
 
         {/* User Menu */}
-        <div className="ml-auto flex items-center space-x-4">
+        <div className="ml-auto flex items-center">
           {mounted && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="relative h-8 w-8 rounded-full">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-[#23479A] text-white">
-                      {userName.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
+                <Button 
+                  variant="outline" 
+                  className="h-9 rounded-full px-3 border-0 hover:bg-gray-50 transition-colors duration-200"
+                >
+                  <User2 className="h-5 w-5 mr-2 text-gray-600" />
+                  <span className="text-sm font-medium text-gray-700 hidden md:block mr-1">
+                    {userName.split(' ')[0]}
+                  </span>
+                  <ChevronDown className="h-3 w-3 text-gray-500" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 
-                sideOffset={5} 
                 align="end" 
-                className="w-56 bg-white border border-gray-200 shadow-md"
+                className="w-72 p-0 bg-white border border-gray-200 shadow-lg rounded-lg"
+                sideOffset={8}
               >
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{userName}</p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {userRole.toLowerCase()}@mail.com
-                    </p>
+                {/* User Info Header */}
+                <DropdownMenuLabel className="p-4 border-b border-gray-100">
+                  <div className="flex items-center space-x-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback className="bg-[#23479A] text-white">
+                        {userName.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-900 truncate">
+                        {userName}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {userEmail}
+                      </p>
+                    </div>
                   </div>
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer">
-                  <User2 className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer text-red-600">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
+
+                {/* Menu Items */}
+                <div className="p-2">
+                  {/* Profile Settings Link */}
+                  <Link href="/dashboard/profile">
+                    <DropdownMenuItem className="flex items-center px-3 py-2.5 rounded-md cursor-pointer hover:bg-gray-50 transition-colors duration-150">
+                      <User2 className="mr-3 h-4 w-4 text-gray-500" />
+                      <span className="text-sm text-gray-700">Profile Settings</span>
+                    </DropdownMenuItem>
+                  </Link>
+                  
+                  <DropdownMenuItem className="flex items-center px-3 py-2.5 rounded-md cursor-pointer hover:bg-gray-50 transition-colors duration-150">
+                    <HelpCircle className="mr-3 h-4 w-4 text-gray-500" />
+                    <span className="text-sm text-gray-700">Help Center</span>
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuItem className="flex items-center px-3 py-2.5 rounded-md cursor-pointer hover:bg-gray-50 transition-colors duration-150">
+                    <Moon className="mr-3 h-4 w-4 text-gray-500" />
+                    <span className="text-sm text-gray-700">Dark Mode</span>
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuItem className="flex items-center px-3 py-2.5 rounded-md cursor-pointer hover:bg-gray-50 transition-colors duration-150">
+                    <Settings className="mr-3 h-4 w-4 text-gray-500" />
+                    <span className="text-sm text-gray-700">Settings</span>
+                  </DropdownMenuItem>
+                </div>
+                
+                <DropdownMenuSeparator className="my-1 bg-gray-100" />
+                
+                {/* Sign Out */}
+                <div className="p-2">
+                  <DropdownMenuItem className="flex items-center px-3 py-2.5 rounded-md cursor-pointer hover:bg-red-50 text-red-600 transition-colors duration-150">
+                    <LogOut className="mr-3 h-4 w-4" />
+                    <span className="text-sm">Sign Out</span>
+                  </DropdownMenuItem>
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
@@ -182,4 +223,4 @@ export function MainNav() {
       </div>
     </nav>
   )
-} 
+}

@@ -4,7 +4,8 @@ import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { LogIn, Menu, X } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { usePathname } from "next/navigation"
 
 interface MenuItem {
   href: string
@@ -20,6 +21,12 @@ const menuItems: MenuItem[] = [
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const pathname = usePathname()
+  const isDashboard = pathname?.startsWith("/dashboard")
+
+  if (isDashboard) {
+    return null
+  }
 
   return (
     <nav className="w-full border-b bg-white">

@@ -1,6 +1,5 @@
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
-import { headers } from "next/headers"
 import { Inter } from "next/font/google"
 import { Metadata } from "next"
 import "./globals.css"
@@ -23,16 +22,12 @@ interface RootLayoutProps {
 }
 
 export default function RootLayout({ children }: RootLayoutProps) {
-  const headersList = headers();
-  const pathname = headersList.get("x-pathname") || "";
-  const isDashboard = pathname.startsWith("/dashboard");
-
   return (
     <html lang="en">
       <body className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col`}>
-        {!isDashboard && <Navbar />}
+        <Navbar />
         <main className="flex-1">{children}</main>
-        {!isDashboard && <Footer />}
+        <Footer />
       </body>
     </html>
   );
