@@ -1,14 +1,13 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Download } from "lucide-react"
-import Link from "next/link"
 import Image from "next/image"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
 const Hero = () => {
   return (
-    <section className="relative bg-[#23479A] min-h-[350px] overflow-hidden">
-      {/* Background Image */}
+    <section className="relative bg-[#23479A] pb-28">
+      {/* Background Pattern */}
       <div 
         className="absolute inset-x-0 bottom-0 h-[250px]"
         style={{
@@ -20,39 +19,32 @@ const Hero = () => {
         }}
       />
       
-      <div className="max-w-7xl mx-auto px-4 pt-10 pb-20 lg:pt-12">
+      <div className="max-w-7xl mx-auto px-8 py-12 lg:py-24">
         <div className="grid lg:grid-cols-2 gap-8 items-center">
-          {/* Left Content */}
-          <div className="text-white space-y-8 relative z-10">
-            <h1 className="text-2xl lg:text-3xl xl:text-4xl font-bold leading-tight max-w-xl">
-              MAARING MO NG I PROSESO ANG MGA DOKUMENTO NA KAILANGAN MO SA BARAGAY
+          <div className="relative z-10 text-white">
+            <h1 className="text-4xl lg:text-5xl font-bold leading-tight mb-6">
+              Welcome to Alma Villa Barangay Portal
             </h1>
-            <div className="flex items-center gap-3">
+            <p className="text-lg text-white/80 mb-8">
+              Your one-stop platform for accessing barangay services, submitting requests, and staying updated with community news.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4">
               <Button 
-                variant="secondary" 
-                size="lg"
-                className="bg-white text-[#23479A] hover:bg-white/90 rounded-[2px] px-6 h-11"
                 asChild
+                className="bg-white text-[#23479A] hover:bg-white/90"
               >
-                <Link href="/request">
-                  Request Now
-                </Link>
+                <Link href="/register">Register as Resident</Link>
               </Button>
               <Button 
-                variant="outline" 
-                size="lg"
-                className="bg-transparent border-white text-white hover:bg-white/10 rounded-[2px] px-6 h-11"
                 asChild
+                variant="outline"
+                className="border-white text-white hover:bg-white/10"
               >
-                <Link href="/forms" className="flex items-center gap-2">
-                  <Download className="h-4 w-4" />
-                  Download Forms
-                </Link>
+                <Link href="/services">View Services</Link>
               </Button>
             </div>
           </div>
-
-          {/* Right Content */}
+          
           <div className="relative hidden lg:block">
             <Image
               src="/assets/img/heroimage.png"

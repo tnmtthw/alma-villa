@@ -29,11 +29,16 @@ import {
   Newspaper, 
   Settings, 
   User2,
-  Bell,
-  BadgeCheck
 } from "lucide-react"
+import { useState, useEffect } from "react"
 
-const navigationItems = [
+interface NavigationItem {
+  icon: React.ElementType
+  label: string
+  href: string
+}
+
+const navigationItems: NavigationItem[] = [
   {
     icon: LayoutDashboard,
     label: "Dashboard",
@@ -64,6 +69,11 @@ const navigationItems = [
 export function MainNav() {
   const userName = "Juan Dela Cruz" // This should come from your auth state
   const userRole = "Resident"
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   return (
     <nav className="w-full border-b bg-white">
@@ -127,50 +137,47 @@ export function MainNav() {
 
         {/* User Menu */}
         <div className="ml-auto flex items-center space-x-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="relative h-8 w-8 rounded-full">
-                <Avatar>
-                  <AvatarFallback className="bg-[#23479A] text-white">
-                    {userName.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64 bg-white rounded-xl shadow-lg border-none p-2">
-              {/* User Info Section */}
-              <div className="px-2 py-2 mb-2">
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-6 w-6">
-                    <AvatarFallback className="bg-[#23479A] text-white text-sm">
+          {mounted && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="relative h-8 w-8 rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="bg-[#23479A] text-white">
                       {userName.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="flex items-center gap-1">
-                    <span className="text-sm font-medium">{userName}</span>
-                    <BadgeCheck className="h-4 w-4 text-[#23479A]" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent 
+                sideOffset={5} 
+                align="end" 
+                className="w-56 bg-white border border-gray-200 shadow-md"
+              >
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{userName}</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {userRole.toLowerCase()}@mail.com
+                    </p>
                   </div>
-                </div>
-                <div className="mt-1 text-sm text-gray-500 pl-8">
-                  {userRole.toLowerCase()}@mail.com
-                </div>
-              </div>
-
-              <DropdownMenuSeparator className="bg-gray-100 my-1" />
-
-              <DropdownMenuItem className="rounded-lg hover:bg-gray-50 cursor-pointer gap-2 p-2 text-sm">
-                <Settings className="h-4 w-4" />
-                Profile Settings
-              </DropdownMenuItem>
-
-              <DropdownMenuSeparator className="bg-gray-100 my-1" />
-
-              <DropdownMenuItem className="rounded-lg hover:bg-gray-50 cursor-pointer gap-2 p-2 text-sm text-red-600">
-                <LogOut className="h-4 w-4" />
-                Sign Out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="cursor-pointer">
+                  <User2 className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer">
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="cursor-pointer text-red-600">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </div>
     </nav>

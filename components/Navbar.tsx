@@ -6,15 +6,20 @@ import { Button } from "@/components/ui/button"
 import { LogIn, Menu, X } from "lucide-react"
 import { useState } from "react"
 
+interface MenuItem {
+  href: string
+  label: string
+}
+
+const menuItems: MenuItem[] = [
+  { href: "/", label: "Home" },
+  { href: "/services", label: "Services" },
+  { href: "/forms", label: "Forms" },
+  { href: "/news", label: "News" },
+]
+
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-
-  const menuItems = [
-    { href: "/", label: "Home" },
-    { href: "/services", label: "Services" },
-    { href: "/forms", label: "Forms" },
-    { href: "/news", label: "News" },
-  ]
 
   return (
     <nav className="w-full border-b bg-white">
@@ -63,7 +68,7 @@ const Navbar = () => {
             <Link 
               key={item.label}
               href={item.href} 
-              className="text-sm font-medium transition-colors hover:text-primary"
+              className="text-sm font-medium transition-colors hover:text-[#23479A]"
             >
               {item.label}
             </Link>
@@ -114,6 +119,6 @@ const Navbar = () => {
       )}
     </nav>
   )
-} 
+}
 
 export default Navbar 
