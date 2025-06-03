@@ -11,7 +11,7 @@ const Guide = () => {
     {
       image: "/assets/img/signupphone.png",
       title: "Register an Account",
-      description: "Provide your mobile number and authenticate with a One-Time Pin"
+      description: "Create your account using your Gmail address and verify through the email verification link"
     },
     {
       image: "/assets/img/verifiedphone.png",

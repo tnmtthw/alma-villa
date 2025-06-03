@@ -19,9 +19,9 @@ const Footer = () => {
       title: "Contact Us",
       links: [
         { label: "Barangay Alma Villa", href: "#" },
-        { label: "Quezon City, Philippines", href: "#" },
-        { label: "(02) 8123-4567", href: "tel:+028123456" },
-        { label: "almavilla@example.com", href: "mailto:almavilla@example.com" },
+        { label: "Gloria, Oriental Mindoro", href: "#" },
+        { label: "Contact No: Coming Soon", href: "#" },
+        { label: "almavilla.gloria@gmail.com", href: "mailto:almavilla.gloria@gmail.com" },
       ],
     },
   ]
@@ -43,7 +43,7 @@ const Footer = () => {
               <span className="text-xl font-semibold text-white">Alma Villa</span>
             </Link>
             <p className="text-sm text-white/80">
-              Serving our community with dedication and excellence. Your trusted partner in local governance.
+              Serving the community of Gloria, Oriental Mindoro with dedication and excellence. Your trusted partner in local governance.
             </p>
           </div>
 
@@ -82,16 +82,16 @@ const Footer = () => {
         <div className="mt-12 pt-8 border-t border-white/10">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-white/80">
-              © {currentYear} Barangay Alma Villa. All rights reserved.
+              © {currentYear} Barangay Alma Villa, Gloria, Oriental Mindoro. All rights reserved.
             </p>
             <div className="flex items-center space-x-4">
               <Link href="#" className="text-white/80 hover:text-white transition-colors">
                 <Facebook className="h-5 w-5" />
               </Link>
-              <Link href="mailto:almavilla@example.com" className="text-white/80 hover:text-white transition-colors">
+              <Link href="mailto:almavilla.gloria@gmail.com" className="text-white/80 hover:text-white transition-colors">
                 <Mail className="h-5 w-5" />
               </Link>
-              <Link href="tel:+028123456" className="text-white/80 hover:text-white transition-colors">
+              <Link href="#" className="text-white/80 hover:text-white transition-colors">
                 <Phone className="h-5 w-5" />
               </Link>
               <Link href="#" className="text-white/80 hover:text-white transition-colors">

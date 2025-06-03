@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, useCallback } from "react"
+import { useRef, useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Camera, RefreshCcw } from "lucide-react"
@@ -11,10 +11,52 @@ interface FaceCaptureProps {
   onBack: () => void
 }
 
+const createSamplePhoto = (): string => {
+  // Create a sample photo using canvas
+  const canvas = document.createElement('canvas')
+  canvas.width = 720
+  canvas.height = 720
+  const ctx = canvas.getContext('2d')
+  if (ctx) {
+    // Draw a simple face placeholder
+    ctx.fillStyle = '#f0f0f0'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    ctx.fillStyle = '#333'
+    // Head
+    ctx.beginPath()
+    ctx.arc(360, 300, 200, 0, Math.PI * 2)
+    ctx.fill()
+    // Eyes
+    ctx.fillStyle = '#fff'
+    ctx.beginPath()
+    ctx.arc(280, 250, 30, 0, Math.PI * 2)
+    ctx.arc(440, 250, 30, 0, Math.PI * 2)
+    ctx.fill()
+    // Smile
+    ctx.beginPath()
+    ctx.arc(360, 350, 100, 0, Math.PI)
+    ctx.stroke()
+  }
+  return canvas.toDataURL('image/jpeg')
+}
+
 export default function FaceCapture({ onNext, onBack }: FaceCaptureProps) {
   const webcamRef = useRef<Webcam>(null)
-  const [photo, setPhoto] = useState<string | null>(null)
+  const [photo, setPhoto] = useState<string | null>(() => {
+    // Try to load saved photo from localStorage
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('capturedPhoto')
+    }
+    return null
+  })
   const [cameraError, setCameraError] = useState(false)
+
+  // Save photo whenever it changes
+  useEffect(() => {
+    if (photo) {
+      localStorage.setItem('capturedPhoto', photo)
+    }
+  }, [photo])
 
   const videoConstraints = {
     width: 720,
@@ -31,17 +73,39 @@ export default function FaceCapture({ onNext, onBack }: FaceCaptureProps) {
 
   const retake = () => {
     setPhoto(null)
+    localStorage.removeItem('capturedPhoto')
+  }
+
+  // Clear saved photo when moving to next step
+  const handleNext = () => {
+    localStorage.removeItem('capturedPhoto')
+    onNext()
   }
 
   const handleCameraError = () => {
     setCameraError(true)
   }
 
+  const fillWithSampleData = () => {
+    setPhoto(createSamplePhoto())
+  }
+
   return (
-    <div className="bg-white rounded-[2px] shadow-sm p-6">
-      <h2 className="text-2xl font-semibold text-gray-900 mb-6">Face Verification</h2>
+    <div className="bg-white/95 backdrop-blur-sm rounded-[2px] shadow-lg p-6 max-w-[1100px] mx-auto">
+      <div className="border-b border-gray-200/50 pb-4 mb-6">
+        <h2 className="text-2xl font-semibold text-gray-900">Face Verification</h2>
+        <p className="text-sm text-gray-500 mt-1">Please follow the guidelines to capture a clear photo of your face.</p>
+        <Button
+          type="button"
+          onClick={fillWithSampleData}
+          variant="outline"
+          className="mt-2 text-sm border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10"
+        >
+          Fill with Sample Photo
+        </Button>
+      </div>
       
-      <div className="space-y-8">
+      <div className="space-y-6">
         <div className="space-y-4">
           <Label>Live Photo Capture</Label>
           <div className="flex flex-col items-center space-y-4">
@@ -124,7 +188,7 @@ export default function FaceCapture({ onNext, onBack }: FaceCaptureProps) {
           </Button>
           <Button
             type="button"
-            onClick={onNext}
+            onClick={handleNext}
             disabled={!photo}
             className="bg-[#23479A] hover:bg-[#23479A]/90 text-white rounded-[2px]"
           >

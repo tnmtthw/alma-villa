@@ -1,40 +1,100 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select } from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Eye, EyeOff } from "lucide-react"
 
 interface CredentialsProps {
   onBack: () => void
+  onComplete: () => void
 }
 
-export default function Credentials({ onBack }: CredentialsProps) {
-  const [showPassword, setShowPassword] = useState(false)
-  const [showPin, setShowPin] = useState(false)
-  const [agreeToTerms, setAgreeToTerms] = useState(false)
+interface CredentialsFormData {
+  username: string;
+  password: string;
+}
 
-  const securityQuestions = [
-    "What was your first pet's name?",
-    "What is your mother's maiden name?",
-    "What city were you born in?",
-    "What was the name of your first school?",
-    "What is your favorite book?",
-    "What was your childhood nickname?"
-  ]
+const sampleData: CredentialsFormData = {
+  username: "juan.delacruz",
+  password: "Test@123456"
+}
+
+export default function Credentials({ onBack, onComplete }: CredentialsProps) {
+  const [showPassword, setShowPassword] = useState(false)
+  const [agreeToTerms, setAgreeToTerms] = useState(() => {
+    // Try to load saved terms acceptance from localStorage
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('agreeToTerms') === 'true'
+    }
+    return false
+  })
+
+  const [formData, setFormData] = useState<CredentialsFormData>(() => {
+    // Try to load saved credentials from localStorage
+    if (typeof window !== 'undefined') {
+      const savedData = localStorage.getItem('credentialsData')
+      return savedData ? JSON.parse(savedData) : {
+        username: "",
+        password: ""
+      }
+    }
+    return {
+      username: "",
+      password: ""
+    }
+  })
+
+  // Save form data whenever it changes
+  useEffect(() => {
+    localStorage.setItem('credentialsData', JSON.stringify(formData))
+  }, [formData])
+
+  // Save terms acceptance whenever it changes
+  useEffect(() => {
+    localStorage.setItem('agreeToTerms', agreeToTerms.toString())
+  }, [agreeToTerms])
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [id]: value
+    }))
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    // Clear saved data before submitting
+    localStorage.removeItem('credentialsData')
+    localStorage.removeItem('agreeToTerms')
     // Handle form submission
+    onComplete()
+  }
+
+  const fillWithSampleData = () => {
+    setFormData(sampleData)
+    setAgreeToTerms(true)
   }
 
   return (
-    <div className="bg-white rounded-[2px] shadow-sm p-6">
-      <h2 className="text-2xl font-semibold text-gray-900 mb-6">Account Setup</h2>
+    <div className="bg-white/95 backdrop-blur-sm rounded-[2px] shadow-lg p-6 max-w-[1100px] mx-auto">
+      <div className="border-b border-gray-200/50 pb-4 mb-6">
+        <h2 className="text-2xl font-semibold text-gray-900">Account Setup</h2>
+        <p className="text-sm text-gray-500 mt-1">Create your login credentials and accept the terms of service.</p>
+        <Button
+          type="button"
+          onClick={fillWithSampleData}
+          variant="outline"
+          className="mt-2 text-sm border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10"
+        >
+          Fill with Sample Data
+        </Button>
+      </div>
       
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* Account Credentials */}
         <div className="space-y-6">
           <h3 className="text-lg font-medium text-gray-900">Login Credentials</h3>
@@ -48,6 +108,8 @@ export default function Credentials({ onBack }: CredentialsProps) {
                 placeholder="Enter username"
                 className="mt-1"
                 required
+                value={formData.username}
+                onChange={handleInputChange}
               />
             </div>
 
@@ -60,101 +122,39 @@ export default function Credentials({ onBack }: CredentialsProps) {
                   placeholder="Enter password"
                   className="pr-10"
                   required
+                  value={formData.password}
+                  onChange={handleInputChange}
                 />
-                <button
+                <Button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  variant="outline"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 border-0"
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4" />
                   ) : (
                     <Eye className="h-4 w-4" />
                   )}
-                </button>
+                </Button>
               </div>
               <p className="mt-1 text-xs text-gray-500">
                 Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters
               </p>
             </div>
-
-            <div>
-              <Label htmlFor="pin">6-Digit PIN</Label>
-              <div className="relative mt-1">
-                <Input
-                  id="pin"
-                  type={showPin ? "text" : "password"}
-                  placeholder="Enter 6-digit PIN"
-                  maxLength={6}
-                  pattern="[0-9]{6}"
-                  className="pr-10"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPin(!showPin)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                >
-                  {showPin ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </button>
-              </div>
-            </div>
           </div>
-        </div>
-
-        {/* Security Questions */}
-        <div className="space-y-6">
-          <h3 className="text-lg font-medium text-gray-900">Security Questions</h3>
-          
-          {[1, 2].map((num) => (
-            <div key={num} className="space-y-4">
-              <div>
-                <Label htmlFor={`question${num}`}>Security Question {num}</Label>
-                <Select
-                  id={`question${num}`}
-                  className="mt-1"
-                  required
-                >
-                  <option value="">Select a security question</option>
-                  {securityQuestions.map((question) => (
-                    <option key={question} value={question}>
-                      {question}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor={`answer${num}`}>Your Answer</Label>
-                <Input
-                  id={`answer${num}`}
-                  type="text"
-                  placeholder="Enter your answer"
-                  className="mt-1"
-                  required
-                />
-              </div>
-            </div>
-          ))}
         </div>
 
         {/* Terms and Conditions */}
         <div className="space-y-4">
-          <div className="flex items-start">
-            <div className="flex items-center h-5">
-              <input
-                id="terms"
-                type="checkbox"
-                checked={agreeToTerms}
-                onChange={(e) => setAgreeToTerms(e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 text-[#23479A] focus:ring-[#23479A]"
-                required
-              />
-            </div>
-            <div className="ml-3">
+          <div className="flex items-start space-x-3">
+            <Checkbox
+              id="terms"
+              checked={agreeToTerms}
+              onCheckedChange={(checked) => setAgreeToTerms(checked as boolean)}
+              required
+            />
+            <div>
               <Label
                 htmlFor="terms"
                 className="text-sm text-gray-600"

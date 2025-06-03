@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { Eye, EyeOff, User, Lock } from "lucide-react"
 import Image from "next/image"
+import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -55,26 +57,22 @@ export default function LoginPage() {
           {/* Login Form */}
           <form className="space-y-6">
             <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email or Phone Number
-              </label>
+              <Label htmlFor="email">Email Address</Label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <User className="h-5 w-5 text-gray-400" />
                 </div>
                 <Input
                   id="email"
-                  type="text"
-                  placeholder="Enter your email or phone number"
+                  type="email"
+                  placeholder="Enter your email address"
                   className="w-full pl-10 pr-4 py-2 border rounded-[2px] focus:ring-2 focus:ring-[#23479A]/20 focus:border-[#23479A]"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
+              <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-gray-400" />
@@ -85,30 +83,30 @@ export default function LoginPage() {
                   placeholder="Enter your password"
                   className="w-full pl-10 pr-10 py-2 border rounded-[2px] focus:ring-2 focus:ring-[#23479A]/20 focus:border-[#23479A]"
                 />
-                <button
+                <Button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  variant="outline"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 border-0"
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
+                    <EyeOff className="h-4 w-4" />
                   ) : (
-                    <Eye className="h-5 w-5" />
+                    <Eye className="h-4 w-4" />
                   )}
-                </button>
+                </Button>
               </div>
             </div>
 
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <input
+                <Checkbox
                   id="remember"
-                  type="checkbox"
                   className="h-4 w-4 text-[#23479A] focus:ring-2 focus:ring-[#23479A]/20 border-gray-300 rounded-[2px]"
                 />
-                <label htmlFor="remember" className="ml-2 block text-sm text-gray-700">
+                <Label htmlFor="remember" className="ml-2 block text-sm text-gray-700">
                   Remember me
-                </label>
+                </Label>
               </div>
               <a href="#" className="text-sm text-[#23479A] hover:text-[#23479A]/80">
                 Forgot password?

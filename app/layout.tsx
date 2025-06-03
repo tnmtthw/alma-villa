@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { headers } from "next/headers";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -19,12 +20,16 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const headersList = headers();
+  const pathname = headersList.get("x-pathname") || "";
+  const isDashboard = pathname.startsWith("/dashboard");
+
   return (
     <html lang="en">
       <body className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col`}>
-        <Navbar />
+        {!isDashboard && <Navbar />}
         <main className="flex-1">{children}</main>
-        <Footer />
+        {!isDashboard && <Footer />}
       </body>
     </html>
   );

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Select } from "@/components/ui/select"
@@ -11,8 +11,36 @@ interface DocumentUploadProps {
   onBack: () => void
 }
 
+const createSampleFile = (name: string): File => {
+  // Create a sample image file
+  const canvas = document.createElement('canvas')
+  canvas.width = 800
+  canvas.height = 600
+  const ctx = canvas.getContext('2d')
+  if (ctx) {
+    ctx.fillStyle = '#f0f0f0'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    ctx.fillStyle = '#333'
+    ctx.font = '24px Arial'
+    ctx.fillText('Sample ' + name, 50, 50)
+  }
+  return new File([canvas.toDataURL()], name + '.png', { type: 'image/png' })
+}
+
 export default function DocumentUpload({ onNext, onBack }: DocumentUploadProps) {
-  const [selectedId, setSelectedId] = useState("")
+  const [selectedId, setSelectedId] = useState(() => {
+    // Try to load saved ID selection from localStorage
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('selectedIdType') || ""
+    }
+    return ""
+  })
+
+  // Save selected ID type whenever it changes
+  useEffect(() => {
+    localStorage.setItem('selectedIdType', selectedId)
+  }, [selectedId])
+
   const [frontImage, setFrontImage] = useState<File | null>(null)
   const [backImage, setBackImage] = useState<File | null>(null)
   const [supportingDocs, setSupportingDocs] = useState<File[]>([])
@@ -49,11 +77,44 @@ export default function DocumentUpload({ onNext, onBack }: DocumentUploadProps) 
     setSupportingDocs(supportingDocs.filter((_, i) => i !== index))
   }
 
+  const isFormValid = () => {
+    return selectedId !== "" && frontImage !== null && backImage !== null
+  }
+
+  // Clear saved data when moving to next step
+  const handleNext = (e: React.FormEvent) => {
+    e.preventDefault()
+    localStorage.removeItem('selectedIdType')
+    onNext()
+  }
+
+  const fillWithSampleData = () => {
+    setSelectedId("PhilSys ID/National ID")
+    const frontFile = createSampleFile('ID Front')
+    const backFile = createSampleFile('ID Back')
+    const supportingFile = createSampleFile('Supporting Doc')
+    
+    setFrontImage(frontFile)
+    setBackImage(backFile)
+    setSupportingDocs([supportingFile])
+  }
+
   return (
-    <div className="bg-white rounded-[2px] shadow-sm p-6">
-      <h2 className="text-2xl font-semibold text-gray-900 mb-6">Document Upload</h2>
+    <div className="bg-white/95 backdrop-blur-sm rounded-[2px] shadow-lg p-6 max-w-[1100px] mx-auto">
+      <div className="border-b border-gray-200/50 pb-4 mb-6">
+        <h2 className="text-2xl font-semibold text-gray-900">Document Upload</h2>
+        <p className="text-sm text-gray-500 mt-1">Please upload clear and valid identification documents.</p>
+        <Button
+          type="button"
+          onClick={fillWithSampleData}
+          variant="outline"
+          className="mt-2 text-sm border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10"
+        >
+          Fill with Sample Data
+        </Button>
+      </div>
       
-      <form className="space-y-8">
+      <form className="space-y-6">
         {/* ID Selection */}
         <div className="space-y-4">
           <Label htmlFor="idType">Select Valid Government ID</Label>
@@ -62,6 +123,7 @@ export default function DocumentUpload({ onNext, onBack }: DocumentUploadProps) 
             value={selectedId}
             onChange={(e) => setSelectedId(e.target.value)}
             className="mt-1"
+            required
           >
             <option value="">Select ID Type</option>
             {validIds.map((id) => (
@@ -92,6 +154,7 @@ export default function DocumentUpload({ onNext, onBack }: DocumentUploadProps) 
                         accept="image/*"
                         className="sr-only"
                         onChange={(e) => handleFileUpload(e, "front")}
+                        required
                       />
                     </label>
                   </div>
@@ -122,6 +185,7 @@ export default function DocumentUpload({ onNext, onBack }: DocumentUploadProps) 
                         accept="image/*"
                         className="sr-only"
                         onChange={(e) => handleFileUpload(e, "back")}
+                        required
                       />
                     </label>
                   </div>
@@ -171,13 +235,14 @@ export default function DocumentUpload({ onNext, onBack }: DocumentUploadProps) 
                   className="flex items-center justify-between p-2 bg-gray-50 rounded-[2px]"
                 >
                   <span className="text-sm text-gray-600">{file.name}</span>
-                  <button
+                  <Button
                     type="button"
                     onClick={() => removeFile(index)}
-                    className="text-gray-400 hover:text-gray-500"
+                    variant="outline"
+                    className="h-8 w-8 p-0 border-0 hover:bg-gray-100"
                   >
                     <X className="h-4 w-4" />
-                  </button>
+                  </Button>
                 </div>
               ))}
             </div>
@@ -196,11 +261,9 @@ export default function DocumentUpload({ onNext, onBack }: DocumentUploadProps) 
           </Button>
           <Button
             type="submit"
-            onClick={(e) => {
-              e.preventDefault()
-              onNext()
-            }}
-            className="bg-[#23479A] hover:bg-[#23479A]/90 text-white rounded-[2px]"
+            onClick={handleNext}
+            disabled={!isFormValid()}
+            className="bg-[#23479A] hover:bg-[#23479A]/90 text-white rounded-[2px] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Next Step
           </Button>
