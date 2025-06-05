@@ -1,5 +1,4 @@
-import Navbar from "@/components/Navbar"
-import Footer from "@/components/Footer"
+import ConditionalLayout from "@/components/ConditionalLayout"
 import { Inter } from "next/font/google"
 import { Metadata } from "next"
 import "./globals.css"
@@ -24,11 +23,9 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col`}>
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
+      <body className={`${inter.variable} font-sans antialiased`}>
+        <ConditionalLayout>{children}</ConditionalLayout>
       </body>
     </html>
   );
-} 
+}
