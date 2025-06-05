@@ -3,12 +3,18 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { Select } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Upload, X } from "lucide-react"
 
 interface DocumentUploadProps {
-  onNext: () => void
-  onBack: () => void
+  onNextAction: () => void
+  onBackAction: () => void
 }
 
 const createSampleFile = (name: string): File => {
@@ -27,7 +33,7 @@ const createSampleFile = (name: string): File => {
   return new File([canvas.toDataURL()], name + '.png', { type: 'image/png' })
 }
 
-export default function DocumentUpload({ onNext, onBack }: DocumentUploadProps) {
+export default function DocumentUpload({ onNextAction, onBackAction }: DocumentUploadProps) {
   const [selectedId, setSelectedId] = useState(() => {
     // Try to load saved ID selection from localStorage
     if (typeof window !== 'undefined') {
@@ -85,7 +91,7 @@ export default function DocumentUpload({ onNext, onBack }: DocumentUploadProps) 
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault()
     localStorage.removeItem('selectedIdType')
-    onNext()
+    onNextAction()
   }
 
   const fillWithSampleData = () => {
@@ -119,16 +125,19 @@ export default function DocumentUpload({ onNext, onBack }: DocumentUploadProps) 
         <div className="space-y-4">
           <Label htmlFor="idType">Select Valid Government ID</Label>
           <Select 
-            id="idType"
             value={selectedId}
-            onChange={(e) => setSelectedId(e.target.value)}
-            className="mt-1"
-            required
+            onValueChange={setSelectedId}
           >
-            <option value="">Select ID Type</option>
-            {validIds.map((id) => (
-              <option key={id} value={id}>{id}</option>
-            ))}
+            <SelectTrigger className="mt-1">
+              <SelectValue placeholder="Select ID Type" />
+            </SelectTrigger>
+            <SelectContent>
+              {validIds.map((id) => (
+                <SelectItem key={id} value={id}>
+                  {id}
+                </SelectItem>
+              ))}
+            </SelectContent>
           </Select>
         </div>
 
@@ -253,7 +262,7 @@ export default function DocumentUpload({ onNext, onBack }: DocumentUploadProps) 
         <div className="flex justify-between space-x-4 pt-6 border-t">
           <Button
             type="button"
-            onClick={onBack}
+            onClick={onBackAction}
             variant="outline"
             className="border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10 rounded-[2px]"
           >
@@ -271,4 +280,4 @@ export default function DocumentUpload({ onNext, onBack }: DocumentUploadProps) 
       </form>
     </div>
   )
-} 
+}

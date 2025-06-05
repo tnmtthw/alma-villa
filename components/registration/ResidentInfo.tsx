@@ -1,13 +1,19 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react" 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface ResidentInfoProps {
-  onNext: () => void
+  onNextAction: () => void
 }
 
 interface FormData {
@@ -60,7 +66,7 @@ const sampleData: FormData = {
   residencyLength: "5"
 }
 
-export default function ResidentInfo({ onNext }: ResidentInfoProps) {
+export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
   const [formData, setFormData] = useState<FormData>(() => {
     // Try to load saved data from localStorage on initial render
     if (typeof window !== 'undefined') {
@@ -121,8 +127,15 @@ export default function ResidentInfo({ onNext }: ResidentInfoProps) {
     localStorage.setItem('residentInfoData', JSON.stringify(formData))
   }, [formData])
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [id]: value
+    }))
+  }
+
+  const handleSelectChange = (value: string, id: string) => {
     setFormData(prev => ({
       ...prev,
       [id]: value
@@ -160,7 +173,7 @@ export default function ResidentInfo({ onNext }: ResidentInfoProps) {
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault()
     localStorage.removeItem('residentInfoData')
-    onNext()
+    onNextAction()  // Changed to call onNextAction() instead of onNext()
   }
 
   const fillWithSampleData = () => {
@@ -199,7 +212,7 @@ export default function ResidentInfo({ onNext }: ResidentInfoProps) {
                     id="lastName" 
                     placeholder="Enter last name" 
                     className="mt-1" 
-                    required 
+                    required  
                     value={formData.lastName}
                     onChange={handleInputChange}
                   />
@@ -260,32 +273,34 @@ export default function ResidentInfo({ onNext }: ResidentInfoProps) {
                 </div>
                 <div>
                   <Label htmlFor="gender">Gender</Label>
-                  <Select 
-                    id="gender" 
-                    className="mt-1" 
-                    required
+                  <Select
                     value={formData.gender}
-                    onChange={handleInputChange}
+                    onValueChange={(value) => handleSelectChange(value, 'gender')}
                   >
-                    <option value="">Select gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="male">Male</SelectItem>
+                      <SelectItem value="female">Female</SelectItem>
+                    </SelectContent>
                   </Select>
                 </div>
                 <div>
                   <Label htmlFor="civilStatus">Civil Status</Label>
-                  <Select 
-                    id="civilStatus" 
-                    className="mt-1" 
-                    required
+                  <Select
                     value={formData.civilStatus}
-                    onChange={handleInputChange}
+                    onValueChange={(value) => handleSelectChange(value, 'civilStatus')}
                   >
-                    <option value="">Select status</option>
-                    <option value="single">Single</option>
-                    <option value="married">Married</option>
-                    <option value="widowed">Widowed</option>
-                    <option value="separated">Separated</option>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="single">Single</SelectItem>
+                      <SelectItem value="married">Married</SelectItem>
+                      <SelectItem value="widowed">Widowed</SelectItem>
+                      <SelectItem value="separated">Separated</SelectItem>
+                    </SelectContent>
                   </Select>
                 </div>
                 <div>
@@ -490,4 +505,4 @@ export default function ResidentInfo({ onNext }: ResidentInfoProps) {
       </form>
     </div>
   )
-} 
+}

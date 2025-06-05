@@ -26,11 +26,11 @@ export default function SignUpPage() {
   const renderPhase = () => {
     switch (currentPhase) {
       case 1:
-        return <ResidentInfo onNext={() => setCurrentPhase(2)} />
+        return <ResidentInfo onNextAction={() => setCurrentPhase(2)} />
       case 2:
         return <DocumentUpload 
-          onNext={() => setCurrentPhase(3)} 
-          onBack={() => setCurrentPhase(1)} 
+          onNextAction={() => setCurrentPhase(3)}
+          onBackAction={() => setCurrentPhase(1)}
         />
       case 3:
         return <FaceCapture 
@@ -101,4 +101,4 @@ export default function SignUpPage() {
       </div>
     </div>
   )
-} 
+}
