@@ -9,7 +9,7 @@ import { ArrowLeft, Upload, X } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 
 interface CedulaFormProps {
-  onBack: () => void
+  onBackAction: () => void
 }
 
 interface FormData {
@@ -65,7 +65,7 @@ const sampleData: FormData = {
   purpose: "For employment requirements"
 }
 
-export default function CedulaForm({ onBack }: CedulaFormProps) {
+export default function CedulaForm({ onBackAction }: CedulaFormProps) {
   const [formData, setFormData] = useState<FormData>({
     lastName: "",
     firstName: "",

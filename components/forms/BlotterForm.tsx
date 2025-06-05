@@ -11,7 +11,7 @@ import { Upload, X, FileText } from "lucide-react"
 
 interface BlotterFormProps {
   onSubmit: (formData: any) => void
-  onBack: () => void
+  onBackAction: () => void
 }
 
 interface FormData {
@@ -97,7 +97,7 @@ Submitted: ${new Date().toLocaleString()}
   URL.revokeObjectURL(url)
 }
 
-export default function BlotterForm({ onSubmit, onBack }: BlotterFormProps) {
+export default function BlotterForm({ onSubmit, onBackAction }: BlotterFormProps) {
   const [formData, setFormData] = useState<FormData>({
     fullName: "",
     address: "",

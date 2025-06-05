@@ -50,7 +50,7 @@ const navigationItems: NavigationItem[] = [
   {
     icon: FileText,
     label: "Request",
-    href: "/request",
+    href: "/dashboard/request",
   },
   {
     icon: History,

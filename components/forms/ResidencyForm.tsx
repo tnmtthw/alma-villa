@@ -11,7 +11,7 @@ import { Upload, X, FileText } from "lucide-react"
 
 interface ResidencyFormProps {
   onSubmit: (formData: any) => void
-  onBack: () => void
+  onBackAction: () => void
 }
 
 interface FormData {
@@ -75,7 +75,7 @@ Submitted: ${new Date().toLocaleString()}
   URL.revokeObjectURL(url)
 }
 
-export default function ResidencyForm({ onSubmit, onBack }: ResidencyFormProps) {
+export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormProps) {
   const [formData, setFormData] = useState<FormData>({
     fullName: "",
     address: "",

@@ -7,7 +7,7 @@ const services = [
     title: "Document Request",
     description: "Request various barangay documents and certificates online",
     icon: "/file.svg",
-    href: "/request"
+    href: "/dashboard/request"
   },
   {
     title: "Online Forms",

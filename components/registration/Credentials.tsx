@@ -8,8 +8,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Eye, EyeOff } from "lucide-react"
 
 interface CredentialsProps {
-  onBack: () => void
-  onComplete: () => void
+  onBackAction: () => void
+  onCompleteAction: () => void
 }
 
 interface CredentialsFormData {
@@ -22,20 +22,20 @@ const sampleData: CredentialsFormData = {
   password: "Test@123456"
 }
 
-export default function Credentials({ onBack, onComplete }: CredentialsProps) {
+export default function Credentials({ onBackAction: onBack, onCompleteAction: onComplete }: CredentialsProps) {
   const [showPassword, setShowPassword] = useState(false)
   const [agreeToTerms, setAgreeToTerms] = useState(() => {
-    // Try to load saved terms acceptance from localStorage
+    // Try to load saved terms acceptance from sessionStorage
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('agreeToTerms') === 'true'
+      return sessionStorage.getItem('agreeToTerms') === 'true'
     }
     return false
   })
 
   const [formData, setFormData] = useState<CredentialsFormData>(() => {
-    // Try to load saved credentials from localStorage
+    // Try to load saved credentials from sessionStorage
     if (typeof window !== 'undefined') {
-      const savedData = localStorage.getItem('credentialsData')
+      const savedData = sessionStorage.getItem('credentialsData')
       return savedData ? JSON.parse(savedData) : {
         username: "",
         password: ""
@@ -49,12 +49,12 @@ export default function Credentials({ onBack, onComplete }: CredentialsProps) {
 
   // Save form data whenever it changes
   useEffect(() => {
-    localStorage.setItem('credentialsData', JSON.stringify(formData))
+    sessionStorage.setItem('credentialsData', JSON.stringify(formData))
   }, [formData])
 
   // Save terms acceptance whenever it changes
   useEffect(() => {
-    localStorage.setItem('agreeToTerms', agreeToTerms.toString())
+    sessionStorage.setItem('agreeToTerms', agreeToTerms.toString())
   }, [agreeToTerms])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,8 +68,8 @@ export default function Credentials({ onBack, onComplete }: CredentialsProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     // Clear saved data before submitting
-    localStorage.removeItem('credentialsData')
-    localStorage.removeItem('agreeToTerms')
+    sessionStorage.removeItem('credentialsData')
+    sessionStorage.removeItem('agreeToTerms')
     // Handle form submission
     onComplete()
   }
@@ -80,15 +80,15 @@ export default function Credentials({ onBack, onComplete }: CredentialsProps) {
   }
 
   return (
-    <div className="bg-white/95 backdrop-blur-sm rounded-[2px] shadow-lg p-6 max-w-[1100px] mx-auto">
+    <div className="bg-white/95 backdrop-blur-sm rounded-[2px] shadow-lg p-4 sm:p-6 max-w-[1100px] mx-auto">
       <div className="border-b border-gray-200/50 pb-4 mb-6">
-        <h2 className="text-2xl font-semibold text-gray-900">Account Setup</h2>
+        <h2 className="text-xl sm:text-2xl font-semibold text-gray-900">Account Setup</h2>
         <p className="text-sm text-gray-500 mt-1">Create your login credentials and accept the terms of service.</p>
         <Button
           type="button"
           onClick={fillWithSampleData}
           variant="outline"
-          className="mt-2 text-sm border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10"
+          className="mt-2 text-sm border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10 w-full sm:w-auto"
         >
           Fill with Sample Data
         </Button>
@@ -101,12 +101,12 @@ export default function Credentials({ onBack, onComplete }: CredentialsProps) {
           
           <div className="space-y-4">
             <div>
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username" className="text-sm font-medium">Username</Label>
               <Input
                 id="username"
                 type="text"
                 placeholder="Enter username"
-                className="mt-1"
+                className="mt-1 h-12 text-base"
                 required
                 value={formData.username}
                 onChange={handleInputChange}
@@ -114,13 +114,13 @@ export default function Credentials({ onBack, onComplete }: CredentialsProps) {
             </div>
 
             <div>
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-sm font-medium">Password</Label>
               <div className="relative mt-1">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter password"
-                  className="pr-10"
+                  className="pr-12 h-12 text-base"
                   required
                   value={formData.password}
                   onChange={handleInputChange}
@@ -129,7 +129,7 @@ export default function Credentials({ onBack, onComplete }: CredentialsProps) {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   variant="outline"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 border-0"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-10 w-10 p-0 border-0"
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -138,7 +138,7 @@ export default function Credentials({ onBack, onComplete }: CredentialsProps) {
                   )}
                 </Button>
               </div>
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-2 text-xs text-gray-500 leading-relaxed">
                 Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters
               </p>
             </div>
@@ -153,17 +153,19 @@ export default function Credentials({ onBack, onComplete }: CredentialsProps) {
               checked={agreeToTerms}
               onCheckedChange={(checked) => setAgreeToTerms(checked as boolean)}
               required
+              className="mt-1 flex-shrink-0"
             />
-            <div>
+            <div className="min-w-0">
               <Label
                 htmlFor="terms"
-                className="text-sm text-gray-600"
+                className="text-sm text-gray-600 leading-relaxed cursor-pointer"
               >
                 I agree to the{" "}
                 <a
                   href="/terms"
                   className="text-[#23479A] hover:underline"
                   target="_blank"
+                  rel="noopener noreferrer"
                 >
                   Terms and Conditions
                 </a>
@@ -172,6 +174,7 @@ export default function Credentials({ onBack, onComplete }: CredentialsProps) {
                   href="/privacy"
                   className="text-[#23479A] hover:underline"
                   target="_blank"
+                  rel="noopener noreferrer"
                 >
                   Privacy Policy
                 </a>
@@ -180,24 +183,48 @@ export default function Credentials({ onBack, onComplete }: CredentialsProps) {
           </div>
         </div>
 
-        {/* Navigation Buttons */}
-        <div className="flex justify-between space-x-4 pt-6 border-t">
-          <Button
-            type="button"
-            onClick={onBack}
-            variant="outline"
-            className="border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10 rounded-[2px]"
-          >
-            Previous Step
-          </Button>
-          <Button
-            type="submit"
-            className="bg-[#23479A] hover:bg-[#23479A]/90 text-white rounded-[2px]"
-          >
-            Complete Registration
-          </Button>
+        {/* Navigation Buttons - Mobile Optimized */}
+        <div className="pt-6 border-t border-gray-200/50">
+          {/* Mobile: Stack buttons vertically */}
+          <div className="flex flex-col space-y-3 sm:hidden">
+            <Button
+              type="submit"
+              className="bg-[#23479A] hover:bg-[#23479A]/90 text-white rounded-[2px] h-12 text-base font-medium"
+            >
+              Complete Registration
+            </Button>
+            <Button
+              type="button"
+              onClick={onBack}
+              variant="outline"
+              className="border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10 rounded-[2px] h-12 text-base"
+            >
+              Previous Step
+            </Button>
+          </div>
+          
+          {/* Desktop: Side by side */}
+          <div className="hidden sm:flex sm:justify-between sm:space-x-4">
+            <Button
+              type="button"
+              onClick={onBack}
+              variant="outline"
+              className="border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10 rounded-[2px] h-12"
+            >
+              Previous Step
+            </Button>
+            <Button
+              type="submit"
+              className="bg-[#23479A] hover:bg-[#23479A]/90 text-white rounded-[2px] h-12"
+            >
+              Complete Registration
+            </Button>
+          </div>
         </div>
+
+        {/* Extra spacing for mobile to prevent overlap with browser UI */}
+        <div className="h-8 sm:hidden" />
       </form>
     </div>
   )
-} 
+}

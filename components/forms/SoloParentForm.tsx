@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { ArrowLeft, Upload, X, Plus, Minus } from "lucide-react"
 
 interface SoloParentFormProps {
-  onBack: () => void
+  onBackAction: () => void
 }
 
 interface Child {
@@ -98,7 +98,7 @@ const sampleData: FormData = {
   purpose: "To apply for solo parent benefits and services"
 }
 
-export default function SoloParentForm({ onBack }: SoloParentFormProps) {
+export default function SoloParentForm({ onBackAction }: SoloParentFormProps) {
   const [formData, setFormData] = useState<FormData>({
     lastName: "",
     firstName: "",

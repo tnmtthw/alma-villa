@@ -39,8 +39,8 @@ export default function SignUpPage() {
         />
       case 4:
         return <Credentials 
-          onBack={() => setCurrentPhase(3)}
-          onComplete={handleRegistrationComplete}
+          onBackAction={() => setCurrentPhase(3)}
+          onCompleteAction={handleRegistrationComplete}
         />
       default:
         return null

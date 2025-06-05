@@ -12,7 +12,7 @@ import { Upload, X, FileText } from "lucide-react"
 
 interface IndigencyFormProps {
   onSubmit: (formData: any) => void
-  onBack: () => void
+  onBackAction: () => void
 }
 
 interface FamilyMember {
@@ -165,7 +165,7 @@ Submitted: ${new Date().toLocaleString()}
   URL.revokeObjectURL(url)
 }
 
-export default function IndigencyForm({ onSubmit, onBack }: IndigencyFormProps) {
+export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormProps) {
   const [formData, setFormData] = useState<FormData>({
     fullName: "",
     address: "",
@@ -799,7 +799,7 @@ export default function IndigencyForm({ onSubmit, onBack }: IndigencyFormProps) 
           <div className="flex justify-end gap-4">
             <Button
               type="button"
-              onClick={onBack}
+              onClick={onBackAction}
               variant="outline"
             >
               Back

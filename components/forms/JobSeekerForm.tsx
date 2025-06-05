@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, Upload, X, FileText, User, GraduationCap, Briefcase, Target } from "lucide-react"
 
 interface JobSeekerFormProps {
-  onBack: () => void
+  onBackAction: () => void
 }
 
 interface FormData {
@@ -90,7 +90,7 @@ const sampleData: FormData = {
   purpose: "To obtain employment certification for job application"
 }
 
-export default function JobSeekerForm({ onBack }: JobSeekerFormProps) {
+export default function JobSeekerForm({ onBackAction }: JobSeekerFormProps) {
   const [formData, setFormData] = useState<FormData>({
     lastName: "",
     firstName: "",
@@ -188,7 +188,7 @@ export default function JobSeekerForm({ onBack }: JobSeekerFormProps) {
           <div className="flex items-center gap-4">
             <Button
               type="button"
-              onClick={onBack}
+              onClick={onBackAction}
               variant="outline"
               size="sm"
             >
@@ -713,7 +713,7 @@ export default function JobSeekerForm({ onBack }: JobSeekerFormProps) {
               <div className="flex gap-3">
                 <Button
                   type="button"
-                  onClick={onBack}
+                  onClick={onBackAction}
                   variant="outline"
                 >
                   Cancel

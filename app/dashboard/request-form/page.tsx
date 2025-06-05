@@ -184,7 +184,7 @@ function RequestFormContent() {
         </div>
 
         {/* Form Component */}
-        <FormComponent onBack={handleBack} onSubmit={handleFormSubmit} />
+        <FormComponent onBackAction={handleBack} onSubmit={handleFormSubmit} />
       </div>
     </div>
   )
