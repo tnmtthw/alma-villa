@@ -3,5 +3,9 @@
 import ResidentsTable from "@/components/admincomponents/ResidentsTable"
 
 export default function ResidentsPage() {
-  return <ResidentsTable />
+  return (
+    <div className="w-full h-full">
+      <ResidentsTable />
+    </div>
+  )
 } 
