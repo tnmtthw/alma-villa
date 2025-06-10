@@ -1,154 +1,156 @@
+import Link from "next/link"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { FileText, History, MessageSquare, Bell, Plus, ChevronRight, TrendingUp, Clock, CheckCircle, ArrowUpRight, Activity, Calendar, Users, Star } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import DocumentStatusTracker from "@/components/DocumentStatusTracker"
+import ScrollToTop from "@/components/ScrollToTop"
 
-  import Link from "next/link"
-  import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-  import { FileText, History, MessageSquare, Bell, Plus, ChevronRight, TrendingUp, Clock, CheckCircle, ArrowUpRight, Activity, Calendar, Users, Star } from "lucide-react"
-  import { Button } from "@/components/ui/button"
-  import { Badge } from "@/components/ui/badge"
-  import DocumentStatusTracker from "@/components/DocumentStatusTracker"
+const stats = [
+  {
+    title: "Pending Requests",
+    value: "2",
+    change: "+1 from last week",
+    description: "Active requests awaiting approval",
+    icon: MessageSquare,
+    color: "text-amber-600",
+    bgColor: "bg-amber-50",
+    borderColor: "border-amber-200",
+    trend: "up"
+  },
+  {
+    title: "Completed Forms",
+    value: "5",
+    change: "+2 this month",
+    description: "Successfully processed",
+    icon: CheckCircle,
+    color: "text-emerald-600",
+    bgColor: "bg-emerald-50",
+    borderColor: "border-emerald-200",
+    trend: "up"
+  },
+  {
+    title: "Total Requests",
+    value: "12",
+    change: "All time",
+    description: "Historical submissions",
+    icon: TrendingUp,
+    color: "text-blue-600",
+    bgColor: "bg-blue-50",
+    borderColor: "border-blue-200",
+    trend: "neutral"
+  },
+  {
+    title: "New Updates",
+    value: "3",
+    change: "This week",
+    description: "Notifications & announcements",
+    icon: Bell,
+    color: "text-purple-600",
+    bgColor: "bg-purple-50",
+    borderColor: "border-purple-200",
+    trend: "up"
+  },
+]
 
-  const stats = [
-    {
-      title: "Pending Requests",
-      value: "2",
-      change: "+1 from last week",
-      description: "Active requests awaiting approval",
-      icon: MessageSquare,
-      color: "text-amber-600",
-      bgColor: "bg-amber-50",
-      borderColor: "border-amber-200",
-      trend: "up"
-    },
-    {
-      title: "Completed Forms",
-      value: "5",
-      change: "+2 this month",
-      description: "Successfully processed",
-      icon: CheckCircle,
-      color: "text-emerald-600",
-      bgColor: "bg-emerald-50",
-      borderColor: "border-emerald-200",
-      trend: "up"
-    },
-    {
-      title: "Total Requests",
-      value: "12",
-      change: "All time",
-      description: "Historical submissions",
-      icon: TrendingUp,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
-      borderColor: "border-blue-200",
-      trend: "neutral"
-    },
-    {
-      title: "New Updates",
-      value: "3",
-      change: "This week",
-      description: "Notifications & announcements",
-      icon: Bell,
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
-      borderColor: "border-purple-200",
-      trend: "up"
-    },
-  ]
+const recentActivities = [
+  {
+    title: "Barangay Clearance",
+    description: "Application approved and ready for pickup",
+    icon: CheckCircle,
+    time: "2 hours ago",
+    status: "completed",
+    color: "text-emerald-600",
+    bgColor: "bg-emerald-50",
+    statusColor: "bg-emerald-100 text-emerald-800"
+  },
+  {
+    title: "Business Permit",
+    description: "Under review by barangay office",
+    icon: Clock,
+    time: "1 day ago",
+    status: "pending",
+    color: "text-amber-600",
+    bgColor: "bg-amber-50",
+    statusColor: "bg-amber-100 text-amber-800"
+  },
+  {
+    title: "Community Notice",
+    description: "New sanitation guidelines posted",
+    icon: Bell,
+    time: "2 days ago",
+    status: "info",
+    color: "text-blue-600",
+    bgColor: "bg-blue-50",
+    statusColor: "bg-blue-100 text-blue-800"
+  },
+]
 
-  const recentActivities = [
-    {
-      title: "Barangay Clearance",
-      description: "Application approved and ready for pickup",
-      icon: CheckCircle,
-      time: "2 hours ago",
-      status: "completed",
-      color: "text-emerald-600",
-      bgColor: "bg-emerald-50",
-      statusColor: "bg-emerald-100 text-emerald-800"
-    },
-    {
-      title: "Business Permit",
-      description: "Under review by barangay office",
-      icon: Clock,
-      time: "1 day ago",
-      status: "pending",
-      color: "text-amber-600",
-      bgColor: "bg-amber-50",
-      statusColor: "bg-amber-100 text-amber-800"
-    },
-    {
-      title: "Community Notice",
-      description: "New sanitation guidelines posted",
-      icon: Bell,
-      time: "2 days ago",
-      status: "info",
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
-      statusColor: "bg-blue-100 text-blue-800"
-    },
-  ]
+const quickActions = [
+  {
+    title: "Request Document",
+    description: "Barangay clearance, certificates",
+    icon: FileText,
+    href: "dashboard/request",
+    color: "bg-gradient-to-br from-blue-500 to-blue-600",
+    textColor: "text-white"
+  },
+  {
+    title: "Download Forms",
+    description: "Printable application forms",
+    icon: FileText,
+    href: "/forms",
+    color: "bg-gradient-to-br from-emerald-500 to-emerald-600",
+    textColor: "text-white"
+  },
+  {
+    title: "View History",
+    description: "Track your submissions",
+    icon: History,
+    href: "/history",
+    color: "bg-gradient-to-br from-purple-500 to-purple-600",
+    textColor: "text-white"
+  },
+  {
+    title: "Community News",
+    description: "Latest announcements",
+    icon: Bell,
+    href: "/news",
+    color: "bg-gradient-to-br from-amber-500 to-amber-600",
+    textColor: "text-white"
+  },
+]
 
-  const quickActions = [
-    {
-      title: "Request Document",
-      description: "Barangay clearance, certificates",
-      icon: FileText,
-      href: "dashboard/request",
-      color: "bg-gradient-to-br from-blue-500 to-blue-600",
-      textColor: "text-white"
-    },
-    {
-      title: "Download Forms",
-      description: "Printable application forms",
-      icon: FileText,
-      href: "/forms",
-      color: "bg-gradient-to-br from-emerald-500 to-emerald-600",
-      textColor: "text-white"
-    },
-    {
-      title: "View History",
-      description: "Track your submissions",
-      icon: History,
-      href: "/history",
-      color: "bg-gradient-to-br from-purple-500 to-purple-600",
-      textColor: "text-white"
-    },
-    {
-      title: "Community News",
-      description: "Latest announcements",
-      icon: Bell,
-      href: "/news",
-      color: "bg-gradient-to-br from-amber-500 to-amber-600",
-      textColor: "text-white"
-    },
-  ]
+const upcomingEvents = [
+  {
+    title: "Barangay Assembly",
+    date: "Jun 15, 2025",
+    time: "9:00 AM",
+    location: "Community Center",
+    type: "Meeting"
+  },
+  {
+    title: "Clean-up Drive",
+    date: "Jun 20, 2025",
+    time: "6:00 AM",
+    location: "Main Street",
+    type: "Community"
+  },
+  {
+    title: "Health Program",
+    date: "Jun 25, 2025",
+    time: "8:00 AM",
+    location: "Barangay Hall",
+    type: "Health"
+  },
+]
 
-  const upcomingEvents = [
-    {
-      title: "Barangay Assembly",
-      date: "Jun 15, 2025",
-      time: "9:00 AM",
-      location: "Community Center",
-      type: "Meeting"
-    },
-    {
-      title: "Clean-up Drive",
-      date: "Jun 20, 2025",
-      time: "6:00 AM",
-      location: "Main Street",
-      type: "Community"
-    },
-    {
-      title: "Health Program",
-      date: "Jun 25, 2025",
-      time: "8:00 AM",
-      location: "Barangay Hall",
-      type: "Health"
-    },
-  ]
+export default function DashboardPage() {
+  const userName = "Juan" // This should come from your auth state
 
-  export default function DashboardPage() {
-    const userName = "Juan" // This should come from your auth state
-
-    return (
+  return (
+    <main>
+      <ScrollToTop />
       <div className="min-h-screen bg-gray-50">
         {/* Hero Section with Background - Mobile Optimized */}
         <div className="relative bg-[#23479A] pt-16">
@@ -404,5 +406,6 @@
           </Card>
         </div>
       </div>
-    )
-  }
+    </main>
+  )
+}

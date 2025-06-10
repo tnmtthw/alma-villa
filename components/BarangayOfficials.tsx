@@ -1,4 +1,5 @@
 import Image from "next/image"
+import ScrollToTop from "./ScrollToTop"
 
 const BarangayOfficials = () => {
   const barangayCaptain = {
@@ -47,6 +48,7 @@ const BarangayOfficials = () => {
 
   return (
     <section className="py-20 bg-gray-50">
+      <ScrollToTop />
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-20">
           <h2 className="text-5xl font-bold bg-gradient-to-r from-[#23479A] to-[#23479A]/80 bg-clip-text text-transparent mb-6">
