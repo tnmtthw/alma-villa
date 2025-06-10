@@ -37,19 +37,44 @@ export default function DocumentUpload({ onNextAction, onBackAction }: DocumentU
   const [selectedId, setSelectedId] = useState(() => {
     // Try to load saved ID selection from localStorage
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('selectedIdType') || ""
+      return localStorage.getItem('type') || ""
     }
     return ""
   })
 
-  // Save selected ID type whenever it changes
-  useEffect(() => {
-    localStorage.setItem('selectedIdType', selectedId)
-  }, [selectedId])
-
   const [frontImage, setFrontImage] = useState<File | null>(null)
   const [backImage, setBackImage] = useState<File | null>(null)
   const [supportingDocs, setSupportingDocs] = useState<File[]>([])
+
+  // Save selected ID type whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('type', selectedId)
+    }
+  }, [selectedId])
+
+  // Save images to localStorage when they change
+  useEffect(() => {
+    if (typeof window !== 'undefined' && frontImage) {
+      // Convert File to base64 for localStorage
+      const reader = new FileReader()
+      reader.onload = () => {
+        localStorage.setItem('frontId', reader.result as string)
+      }
+      reader.readAsDataURL(frontImage)
+    }
+  }, [frontImage])
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && backImage) {
+      // Convert File to base64 for localStorage
+      const reader = new FileReader()
+      reader.onload = () => {
+        localStorage.setItem('backId', reader.result as string)
+      }
+      reader.readAsDataURL(backImage)
+    }
+  }, [backImage])
 
   const validIds = [
     "PhilSys ID/National ID",
@@ -90,7 +115,6 @@ export default function DocumentUpload({ onNextAction, onBackAction }: DocumentU
   // Clear saved data when moving to next step
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault()
-    localStorage.removeItem('selectedIdType')
     onNextAction()
   }
 
@@ -99,7 +123,7 @@ export default function DocumentUpload({ onNextAction, onBackAction }: DocumentU
     const frontFile = createSampleFile('ID Front')
     const backFile = createSampleFile('ID Back')
     const supportingFile = createSampleFile('Supporting Doc')
-    
+
     setFrontImage(frontFile)
     setBackImage(backFile)
     setSupportingDocs([supportingFile])
@@ -119,12 +143,12 @@ export default function DocumentUpload({ onNextAction, onBackAction }: DocumentU
           Fill with Sample Data
         </Button>
       </div>
-      
+
       <form className="space-y-6">
         {/* ID Selection */}
         <div className="space-y-4">
           <Label htmlFor="idType">Select Valid Government ID</Label>
-          <Select 
+          <Select
             value={selectedId}
             onValueChange={setSelectedId}
           >
@@ -208,7 +232,7 @@ export default function DocumentUpload({ onNextAction, onBackAction }: DocumentU
           </div>
         </div>
 
-        {/* Supporting Documents */}
+        {/* Supporting Documents
         <div className="space-y-4">
           <Label htmlFor="supporting">Supporting Documents</Label>
           <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-[2px]">
@@ -236,7 +260,7 @@ export default function DocumentUpload({ onNextAction, onBackAction }: DocumentU
           </div>
 
           {/* Supporting Documents List */}
-          {supportingDocs.length > 0 && (
+        {/* {supportingDocs.length > 0 && (
             <div className="mt-4 space-y-2">
               {supportingDocs.map((file, index) => (
                 <div
@@ -256,7 +280,7 @@ export default function DocumentUpload({ onNextAction, onBackAction }: DocumentU
               ))}
             </div>
           )}
-        </div>
+        </div> */}
 
         {/* Navigation Buttons */}
         <div className="flex justify-between space-x-4 pt-6 border-t">

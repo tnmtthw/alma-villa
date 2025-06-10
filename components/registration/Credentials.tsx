@@ -17,13 +17,67 @@ interface CredentialsFormData {
   password: string;
 }
 
+function generateRandomUsername(): string {
+  const firstNames = ["juan", "maria", "jose", "ana", "pedro", "lisa"];
+  const lastNames = ["delacruz", "reyes", "santos", "garcia", "torres", "lopez"];
+  const randomFirst = firstNames[Math.floor(Math.random() * firstNames.length)];
+  const randomLast = lastNames[Math.floor(Math.random() * lastNames.length)];
+  const randomNumber = Math.floor(Math.random() * 1000); // Optional: adds uniqueness
+
+  return `${randomFirst}.${randomLast}${randomNumber}`;
+}
+
 const sampleData: CredentialsFormData = {
-  username: "juan.delacruz",
+  username: generateRandomUsername(),
   password: "Test@123456"
+};
+
+// Helper function to convert base64 to Blob
+function base64ToBlob(base64Data: string): Blob {
+  const parts = base64Data.split(',');
+  const contentType = parts[0].split(':')[1].split(';')[0];
+  const byteCharacters = atob(parts[1]);
+  const byteNumbers = new Array(byteCharacters.length);
+
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+
+  const byteArray = new Uint8Array(byteNumbers);
+  return new Blob([byteArray], { type: contentType });
+}
+
+// Helper function to upload a single image
+async function uploadImage(base64Data: string, imageName: string, folder: string): Promise<string> {
+  const blob = base64ToBlob(base64Data);
+  const file = new File([blob], `${imageName}.jpg`, { type: blob.type });
+
+  const timestamp = new Date().getTime();
+  const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
+  const filename = `AlmaVilla/${folder}/${timestamp}-${safeName}`;
+
+  const uploadFormData = new FormData();
+  uploadFormData.append('file', file);
+  uploadFormData.append('filename', filename);
+
+  const uploadRes = await fetch(`/api/upload?filename=${filename}`, {
+    method: 'POST',
+    body: uploadFormData,
+  });
+
+  if (!uploadRes.ok) {
+    const uploadError = await uploadRes.text();
+    console.error(`Upload failed for ${imageName}:`, uploadError);
+    throw new Error(`Upload failed for ${imageName}: ${uploadRes.status} - ${uploadError}`);
+  }
+
+  const result = await uploadRes.json();
+  return result.url;
 }
 
 export default function Credentials({ onBackAction: onBack, onCompleteAction: onComplete }: CredentialsProps) {
   const [showPassword, setShowPassword] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [agreeToTerms, setAgreeToTerms] = useState(() => {
     // Try to load saved terms acceptance from sessionStorage
     if (typeof window !== 'undefined') {
@@ -49,12 +103,16 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
 
   // Save form data whenever it changes
   useEffect(() => {
-    sessionStorage.setItem('credentialsData', JSON.stringify(formData))
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('credentialsData', JSON.stringify(formData))
+    }
   }, [formData])
 
   // Save terms acceptance whenever it changes
   useEffect(() => {
-    sessionStorage.setItem('agreeToTerms', agreeToTerms.toString())
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('agreeToTerms', agreeToTerms.toString())
+    }
   }, [agreeToTerms])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,14 +123,115 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
     }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Clear saved data before submitting
-    sessionStorage.removeItem('credentialsData')
-    sessionStorage.removeItem('agreeToTerms')
-    // Handle form submission
-    onComplete()
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const savedResidentInfo = localStorage.getItem('residentInfoData');
+      const type = localStorage.getItem('type');
+      const frontId = localStorage.getItem('frontId');
+      const backId = localStorage.getItem('backId');
+      const capturedPhoto = localStorage.getItem('capturedPhoto');
+      const residentInfo = savedResidentInfo ? JSON.parse(savedResidentInfo) : null;
+
+      if (!residentInfo || !capturedPhoto) {
+        alert("Missing resident info or photo. Please complete previous steps.");
+        return;
+      }
+
+      // Upload all images in parallel
+      const uploadPromises = [];
+
+      // Always upload captured photo
+      uploadPromises.push(
+        uploadImage(capturedPhoto, "captured_photo", "verifiedPhoto")
+      );
+
+      // Upload front ID if available
+      if (frontId) {
+        uploadPromises.push(
+          uploadImage(frontId, "front_id", "idDocuments")
+        );
+      }
+
+      // Upload back ID if available
+      if (backId) {
+        uploadPromises.push(
+          uploadImage(backId, "back_id", "idDocuments")
+        );
+      }
+
+      console.log("Uploading images...");
+      const uploadResults = await Promise.all(uploadPromises);
+
+      // Map results back to their respective URLs
+      const capturedPhotoUrl = uploadResults[0];
+      const frontIdUrl = frontId ? uploadResults[1] : null;
+      const backIdUrl = backId ? uploadResults[frontId ? 2 : 1] : null;
+
+      console.log("Images uploaded successfully:", {
+        capturedPhoto: capturedPhotoUrl,
+        frontId: frontIdUrl,
+        backId: backIdUrl
+      });
+
+      // Prepare signup data
+      const signupData = {
+        username: formData.username,
+        password: formData.password,
+        type: type,
+        capturedPhoto: capturedPhotoUrl,
+        frontId: frontIdUrl,
+        backId: backIdUrl,
+        ...residentInfo,
+      };
+
+      // Submit user signup
+      const signupRes = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(signupData)
+      });
+
+      if (!signupRes.ok) {
+        const errorText = await signupRes.text();
+        console.error("Signup error response:", errorText);
+
+        let errorMessage = "Unknown error";
+        try {
+          const errorJson = JSON.parse(errorText);
+          errorMessage = errorJson.message || errorText;
+        } catch {
+          errorMessage = errorText;
+        }
+
+        alert("Signup failed: " + errorMessage);
+        return;
+      }
+
+      const signupResult = await signupRes.json();
+      console.log("Signup successful:", signupResult);
+
+      // Clear temporary storage
+      localStorage.removeItem('residentInfoData');
+      localStorage.removeItem('capturedPhoto');
+      localStorage.removeItem('frontId');
+      localStorage.removeItem('backId');
+      localStorage.removeItem('type');
+      sessionStorage.removeItem('credentialsData');
+      sessionStorage.removeItem('agreeToTerms');
+
+      onComplete();
+    } catch (err) {
+      console.error("Unexpected error during signup:", err);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const fillWithSampleData = () => {
     setFormData(sampleData)
@@ -89,16 +248,17 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
           onClick={fillWithSampleData}
           variant="outline"
           className="mt-2 text-sm border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10 w-full sm:w-auto"
+          disabled={isSubmitting}
         >
           Fill with Sample Data
         </Button>
       </div>
-      
+
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Account Credentials */}
         <div className="space-y-6">
           <h3 className="text-lg font-medium text-gray-900">Login Credentials</h3>
-          
+
           <div className="space-y-4">
             <div>
               <Label htmlFor="username" className="text-sm font-medium">Username</Label>
@@ -110,6 +270,7 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
                 required
                 value={formData.username}
                 onChange={handleInputChange}
+                disabled={isSubmitting}
               />
             </div>
 
@@ -124,12 +285,14 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
                   required
                   value={formData.password}
                   onChange={handleInputChange}
+                  disabled={isSubmitting}
                 />
                 <Button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   variant="outline"
                   className="absolute right-1 top-1/2 -translate-y-1/2 h-10 w-10 p-0 border-0"
+                  disabled={isSubmitting}
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -154,6 +317,7 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
               onCheckedChange={(checked) => setAgreeToTerms(checked as boolean)}
               required
               className="mt-1 flex-shrink-0"
+              disabled={isSubmitting}
             />
             <div className="min-w-0">
               <Label
@@ -190,19 +354,21 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
             <Button
               type="submit"
               className="bg-[#23479A] hover:bg-[#23479A]/90 text-white rounded-[2px] h-12 text-base font-medium"
+              disabled={isSubmitting}
             >
-              Complete Registration
+              {isSubmitting ? "Processing..." : "Complete Registration"}
             </Button>
             <Button
               type="button"
               onClick={onBack}
               variant="outline"
               className="border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10 rounded-[2px] h-12 text-base"
+              disabled={isSubmitting}
             >
               Previous Step
             </Button>
           </div>
-          
+
           {/* Desktop: Side by side */}
           <div className="hidden sm:flex sm:justify-between sm:space-x-4">
             <Button
@@ -210,14 +376,16 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
               onClick={onBack}
               variant="outline"
               className="border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10 rounded-[2px] h-12"
+              disabled={isSubmitting}
             >
               Previous Step
             </Button>
             <Button
               type="submit"
               className="bg-[#23479A] hover:bg-[#23479A]/90 text-white rounded-[2px] h-12"
+              disabled={isSubmitting}
             >
-              Complete Registration
+              {isSubmitting ? "Processing..." : "Complete Registration"}
             </Button>
           </div>
         </div>

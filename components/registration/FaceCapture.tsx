@@ -78,7 +78,6 @@ export default function FaceCapture({ onNext, onBack }: FaceCaptureProps) {
 
   // Clear saved photo when moving to next step
   const handleNext = () => {
-    localStorage.removeItem('capturedPhoto')
     onNext()
   }
 
@@ -104,7 +103,7 @@ export default function FaceCapture({ onNext, onBack }: FaceCaptureProps) {
           Fill with Sample Photo
         </Button>
       </div>
-      
+
       <div className="space-y-6">
         <div className="space-y-4">
           <Label>Live Photo Capture</Label>

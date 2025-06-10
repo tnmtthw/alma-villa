@@ -8,56 +8,48 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Credintial {
-  id          String   @id @default(uuid()) @db.Uuid
-  username    String
-  password    String
-  residentId  String    @db.Uuid
-  resident    Resident  @relation(fields: [residentId], references: [id], onDelete: Cascade)
-}
-
 model Resident {
   id                String   @id @default(uuid()) @db.Uuid
-  email             String   @unique
-  password          String
 
   // Personal Details
-  lastName          String
-  firstName         String
+  lastName          String?
+  firstName         String?
   middleName        String?
   suffix            String?
-  birthDate         DateTime
-  age               String
-  gender            String
-  civilStatus       String
-  nationality       String
-  religion          String
+  birthDate         String?
+  age               String?
+  gender            String?
+  civilStatus       String?
+  nationality       String?
+  religion          String?
 
   // Contact Info
+  email             String?
   mobileNumber      String?
-  emergencyContact  String
-  emergencyNumber   String
+  emergencyContact  String?
+  emergencyNumber   String?
 
   // Address
-  houseNumber       String
-  street            String
-  purok             String
-  barangay          String
-  city              String
-  province          String
-  zipCode           String
-  residencyLength   String
-
-  goverment         GovermentID[]
-  credintial        Credintial[]
-}
+  houseNumber       String?
+  street            String?
+  purok             String?
+  barangay          String?
+  city              String?
+  province          String?
+  zipCode           String?
+  residencyLength   String?
 
 
-model GovermentID {
-    id            String    @id @default(uuid()) @db.Uuid
-    residentId    String    @db.Uuid
-    type          String
-    frontId       String
-    backId        String
-    resident      Resident  @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  // Government ID
+  type          String
+  frontId       String
+  backId        String
+
+  // Face Verification
+  capturedPhoto     String?
+  
+  // Credintial
+  // username          String?  @unique
+  username          String?
+  password          String?
 }

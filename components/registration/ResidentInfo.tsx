@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react" 
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -172,9 +172,9 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
   // Clear saved data when moving to next step
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault()
-    localStorage.removeItem('residentInfoData')
-    onNextAction()  // Changed to call onNextAction() instead of onNext()
+    onNextAction()
   }
+
 
   const fillWithSampleData = () => {
     setFormData(sampleData)
@@ -194,7 +194,7 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
           Fill with Sample Data
         </Button>
       </div>
-      
+
       <form className="space-y-6">
         <div className="grid grid-cols-12 gap-6">
           {/* Personal Details */}
@@ -204,46 +204,46 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                 <span className="bg-[#23479A] text-white w-6 h-6 rounded-full text-sm flex items-center justify-center mr-2">1</span>
                 Personal Details
               </h3>
-              
+
               <div className="grid grid-cols-2 gap-3">
                 <div className="col-span-2">
                   <Label htmlFor="lastName">Last Name</Label>
-                  <Input 
-                    id="lastName" 
-                    placeholder="Enter last name" 
-                    className="mt-1" 
-                    required  
+                  <Input
+                    id="lastName"
+                    placeholder="Enter last name"
+                    className="mt-1"
+                    required
                     value={formData.lastName}
                     onChange={handleInputChange}
                   />
                 </div>
                 <div className="col-span-2">
                   <Label htmlFor="firstName">First Name</Label>
-                  <Input 
-                    id="firstName" 
-                    placeholder="Enter first name" 
-                    className="mt-1" 
-                    required 
+                  <Input
+                    id="firstName"
+                    placeholder="Enter first name"
+                    className="mt-1"
+                    required
                     value={formData.firstName}
                     onChange={handleInputChange}
                   />
                 </div>
                 <div className="col-span-2">
                   <Label htmlFor="middleName">Middle Name</Label>
-                  <Input 
-                    id="middleName" 
-                    placeholder="Enter middle name" 
-                    className="mt-1" 
-                    required 
+                  <Input
+                    id="middleName"
+                    placeholder="Enter middle name"
+                    className="mt-1"
+                    required
                     value={formData.middleName}
                     onChange={handleInputChange}
                   />
                 </div>
                 <div className="col-span-2">
                   <Label htmlFor="suffix">Suffix</Label>
-                  <Input 
-                    id="suffix" 
-                    placeholder="Jr., Sr., III, etc." 
+                  <Input
+                    id="suffix"
+                    placeholder="Jr., Sr., III, etc."
                     className="mt-1"
                     value={formData.suffix}
                     onChange={handleInputChange}
@@ -251,22 +251,22 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                 </div>
                 <div>
                   <Label htmlFor="birthDate">Date of Birth</Label>
-                  <Input 
-                    id="birthDate" 
-                    type="date" 
-                    className="mt-1" 
-                    required 
+                  <Input
+                    id="birthDate"
+                    type="date"
+                    className="mt-1"
+                    required
                     value={formData.birthDate}
                     onChange={handleInputChange}
                   />
                 </div>
                 <div>
                   <Label htmlFor="age">Age</Label>
-                  <Input 
-                    id="age" 
-                    type="number" 
-                    className="mt-1" 
-                    required 
+                  <Input
+                    id="age"
+                    type="number"
+                    className="mt-1"
+                    required
                     value={formData.age}
                     onChange={handleInputChange}
                   />
@@ -305,22 +305,22 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                 </div>
                 <div>
                   <Label htmlFor="nationality">Nationality</Label>
-                  <Input 
-                    id="nationality" 
-                    placeholder="Enter nationality" 
-                    className="mt-1" 
-                    required 
+                  <Input
+                    id="nationality"
+                    placeholder="Enter nationality"
+                    className="mt-1"
+                    required
                     value={formData.nationality}
                     onChange={handleInputChange}
                   />
                 </div>
                 <div>
                   <Label htmlFor="religion">Religion</Label>
-                  <Input 
-                    id="religion" 
-                    placeholder="Enter religion" 
-                    className="mt-1" 
-                    required 
+                  <Input
+                    id="religion"
+                    placeholder="Enter religion"
+                    className="mt-1"
+                    required
                     value={formData.religion}
                     onChange={handleInputChange}
                   />
@@ -337,7 +337,7 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                 <span className="bg-[#23479A] text-white w-6 h-6 rounded-full text-sm flex items-center justify-center mr-2">2</span>
                 Contact Information
               </h3>
-              
+
               <div className="grid grid-cols-1 gap-3">
                 <div>
                   <Label htmlFor="email">Email Address</Label>
@@ -392,15 +392,15 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                 <span className="bg-[#23479A] text-white w-6 h-6 rounded-full text-sm flex items-center justify-center mr-2">3</span>
                 Address Information
               </h3>
-              
+
               <div className="grid grid-cols-1 gap-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label htmlFor="houseNumber">House/Unit Number</Label>
-                    <Input 
-                      id="houseNumber" 
-                      placeholder="Enter house/unit number" 
-                      className="mt-1" 
+                    <Input
+                      id="houseNumber"
+                      placeholder="Enter house/unit number"
+                      className="mt-1"
                       required
                       value={formData.houseNumber}
                       onChange={handleInputChange}
@@ -408,10 +408,10 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                   </div>
                   <div>
                     <Label htmlFor="purok">Purok/Zone Number</Label>
-                    <Input 
-                      id="purok" 
-                      placeholder="Enter purok/zone" 
-                      className="mt-1" 
+                    <Input
+                      id="purok"
+                      placeholder="Enter purok/zone"
+                      className="mt-1"
                       required
                       value={formData.purok}
                       onChange={handleInputChange}
@@ -420,10 +420,10 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                 </div>
                 <div>
                   <Label htmlFor="street">Street/Subdivision Name</Label>
-                  <Input 
-                    id="street" 
-                    placeholder="Enter street name" 
-                    className="mt-1" 
+                  <Input
+                    id="street"
+                    placeholder="Enter street name"
+                    className="mt-1"
                     required
                     value={formData.street}
                     onChange={handleInputChange}
@@ -431,10 +431,10 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                 </div>
                 <div>
                   <Label htmlFor="barangay">Barangay</Label>
-                  <Input 
-                    id="barangay" 
-                    placeholder="Enter barangay" 
-                    className="mt-1" 
+                  <Input
+                    id="barangay"
+                    placeholder="Enter barangay"
+                    className="mt-1"
                     required
                     value={formData.barangay}
                     onChange={handleInputChange}
@@ -442,10 +442,10 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                 </div>
                 <div>
                   <Label htmlFor="city">City/Municipality</Label>
-                  <Input 
-                    id="city" 
-                    placeholder="Enter city" 
-                    className="mt-1" 
+                  <Input
+                    id="city"
+                    placeholder="Enter city"
+                    className="mt-1"
                     required
                     value={formData.city}
                     onChange={handleInputChange}
@@ -453,10 +453,10 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                 </div>
                 <div>
                   <Label htmlFor="province">Province</Label>
-                  <Input 
-                    id="province" 
-                    placeholder="Enter province" 
-                    className="mt-1" 
+                  <Input
+                    id="province"
+                    placeholder="Enter province"
+                    className="mt-1"
                     required
                     value={formData.province}
                     onChange={handleInputChange}
@@ -465,10 +465,10 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label htmlFor="zipCode">ZIP Code</Label>
-                    <Input 
-                      id="zipCode" 
-                      placeholder="Enter ZIP code" 
-                      className="mt-1" 
+                    <Input
+                      id="zipCode"
+                      placeholder="Enter ZIP code"
+                      className="mt-1"
                       required
                       value={formData.zipCode}
                       onChange={handleInputChange}
@@ -476,10 +476,10 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                   </div>
                   <div>
                     <Label htmlFor="residencyLength">Length of Residency (years)</Label>
-                    <Input 
-                      id="residencyLength" 
-                      type="number" 
-                      className="mt-1" 
+                    <Input
+                      id="residencyLength"
+                      type="number"
+                      className="mt-1"
                       required
                       value={formData.residencyLength}
                       onChange={handleInputChange}
