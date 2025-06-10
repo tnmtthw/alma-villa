@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
@@ -84,6 +84,8 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
   
+  const profileDropdownRef = useRef<HTMLDivElement>(null)
+  
   const adminName = "Juan Dela Cruz"
   const adminRole = "Barangay Administrator"
   const adminEmail = "admin@almavilla.gov.ph"
@@ -91,6 +93,22 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setIsMounted(true)
   }, [])
+
+  // Handle click outside to close profile dropdown
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
+        setIsProfileOpen(false)
+      }
+    }
+
+    if (isProfileOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside)
+      }
+    }
+  }, [isProfileOpen])
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen)
@@ -100,9 +118,21 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
     setIsSidebarCollapsed(!isSidebarCollapsed)
   }
 
-  const handleNavClick = (href: string) => {
-    router.push(href)
+  const handleLinkClick = () => {
     setIsSidebarOpen(false)
+    // Don't close profile dropdown here - let the individual link handlers do it
+  }
+
+  const handleProfileLinkClick = (href: string) => {
+    setIsProfileOpen(false) // Close dropdown
+    router.push(href) // Navigate programmatically
+  }
+
+  const handleSignOut = () => {
+    setIsProfileOpen(false)
+    // Add your sign out logic here
+    console.log("Signing out...")
+    // router.push("/login")
   }
 
   // Prevent hydration mismatch by not rendering dynamic content until mounted
@@ -156,21 +186,26 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
             const isActive = pathname === item.href
             
             return (
-              <button
+              <Link
                 key={item.href}
-                onClick={() => handleNavClick(item.href)}
+                href={item.href}
+                onClick={handleLinkClick}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group relative ${
                   isActive
                     ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-600/25"
-                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                    : "text-gray-700 hover:bg-gray-100"
                 }`}
               >
                 <div className={`flex items-center justify-center ${isSidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4'}`}>
-                  <Icon className={`${isSidebarCollapsed ? 'h-5 w-5' : 'h-4 w-4'} flex-shrink-0 ${isActive ? "text-white" : "text-gray-500"}`} />
+                  <Icon className={`${isSidebarCollapsed ? 'h-5 w-5' : 'h-4 w-4'} flex-shrink-0 ${
+                    isActive ? "text-white" : "text-gray-500 group-hover:text-[#23479A]"
+                  }`} />
                 </div>
                 {!isSidebarCollapsed && (
                   <>
-                    <span className="flex-1 text-left font-medium text-sm">{item.label}</span>
+                    <span className={`flex-1 text-left font-medium text-sm ${
+                      isActive ? "text-white" : "group-hover:text-[#23479A]"
+                    }`}>{item.label}</span>
                     {item.badge && (
                       <span 
                         className={`text-xs h-5 px-2 rounded-full flex items-center justify-center font-semibold ${
@@ -184,7 +219,10 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
                     )}
                   </>
                 )}
-              </button>
+                {!isActive && (
+                  <div className="absolute inset-0 rounded-lg ring-1 ring-transparent group-hover:ring-[#23479A]/20 transition-all duration-200" />
+                )}
+              </Link>
             )
           })}
         </nav>
@@ -199,15 +237,19 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
               <ChevronRight className="h-5 w-5 text-gray-600" />
             </button>
           ) : (
-            <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center shadow-md">
+            <button 
+              onClick={() => handleProfileLinkClick("/admin/profile")}
+              className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 cursor-pointer transition-all duration-200 hover:shadow-md group relative w-full text-left"
+            >
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all duration-200">
                 <User className="h-5 w-5 text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-900 truncate">{adminName}</p>
-                <p className="text-xs text-gray-500 truncate">{adminRole}</p>
+                <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-[#23479A]">{adminName}</p>
+                <p className="text-xs text-gray-500 truncate group-hover:text-[#23479A]/70">{adminRole}</p>
               </div>
-            </div>
+              <div className="absolute inset-0 rounded-xl ring-1 ring-transparent group-hover:ring-[#23479A]/20 transition-all duration-200" />
+            </button>
           )}
         </div>
       </aside>
@@ -270,7 +312,7 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
                 </button>
 
                 {/* Profile Dropdown */}
-                <div className="relative">
+                <div className="relative" ref={profileDropdownRef}>
                   <button
                     onClick={() => setIsProfileOpen(!isProfileOpen)}
                     className="relative h-10 w-10 rounded-lg hover:ring-2 hover:ring-blue-500/30 hover:ring-offset-2 transition-all ml-2"
@@ -281,7 +323,7 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
                   </button>
 
                   {/* Profile Dropdown Menu */}
-                  {isMounted && isProfileOpen && (
+                  {isProfileOpen && (
                     <div className="absolute right-0 mt-3 w-72 bg-white rounded-2xl shadow-xl border border-gray-200/70 py-2 z-50 backdrop-blur-sm">
                       <div className="px-6 py-4 border-b border-gray-200/70">
                         <p className="text-sm font-semibold text-gray-900">{adminName}</p>
@@ -289,22 +331,38 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
                         <p className="text-xs text-blue-600 font-medium mt-1">{adminRole}</p>
                       </div>
                       <div className="py-2">
-                        <button className="flex items-center w-full px-6 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                          <User className="mr-3 h-4 w-4" />
-                          Profile Settings
+                        <button 
+                          onClick={() => handleProfileLinkClick("/admin/profile")}
+                          className="flex items-center w-full px-6 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-all duration-200 group relative text-left"
+                        >
+                          <User className="mr-3 h-4 w-4 text-gray-500 group-hover:text-[#23479A] transition-colors duration-200" />
+                          <span className="group-hover:text-[#23479A] transition-colors duration-200">Profile Settings</span>
+                          <div className="absolute inset-0 ring-1 ring-transparent group-hover:ring-[#23479A]/20 transition-all duration-200" />
                         </button>
-                        <button className="flex items-center w-full px-6 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                          <Settings className="mr-3 h-4 w-4" />
-                          Preferences
+                        <button 
+                          onClick={() => handleProfileLinkClick("/admin/preferences")}
+                          className="flex items-center w-full px-6 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-all duration-200 group relative text-left"
+                        >
+                          <Settings className="mr-3 h-4 w-4 text-gray-500 group-hover:text-[#23479A] transition-colors duration-200" />
+                          <span className="group-hover:text-[#23479A] transition-colors duration-200">Preferences</span>
+                          <div className="absolute inset-0 ring-1 ring-transparent group-hover:ring-[#23479A]/20 transition-all duration-200" />
                         </button>
-                        <button className="flex items-center w-full px-6 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                          <HelpCircle className="mr-3 h-4 w-4" />
-                          Help & Support
+                        <button 
+                          onClick={() => handleProfileLinkClick("/admin/help")}
+                          className="flex items-center w-full px-6 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-all duration-200 group relative text-left"
+                        >
+                          <HelpCircle className="mr-3 h-4 w-4 text-gray-500 group-hover:text-[#23479A] transition-colors duration-200" />
+                          <span className="group-hover:text-[#23479A] transition-colors duration-200">Help & Support</span>
+                          <div className="absolute inset-0 ring-1 ring-transparent group-hover:ring-[#23479A]/20 transition-all duration-200" />
                         </button>
                         <div className="border-t border-gray-200/70 my-2"></div>
-                        <button className="flex items-center w-full px-6 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors">
-                          <LogOut className="mr-3 h-4 w-4" />
-                          Sign Out
+                        <button 
+                          onClick={handleSignOut}
+                          className="flex items-center w-full px-6 py-3 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 group relative text-left"
+                        >
+                          <LogOut className="mr-3 h-4 w-4 text-red-500 group-hover:text-red-600 transition-colors duration-200" />
+                          <span className="group-hover:text-red-700 transition-colors duration-200">Sign Out</span>
+                          <div className="absolute inset-0 ring-1 ring-transparent group-hover:ring-red-200 transition-all duration-200" />
                         </button>
                       </div>
                     </div>
@@ -322,18 +380,10 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Mobile sidebar overlay */}
-      {isMounted && isSidebarOpen && (
+      {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
-
-      {/* Click outside to close profile dropdown */}
-      {isMounted && isProfileOpen && (
-        <div
-          className="fixed inset-0 z-30"
-          onClick={() => setIsProfileOpen(false)}
         />
       )}
     </div>
