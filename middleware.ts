@@ -1,17 +1,38 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { auth } from "@/auth";
 
-export function middleware(request: NextRequest) {
-  const requestHeaders = new Headers(request.headers)
-  requestHeaders.set('x-pathname', request.nextUrl.pathname)
+export default auth((req) => {
+  const privateRoutes = ["/profile", "/user/profile", "cart"];
 
-  return NextResponse.next({
-    request: {
-      headers: requestHeaders,
-    },
-  })
-}
+  const isLoggedIn = !!req.auth;
+  const user = req.auth?.user;
+
+  // const url = "http://localhost:3000";
+  // const url = "https://alma-villa.vercel.app"; 
+  const url = "http://localhost:3000"; 
+  const isRootRoute = req.nextUrl.pathname === "/";
+  const isAuthRoute = req.nextUrl.pathname.includes("/account/");
+  const isPrivateRoute = privateRoutes.includes(req.nextUrl.pathname);
+  const isAdminRoute = req.nextUrl.pathname.includes("/admin");
+
+  if (isLoggedIn && isAuthRoute) {
+    if (user?.role == "Admin") {
+      return Response.redirect(`${url}/admin`);
+    } else if (user?.role == "User") {
+      return Response.redirect(`${url}/`);
+    }
+  }
+
+  if (!isLoggedIn && isPrivateRoute) {
+    return Response.redirect(`${url}/`);
+  }
+
+  if (isAdminRoute) {
+    if (!isLoggedIn || user?.role !== "Admin") {
+      return Response.redirect(`${url}/`);
+    }
+  }
+});
 
 export const config = {
-  matcher: '/:path*',
-} 
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+};

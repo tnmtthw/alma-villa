@@ -8,12 +8,12 @@ export async function POST(req: Request) {
   const { password, ...rest } = await req.json()
   const hashedPassword = await hash(password, 12)
 
-  const resident = await prisma.resident.create({
+  const user = await prisma.user.create({
     data: {
       password: hashedPassword,
       ...rest
     },
   })
 
-  return NextResponse.json(resident)
+  return NextResponse.json(user)
 }

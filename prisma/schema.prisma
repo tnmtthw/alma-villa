@@ -8,7 +8,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Resident {
+model User {
   id                String   @id @default(uuid()) @db.Uuid
 
   // Personal Details
@@ -50,8 +50,8 @@ model Resident {
   
   // Credintial
   // username          String?  @unique
-  username          String?
-  password          String?
+  username          String      @unique
+  password          String
   role              String       @default("Unverified")
 
   createdAt         DateTime     @default(now())

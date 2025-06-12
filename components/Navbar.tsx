@@ -46,12 +46,12 @@ const Navbar = () => {
 
         {/* Mobile Menu Button */}
         <div className="flex items-center gap-4 lg:hidden">
-          <Button 
-            variant="default" 
-            asChild 
+          <Button
+            variant="default"
+            asChild
             className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px] hidden sm:flex"
           >
-            <Link href="/login" className="flex items-center gap-2 text-white">
+            <Link href="/account/login" className="flex items-center gap-2 text-white">
               Log In Resident
               <LogIn className="h-4 w-4" />
             </Link>
@@ -72,20 +72,20 @@ const Navbar = () => {
         {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center space-x-6">
           {menuItems.map((item) => (
-            <Link 
+            <Link
               key={item.label}
-              href={item.href} 
+              href={item.href}
               className="text-sm font-medium transition-colors hover:text-[#23479A]"
             >
               {item.label}
             </Link>
           ))}
-          <Button 
-            variant="default" 
-            asChild 
+          <Button
+            variant="default"
+            asChild
             className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px]"
           >
-            <Link href="/login" className="flex items-center gap-2 text-white">
+            <Link href="/account/login" className="flex items-center gap-2 text-white">
               Log In Resident
               <LogIn className="h-4 w-4" />
             </Link>
@@ -107,13 +107,13 @@ const Navbar = () => {
                 {item.label}
               </Link>
             ))}
-            <Button 
-              variant="default" 
-              asChild 
+            <Button
+              variant="default"
+              asChild
               className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px] w-full sm:hidden"
             >
-              <Link 
-                href="/login" 
+              <Link
+                href="/login"
                 className="flex items-center justify-center gap-2 text-white"
                 onClick={() => setIsMenuOpen(false)}
               >

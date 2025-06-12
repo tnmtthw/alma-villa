@@ -27,7 +27,7 @@ export default function LoginPage() {
       {/* Background with hero section style */}
       <div className="absolute inset-0 bg-[#23479A]">
         {/* Background pattern */}
-        <div 
+        <div
           className="absolute inset-x-0 bottom-0 h-[250px]"
           style={{
             backgroundImage: 'url(/assets/img/herosection.png)',
@@ -139,7 +139,7 @@ export default function LoginPage() {
 
             <p className="text-center text-sm text-gray-600">
               Don't have an account?{" "}
-              <a href="/signup" className="text-[#23479A] hover:text-[#23479A]/80 font-medium">
+              <a href="/account/signup" className="text-[#23479A] hover:text-[#23479A]/80 font-medium">
                 Sign up
               </a>
             </p>
