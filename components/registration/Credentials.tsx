@@ -13,24 +13,9 @@ interface CredentialsProps {
 }
 
 interface CredentialsFormData {
-  username: string;
   password: string;
+  confirmPassword: string;
 }
-
-function generateRandomUsername(): string {
-  const firstNames = ["juan", "maria", "jose", "ana", "pedro", "lisa"];
-  const lastNames = ["delacruz", "reyes", "santos", "garcia", "torres", "lopez"];
-  const randomFirst = firstNames[Math.floor(Math.random() * firstNames.length)];
-  const randomLast = lastNames[Math.floor(Math.random() * lastNames.length)];
-  const randomNumber = Math.floor(Math.random() * 1000); // Optional: adds uniqueness
-
-  return `${randomFirst}.${randomLast}${randomNumber}`;
-}
-
-const sampleData: CredentialsFormData = {
-  username: generateRandomUsername(),
-  password: "Test@123456"
-};
 
 // Helper function to convert base64 to Blob
 function base64ToBlob(base64Data: string): Blob {
@@ -77,7 +62,9 @@ async function uploadImage(base64Data: string, imageName: string, folder: string
 
 export default function Credentials({ onBackAction: onBack, onCompleteAction: onComplete }: CredentialsProps) {
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [userEmail, setUserEmail] = useState("")
   const [agreeToTerms, setAgreeToTerms] = useState(() => {
     // Try to load saved terms acceptance from sessionStorage
     if (typeof window !== 'undefined') {
@@ -91,15 +78,26 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
     if (typeof window !== 'undefined') {
       const savedData = sessionStorage.getItem('credentialsData')
       return savedData ? JSON.parse(savedData) : {
-        username: "",
-        password: ""
+        password: "",
+        confirmPassword: ""
       }
     }
     return {
-      username: "",
-      password: ""
+      password: "",
+      confirmPassword: ""
     }
   })
+
+  // Load email from phase 1 data on component mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedResidentInfo = localStorage.getItem('residentInfoData')
+      if (savedResidentInfo) {
+        const residentInfo = JSON.parse(savedResidentInfo)
+        setUserEmail(residentInfo.email || "")
+      }
+    }
+  }, [])
 
   // Save form data whenever it changes
   useEffect(() => {
@@ -123,8 +121,35 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
     }))
   }
 
+  // Password validation helper
+  const isPasswordValid = (password: string) => {
+    const minLength = password.length >= 8
+    const hasUppercase = /[A-Z]/.test(password)
+    const hasLowercase = /[a-z]/.test(password)
+    const hasNumbers = /\d/.test(password)
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password)
+    
+    return minLength && hasUppercase && hasLowercase && hasNumbers && hasSpecialChar
+  }
+
+  // Check if passwords match
+  const passwordsMatch = formData.password === formData.confirmPassword && formData.confirmPassword !== ""
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate password
+    if (!isPasswordValid(formData.password)) {
+      alert("Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters");
+      return;
+    }
+
+    // Check if passwords match
+    if (!passwordsMatch) {
+      alert("Passwords do not match");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -178,7 +203,7 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
 
       // Prepare signup data
       const signupData = {
-        username: formData.username,
+        username: userEmail,
         password: formData.password,
         type: type,
         capturedPhoto: capturedPhotoUrl,
@@ -233,25 +258,11 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
     }
   };
 
-  const fillWithSampleData = () => {
-    setFormData(sampleData)
-    setAgreeToTerms(true)
-  }
-
   return (
     <div className="bg-white/95 backdrop-blur-sm rounded-[2px] shadow-lg p-4 sm:p-6 max-w-[1100px] mx-auto">
       <div className="border-b border-gray-200/50 pb-4 mb-6">
         <h2 className="text-xl sm:text-2xl font-semibold text-gray-900">Account Setup</h2>
         <p className="text-sm text-gray-500 mt-1">Create your login credentials and accept the terms of service.</p>
-        <Button
-          type="button"
-          onClick={fillWithSampleData}
-          variant="outline"
-          className="mt-2 text-sm border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10 w-full sm:w-auto"
-          disabled={isSubmitting}
-        >
-          Fill with Sample Data
-        </Button>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -260,20 +271,23 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
           <h3 className="text-lg font-medium text-gray-900">Login Credentials</h3>
 
           <div className="space-y-4">
+            {/* Email/Username Display Field */}
             <div>
-              <Label htmlFor="username" className="text-sm font-medium">Username</Label>
+              <Label htmlFor="email" className="text-sm font-medium">Email Address / Username</Label>
               <Input
-                id="username"
-                type="text"
-                placeholder="Enter username"
-                className="mt-1 h-12 text-base"
-                required
-                value={formData.username}
-                onChange={handleInputChange}
-                disabled={isSubmitting}
+                id="email"
+                type="email"
+                value={userEmail}
+                className="mt-1 h-12 text-base bg-gray-50 cursor-not-allowed"
+                disabled
+                readOnly
               />
+              <p className="mt-1 text-xs text-gray-500">
+                This email address will be used as your username for login
+              </p>
             </div>
 
+            {/* Password Field */}
             <div>
               <Label htmlFor="password" className="text-sm font-medium">Password</Label>
               <div className="relative mt-1">
@@ -281,7 +295,11 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter password"
-                  className="pr-12 h-12 text-base"
+                  className={`pr-12 h-12 text-base ${
+                    formData.password && !isPasswordValid(formData.password) 
+                      ? 'border-red-300 focus:border-red-500' 
+                      : ''
+                  }`}
                   required
                   value={formData.password}
                   onChange={handleInputChange}
@@ -301,9 +319,73 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
                   )}
                 </Button>
               </div>
-              <p className="mt-2 text-xs text-gray-500 leading-relaxed">
-                Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters
-              </p>
+              {formData.password && !isPasswordValid(formData.password) && (
+                <p className="mt-1 text-xs text-red-600">
+                  Password must be at least 8 characters with uppercase, lowercase, numbers, and special characters
+                </p>
+              )}
+              {formData.password && isPasswordValid(formData.password) && (
+                <p className="mt-1 text-xs text-green-600">
+                  Password meets requirements ✓
+                </p>
+              )}
+            </div>
+
+            {/* Confirm Password Field */}
+            <div>
+              <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirm Password</Label>
+              <div className="relative mt-1">
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm your password"
+                  className={`pr-12 h-12 text-base ${
+                    formData.confirmPassword && !passwordsMatch 
+                      ? 'border-red-300 focus:border-red-500' 
+                      : formData.confirmPassword && passwordsMatch
+                      ? 'border-green-300 focus:border-green-500'
+                      : ''
+                  }`}
+                  required
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  disabled={isSubmitting}
+                />
+                <Button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  variant="outline"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-10 w-10 p-0 border-0"
+                  disabled={isSubmitting}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+              {formData.confirmPassword && !passwordsMatch && (
+                <p className="mt-1 text-xs text-red-600">
+                  Passwords do not match
+                </p>
+              )}
+              {formData.confirmPassword && passwordsMatch && (
+                <p className="mt-1 text-xs text-green-600">
+                  Passwords match ✓
+                </p>
+              )}
+            </div>
+
+            <div className="mt-2 text-xs text-gray-500 leading-relaxed">
+              <strong>Password Requirements:</strong>
+              <ul className="list-disc list-inside mt-1 space-y-1">
+                <li>At least 8 characters long</li>
+                <li>Include uppercase letters (A-Z)</li>
+                <li>Include lowercase letters (a-z)</li>
+                <li>Include numbers (0-9)</li>
+                <li>Include special characters (!@#$%^&* etc.)</li>
+              </ul>
             </div>
           </div>
         </div>
@@ -354,7 +436,7 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
             <Button
               type="submit"
               className="bg-[#23479A] hover:bg-[#23479A]/90 text-white rounded-[2px] h-12 text-base font-medium"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !passwordsMatch || !isPasswordValid(formData.password)}
             >
               {isSubmitting ? "Processing..." : "Complete Registration"}
             </Button>
@@ -383,7 +465,7 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
             <Button
               type="submit"
               className="bg-[#23479A] hover:bg-[#23479A]/90 text-white rounded-[2px] h-12"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !passwordsMatch || !isPasswordValid(formData.password)}
             >
               {isSubmitting ? "Processing..." : "Complete Registration"}
             </Button>
