@@ -41,9 +41,9 @@ model Resident {
 
 
   // Government ID
-  type          String
-  frontId       String
-  backId        String
+  type            String
+  frontId         String
+  backId          String
 
   // Face Verification
   capturedPhoto     String?
@@ -52,4 +52,7 @@ model Resident {
   // username          String?  @unique
   username          String?
   password          String?
+  role              String       @default("Unverified")
+
+  createdAt         DateTime     @default(now())
 }
