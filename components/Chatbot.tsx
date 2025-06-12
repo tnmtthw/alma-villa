@@ -249,7 +249,9 @@ const ChatBot = () => {
   }
 
   return (
-    <div className="fixed bottom-20 right-6 w-96 h-[500px] bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col z-50">
+    <div className="fixed bottom-20 left-1/2 right-auto -translate-x-1/2 w-full max-w-xs h-[500px] bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col z-50
+      sm:right-6 sm:left-auto sm:w-96 sm:translate-x-0
+    ">
       {/* Header */}
       <div className="bg-[#23479A] text-white p-4 rounded-t-lg flex items-center justify-between">
         <div className="flex items-center gap-3">
