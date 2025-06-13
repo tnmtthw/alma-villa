@@ -239,31 +239,31 @@ const ChatBot = () => {
   if (!isOpen) {
     return (
       <button
-      onClick={() => setIsOpen(true)}
-      className="fixed bottom-20 right-6 
-        bg-[#23479A] hover:bg-[#23479A]/90 
-        text-white p-4 rounded-full 
-        shadow-lg transition-all duration-300 
-        hover:scale-110 z-50 animate-bounce"
-      aria-label="Open chat"
-    >
-      <Bot className="h-6 w-6" />
-    </button>
+        onClick={() => setIsOpen(true)}
+        className="fixed bottom-20 right-6 
+          bg-[#23479A] hover:bg-[#23479A]/90 
+          text-white p-4 rounded-full 
+          shadow-lg transition-all duration-300 
+          hover:scale-110 z-50 animate-bounce"
+        aria-label="Open chat"
+      >
+        <Bot className="h-6 w-6" />
+      </button>
     )
   }
 
   return (
-    <div className="fixed bottom-20 left-1/2 right-auto -translate-x-1/2 w-full max-w-xs h-[500px] bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col z-50
-      sm:right-6 sm:left-auto sm:w-96 sm:translate-x-0
+    <div className="fixed bottom-20 left-4 right-4 h-[550px] bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col z-50
+      sm:left-auto sm:right-6 sm:w-[450px] sm:max-w-none
     ">
       {/* Header */}
-      <div className="bg-[#23479A] text-white p-4 rounded-t-lg flex items-center justify-between">
+      <div className="bg-[#23479A] text-white p-5 rounded-t-lg flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="bg-white/20 p-2 rounded-full">
             <Bot className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="font-semibold">Alma Villa Assistant</h3>
+            <h3 className="font-semibold text-base">Alma Villa Assistant</h3>
             <p className="text-xs text-blue-100">Online now</p>
           </div>
         </div>
@@ -276,11 +276,11 @@ const ChatBot = () => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+      <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-gray-50">
         {messages.map((message) => (
           <div key={message.id} className="space-y-2">
             <div className={`flex ${message.isBot ? 'justify-start' : 'justify-end'}`}>
-              <div className={`flex items-start gap-2 max-w-[80%] ${message.isBot ? 'flex-row' : 'flex-row-reverse'}`}>
+              <div className={`flex items-start gap-3 max-w-[85%] ${message.isBot ? 'flex-row' : 'flex-row-reverse'}`}>
                 <div className={`p-2 rounded-full ${message.isBot ? 'bg-[#23479A]' : 'bg-gray-300'}`}>
                   {message.isBot ? (
                     <Bot className="h-4 w-4 text-white" />
@@ -290,13 +290,13 @@ const ChatBot = () => {
                 </div>
                 <div className="space-y-1">
                   <div
-                    className={`p-3 rounded-lg ${
+                    className={`p-4 rounded-lg ${
                       message.isBot
                         ? 'bg-white border border-gray-200 text-gray-800'
                         : 'bg-[#23479A] text-white'
                     }`}
                   >
-                    <p className="text-sm leading-relaxed">{message.text}</p>
+                    <p className="text-sm leading-relaxed whitespace-pre-line">{message.text}</p>
                   </div>
                   <div className={`flex items-center gap-1 text-xs text-gray-500 ${message.isBot ? 'justify-start' : 'justify-end'}`}>
                     <Clock className="h-3 w-3" />
@@ -308,14 +308,14 @@ const ChatBot = () => {
 
             {/* Suggestions */}
             {message.isBot && message.suggestions && (
-              <div className="ml-12 space-y-2">
+              <div className="ml-14 space-y-2">
                 <p className="text-xs text-gray-500">Quick suggestions:</p>
                 <div className="flex flex-wrap gap-2">
                   {message.suggestions.map((suggestion, index) => (
                     <button
                       key={index}
                       onClick={() => handleSendMessage(suggestion)}
-                      className="px-3 py-1 bg-white border border-[#23479A] text-[#23479A] text-xs rounded-full hover:bg-[#23479A] hover:text-white transition-colors"
+                      className="px-3 py-1.5 bg-white border border-[#23479A] text-[#23479A] text-xs rounded-full hover:bg-[#23479A] hover:text-white transition-colors"
                     >
                       {suggestion}
                     </button>
@@ -328,11 +328,11 @@ const ChatBot = () => {
 
         {isTyping && (
           <div className="flex justify-start">
-            <div className="flex items-start gap-2 max-w-[80%]">
+            <div className="flex items-start gap-3 max-w-[85%]">
               <div className="p-2 rounded-full bg-[#23479A]">
                 <Bot className="h-4 w-4 text-white" />
               </div>
-              <div className="bg-white border border-gray-200 p-3 rounded-lg">
+              <div className="bg-white border border-gray-200 p-4 rounded-lg">
                 <div className="flex gap-1">
                   <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                   <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
@@ -346,20 +346,20 @@ const ChatBot = () => {
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-gray-200 bg-white rounded-b-lg">
-        <div className="flex gap-2">
+      <div className="p-5 border-t border-gray-200 bg-white rounded-b-lg">
+        <div className="flex gap-3">
           <input
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Type your question..."
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#23479A]/20 focus:border-[#23479A] text-sm"
+            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#23479A]/20 focus:border-[#23479A] text-sm"
           />
           <button
             onClick={() => handleSendMessage()}
             disabled={!inputText.trim()}
-            className="bg-[#23479A] hover:bg-[#23479A]/90 disabled:bg-gray-300 text-white p-2 rounded-lg transition-colors"
+            className="bg-[#23479A] hover:bg-[#23479A]/90 disabled:bg-gray-300 text-white p-3 rounded-lg transition-colors"
           >
             <Send className="h-4 w-4" />
           </button>
