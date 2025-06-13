@@ -24,6 +24,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react"
+import { signOut } from "next-auth/react"
 
 const navigationItems = [
   {
@@ -83,9 +84,9 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
-  
+
   const profileDropdownRef = useRef<HTMLDivElement>(null)
-  
+
   const adminName = "Juan Dela Cruz"
   const adminRole = "Barangay Administrator"
   const adminEmail = "admin@almavilla.gov.ph"
@@ -128,11 +129,16 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
     router.push(href) // Navigate programmatically
   }
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
     setIsProfileOpen(false)
-    // Add your sign out logic here
-    console.log("Signing out...")
-    // router.push("/login")
+    try {
+      await signOut()
+      // The signOut function should handle the redirect, but you can add a fallback
+      // router.push("/login")
+    } catch (error) {
+      console.error("Error signing out:", error)
+      // Handle error if needed
+    }
   }
 
   // Prevent hydration mismatch by not rendering dynamic content until mounted
@@ -144,11 +150,9 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
     <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Sidebar */}
       <aside
-        className={`bg-white/90 backdrop-blur-sm border-r border-gray-200/70 transition-all duration-300 flex flex-col shadow-xl ${
-          isSidebarCollapsed ? "w-16" : "w-64"
-        } fixed lg:static inset-y-0 left-0 z-50 ${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        }`}
+        className={`bg-white/90 backdrop-blur-sm border-r border-gray-200/70 transition-all duration-300 flex flex-col shadow-xl ${isSidebarCollapsed ? "w-16" : "w-64"
+          } fixed lg:static inset-y-0 left-0 z-50 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          }`}
       >
         {/* Sidebar Header */}
         <div className="p-4 border-b border-gray-200/70">
@@ -184,35 +188,31 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
           {navigationItems.map((item) => {
             const Icon = item.icon
             const isActive = pathname === item.href
-            
+
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={handleLinkClick}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group relative ${
-                  isActive
-                    ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-600/25"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group relative ${isActive
+                  ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-600/25"
+                  : "text-gray-700 hover:bg-gray-100"
+                  }`}
               >
                 <div className={`flex items-center justify-center ${isSidebarCollapsed ? 'w-5 h-5' : 'w-4 h-4'}`}>
-                  <Icon className={`${isSidebarCollapsed ? 'h-5 w-5' : 'h-4 w-4'} flex-shrink-0 ${
-                    isActive ? "text-white" : "text-gray-500 group-hover:text-[#23479A]"
-                  }`} />
+                  <Icon className={`${isSidebarCollapsed ? 'h-5 w-5' : 'h-4 w-4'} flex-shrink-0 ${isActive ? "text-white" : "text-gray-500 group-hover:text-[#23479A]"
+                    }`} />
                 </div>
                 {!isSidebarCollapsed && (
                   <>
-                    <span className={`flex-1 text-left font-medium text-sm ${
-                      isActive ? "text-white" : "group-hover:text-[#23479A]"
-                    }`}>{item.label}</span>
+                    <span className={`flex-1 text-left font-medium text-sm ${isActive ? "text-white" : "group-hover:text-[#23479A]"
+                      }`}>{item.label}</span>
                     {item.badge && (
-                      <span 
-                        className={`text-xs h-5 px-2 rounded-full flex items-center justify-center font-semibold ${
-                          isActive 
-                            ? "bg-white/20 text-white" 
-                            : "bg-red-100 text-red-700"
-                        }`}
+                      <span
+                        className={`text-xs h-5 px-2 rounded-full flex items-center justify-center font-semibold ${isActive
+                          ? "bg-white/20 text-white"
+                          : "bg-red-100 text-red-700"
+                          }`}
                       >
                         {item.badge}
                       </span>
@@ -237,7 +237,7 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
               <ChevronRight className="h-5 w-5 text-gray-600" />
             </button>
           ) : (
-            <button 
+            <button
               onClick={() => handleProfileLinkClick("/admin/profile")}
               className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 cursor-pointer transition-all duration-200 hover:shadow-md group relative w-full text-left"
             >
@@ -331,7 +331,7 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
                         <p className="text-xs text-blue-600 font-medium mt-1">{adminRole}</p>
                       </div>
                       <div className="py-2">
-                        <button 
+                        <button
                           onClick={() => handleProfileLinkClick("/admin/profile")}
                           className="flex items-center w-full px-6 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-all duration-200 group relative text-left"
                         >
@@ -339,7 +339,7 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
                           <span className="group-hover:text-[#23479A] transition-colors duration-200">Profile Settings</span>
                           <div className="absolute inset-0 ring-1 ring-transparent group-hover:ring-[#23479A]/20 transition-all duration-200" />
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleProfileLinkClick("/admin/preferences")}
                           className="flex items-center w-full px-6 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-all duration-200 group relative text-left"
                         >
@@ -347,7 +347,7 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
                           <span className="group-hover:text-[#23479A] transition-colors duration-200">Preferences</span>
                           <div className="absolute inset-0 ring-1 ring-transparent group-hover:ring-[#23479A]/20 transition-all duration-200" />
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleProfileLinkClick("/admin/help")}
                           className="flex items-center w-full px-6 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-all duration-200 group relative text-left"
                         >
@@ -356,7 +356,7 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
                           <div className="absolute inset-0 ring-1 ring-transparent group-hover:ring-[#23479A]/20 transition-all duration-200" />
                         </button>
                         <div className="border-t border-gray-200/70 my-2"></div>
-                        <button 
+                        <button
                           onClick={handleSignOut}
                           className="flex items-center w-full px-6 py-3 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 group relative text-left"
                         >

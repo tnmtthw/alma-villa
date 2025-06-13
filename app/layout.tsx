@@ -1,4 +1,6 @@
 import ConditionalLayout from "@/components/ConditionalLayout"
+import { SessionProvider } from "next-auth/react";
+import { auth } from "@/auth";
 import { Inter } from "next/font/google"
 import { Metadata } from "next"
 import "./globals.css"
@@ -20,12 +22,16 @@ interface RootLayoutProps {
   children: React.ReactNode
 }
 
+const session = await auth();
+
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} font-sans antialiased`}>
-        <ConditionalLayout>{children}</ConditionalLayout>
-      </body>
-    </html>
+      <SessionProvider session={session}>
+        <body className={`${inter.variable} font-sans antialiased`}>
+          <ConditionalLayout>{children}</ConditionalLayout>
+        </body>
+      </SessionProvider >
+    </html >
   );
 }

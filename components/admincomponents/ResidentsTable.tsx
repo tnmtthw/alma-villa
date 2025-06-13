@@ -208,21 +208,21 @@ const samplePendingRegistrations = [
     emergencyPhone: "09567890124",
     avatar: "ER",
     documents: [
-      { 
-        type: "Valid ID Photo", 
-        status: "submitted", 
+      {
+        type: "Valid ID Photo",
+        status: "submitted",
         url: "https://picsum.photos/800/600?random=1",
         name: "national-id.jpg"
       },
-      { 
-        type: "Profile Picture", 
-        status: "submitted", 
+      {
+        type: "Profile Picture",
+        status: "submitted",
         url: "https://picsum.photos/800/600?random=2",
         name: "profile-photo.jpg"
       },
-      { 
-        type: "Proof of Residence", 
-        status: "pending", 
+      {
+        type: "Proof of Residence",
+        status: "pending",
         url: "",
         name: ""
       }
@@ -246,21 +246,21 @@ const samplePendingRegistrations = [
     emergencyPhone: "09234567892",
     avatar: "MT",
     documents: [
-      { 
-        type: "Valid ID Photo", 
-        status: "submitted", 
+      {
+        type: "Valid ID Photo",
+        status: "submitted",
         url: "https://picsum.photos/800/600?random=3",
         name: "drivers-license.jpg"
       },
-      { 
-        type: "Profile Picture", 
-        status: "pending", 
+      {
+        type: "Profile Picture",
+        status: "pending",
         url: "",
         name: ""
       },
-      { 
-        type: "Proof of Residence", 
-        status: "submitted", 
+      {
+        type: "Proof of Residence",
+        status: "submitted",
         url: "https://picsum.photos/800/600?random=4",
         name: "utility-bill.jpg"
       }
@@ -336,16 +336,16 @@ export default function ModernResidentsTable() {
 
   // Filter and search residents
   const filteredResidents = residents.filter((resident) => {
-    const matchesSearch = 
+    const matchesSearch =
       resident.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       resident.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       resident.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       resident.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       resident.occupation.toLowerCase().includes(searchTerm.toLowerCase())
-    
+
     const matchesStatusFilter = filterStatus === "All" || resident.status === filterStatus
     const matchesGenderFilter = filterGender === "All" || resident.gender === filterGender
-    
+
     return matchesSearch && matchesStatusFilter && matchesGenderFilter
   })
 
@@ -356,7 +356,7 @@ export default function ModernResidentsTable() {
 
   // Handle status change
   const handleStatusChange = (id: string, newStatus: "Active" | "Inactive") => {
-    setResidents(residents.map(resident => 
+    setResidents(residents.map(resident =>
       resident.id === id ? { ...resident, status: newStatus } : resident
     ))
   }
@@ -370,9 +370,9 @@ export default function ModernResidentsTable() {
 
   // Handle bulk actions
   const handleBulkStatusChange = (newStatus: "Active" | "Inactive") => {
-    setResidents(residents.map(resident => 
-      selectedResidents.includes(resident.id) 
-        ? { ...resident, status: newStatus } 
+    setResidents(residents.map(resident =>
+      selectedResidents.includes(resident.id)
+        ? { ...resident, status: newStatus }
         : resident
     ))
     setSelectedResidents([])
@@ -419,7 +419,7 @@ export default function ModernResidentsTable() {
                 {resident.status}
               </Badge>
             </div>
-            
+
             <div className="space-y-2 mb-4">
               <div className="flex items-center gap-2 text-xs text-gray-600">
                 <User2 className="h-3 w-3" />
@@ -461,7 +461,7 @@ export default function ModernResidentsTable() {
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => handleStatusChange(
-                      resident.id, 
+                      resident.id,
                       resident.status === "Active" ? "Inactive" : "Active"
                     )}
                   >
@@ -670,10 +670,10 @@ export default function ModernResidentsTable() {
                 <Grid3X3 className="h-4 w-4" />
               </Button>
             </div>
-            
-            <Button 
-              variant="outline" 
-              size="sm" 
+
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setShowImportModal(true)}
               className="border-[#23479A]/20 text-[#23479A] hover:bg-[#23479A]/5"
             >
@@ -681,17 +681,17 @@ export default function ModernResidentsTable() {
               Import
             </Button>
 
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               className="border-[#23479A]/20 text-[#23479A] hover:bg-[#23479A]/5"
             >
               <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
-            
-            <Button 
-              size="sm" 
+
+            <Button
+              size="sm"
               className="bg-[#23479A] hover:bg-[#23479A]/90 shadow-lg"
               onClick={() => setShowAddModal(true)}
             >
@@ -714,7 +714,7 @@ export default function ModernResidentsTable() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0 shadow-lg">
             <CardContent className="p-3">
               <div className="flex items-center justify-between">
@@ -726,7 +726,7 @@ export default function ModernResidentsTable() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white border-0 shadow-lg">
             <CardContent className="p-3">
               <div className="flex items-center justify-between">
@@ -738,7 +738,7 @@ export default function ModernResidentsTable() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0 shadow-lg">
             <CardContent className="p-3">
               <div className="flex items-center justify-between">
@@ -750,7 +750,7 @@ export default function ModernResidentsTable() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 shadow-lg">
             <CardContent className="p-3">
               <div className="flex items-center justify-between">
@@ -762,7 +762,7 @@ export default function ModernResidentsTable() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card className="bg-gradient-to-br from-pink-500 to-pink-600 text-white border-0 shadow-lg">
             <CardContent className="p-3">
               <div className="flex items-center justify-between">
@@ -780,21 +780,19 @@ export default function ModernResidentsTable() {
         <div className="flex items-center gap-2 border-b border-gray-200">
           <button
             onClick={() => setActiveTab("residents")}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === "residents"
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === "residents"
                 ? "border-[#23479A] text-[#23479A]"
                 : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
+              }`}
           >
             Verified Residents
           </button>
           <button
             onClick={() => setActiveTab("pending")}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
-              activeTab === "pending"
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${activeTab === "pending"
                 ? "border-[#23479A] text-[#23479A]"
                 : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
+              }`}
           >
             Pending Registrations
             {pendingRegistrations.length > 0 && (
@@ -805,11 +803,10 @@ export default function ModernResidentsTable() {
           </button>
           <button
             onClick={() => setActiveTab("rejected")}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
-              activeTab === "rejected"
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${activeTab === "rejected"
                 ? "border-[#23479A] text-[#23479A]"
                 : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
+              }`}
           >
             Rejected Residents
             {rejectedResidents.length > 0 && (
@@ -940,8 +937,8 @@ export default function ModernResidentsTable() {
                   </TableHeader>
                   <TableBody>
                     {paginatedResidents.map((resident) => (
-                      <TableRow 
-                        key={resident.id} 
+                      <TableRow
+                        key={resident.id}
                         className="border-b border-gray-50 hover:bg-gray-50/60"
                       >
                         <TableCell className="w-10">
@@ -1001,10 +998,10 @@ export default function ModernResidentsTable() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge 
+                          <Badge
                             variant={resident.status === "Active" ? "default" : "secondary"}
-                            className={resident.status === "Active" 
-                              ? "bg-green-50 text-green-700 border-0" 
+                            className={resident.status === "Active"
+                              ? "bg-green-50 text-green-700 border-0"
                               : "bg-gray-50 text-gray-700 border-0"
                             }
                           >
@@ -1039,7 +1036,7 @@ export default function ModernResidentsTable() {
                               <DropdownMenuSeparator className="bg-gray-100" />
                               <DropdownMenuItem
                                 onClick={() => handleStatusChange(
-                                  resident.id, 
+                                  resident.id,
                                   resident.status === "Active" ? "Inactive" : "Active"
                                 )}
                                 className="hover:bg-gray-50 cursor-pointer"
@@ -1123,7 +1120,7 @@ export default function ModernResidentsTable() {
               </TableHeader>
               <TableBody>
                 {pendingRegistrations.map((registration) => (
-                  <TableRow 
+                  <TableRow
                     key={registration.id}
                     className="border-b border-gray-50 hover:bg-gray-50/60"
                   >
@@ -1169,7 +1166,7 @@ export default function ModernResidentsTable() {
                       <div className="space-y-1">
                         {registration.documents.map((doc: any) => (
                           <div key={doc.type} className="flex items-center gap-2">
-                            <Badge 
+                            <Badge
                               variant="outline"
                               className={
                                 doc.status === "submitted"
@@ -1224,7 +1221,7 @@ export default function ModernResidentsTable() {
               </TableHeader>
               <TableBody>
                 {rejectedResidents.map((resident) => (
-                  <TableRow 
+                  <TableRow
                     key={resident.id}
                     className="border-b border-gray-50 hover:bg-gray-50/60"
                   >
@@ -1321,18 +1318,17 @@ export default function ModernResidentsTable() {
               </div>
             </div>
           </DialogHeader>
-          
+
           {selectedResident && (
             <div className="space-y-6 pt-6">
               {/* Status Badge */}
               <div className="flex items-center justify-between">
-                <Badge 
+                <Badge
                   variant={selectedResident.status === "Active" ? "default" : "secondary"}
-                  className={`px-3 py-1 ${
-                    selectedResident.status === "Active" 
-                      ? "bg-green-100 text-green-800 border-green-200" 
+                  className={`px-3 py-1 ${selectedResident.status === "Active"
+                      ? "bg-green-100 text-green-800 border-green-200"
                       : "bg-gray-100 text-gray-800 border-gray-200"
-                  }`}
+                    }`}
                 >
                   <Activity className="h-4 w-4 mr-2" />
                   {selectedResident.status} Resident
@@ -1498,7 +1494,7 @@ export default function ModernResidentsTable() {
               {selectedRegistration?.id} • Submitted on {selectedRegistration?.dateSubmitted}
             </DialogDescription>
           </DialogHeader>
-          
+
           {selectedRegistration && (
             <div className="space-y-6 pt-6">
               {/* Personal Information */}
@@ -1577,12 +1573,10 @@ export default function ModernResidentsTable() {
                       <div key={doc.type} className="flex flex-col space-y-3">
                         <div className="flex items-center justify-between p-3 border border-gray-100 rounded-lg">
                           <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg ${
-                              doc.status === "submitted" ? "bg-green-50" : "bg-yellow-50"
-                            }`}>
-                              <ImageIcon className={`h-5 w-5 ${
-                                doc.status === "submitted" ? "text-green-600" : "text-yellow-600"
-                              }`} />
+                            <div className={`p-2 rounded-lg ${doc.status === "submitted" ? "bg-green-50" : "bg-yellow-50"
+                              }`}>
+                              <ImageIcon className={`h-5 w-5 ${doc.status === "submitted" ? "text-green-600" : "text-yellow-600"
+                                }`} />
                             </div>
                             <div>
                               <p className="font-medium text-gray-900">{doc.type}</p>
@@ -1634,7 +1628,7 @@ export default function ModernResidentsTable() {
                             )}
                           </div>
                         </div>
-                        
+
                         {/* Upload Area */}
                         {uploadingDoc === doc.type && (
                           <div className="p-4 bg-gray-50 rounded-lg">

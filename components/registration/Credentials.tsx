@@ -128,7 +128,7 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
     const hasLowercase = /[a-z]/.test(password)
     const hasNumbers = /\d/.test(password)
     const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password)
-    
+
     return minLength && hasUppercase && hasLowercase && hasNumbers && hasSpecialChar
   }
 
@@ -137,7 +137,7 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate password
     if (!isPasswordValid(formData.password)) {
       alert("Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters");
@@ -203,7 +203,6 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
 
       // Prepare signup data
       const signupData = {
-        username: userEmail,
         password: formData.password,
         type: type,
         capturedPhoto: capturedPhotoUrl,
@@ -295,11 +294,10 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter password"
-                  className={`pr-12 h-12 text-base ${
-                    formData.password && !isPasswordValid(formData.password) 
-                      ? 'border-red-300 focus:border-red-500' 
-                      : ''
-                  }`}
+                  className={`pr-12 h-12 text-base ${formData.password && !isPasswordValid(formData.password)
+                    ? 'border-red-300 focus:border-red-500'
+                    : ''
+                    }`}
                   required
                   value={formData.password}
                   onChange={handleInputChange}
@@ -339,13 +337,12 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirm your password"
-                  className={`pr-12 h-12 text-base ${
-                    formData.confirmPassword && !passwordsMatch 
-                      ? 'border-red-300 focus:border-red-500' 
-                      : formData.confirmPassword && passwordsMatch
+                  className={`pr-12 h-12 text-base ${formData.confirmPassword && !passwordsMatch
+                    ? 'border-red-300 focus:border-red-500'
+                    : formData.confirmPassword && passwordsMatch
                       ? 'border-green-300 focus:border-green-500'
                       : ''
-                  }`}
+                    }`}
                   required
                   value={formData.confirmPassword}
                   onChange={handleInputChange}

@@ -3,9 +3,10 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { LogIn, Menu, X } from "lucide-react"
+import { LogIn, LogOut, Menu, X } from "lucide-react"
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
+import { useSession, signOut } from 'next-auth/react';
 
 interface MenuItem {
   href: string
@@ -23,6 +24,7 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const pathname = usePathname()
   const isDashboard = pathname?.startsWith("/dashboard")
+  const { data: session } = useSession();
 
   if (isDashboard) {
     return null
@@ -46,16 +48,29 @@ const Navbar = () => {
 
         {/* Mobile Menu Button */}
         <div className="flex items-center gap-4 lg:hidden">
-          <Button
-            variant="default"
-            asChild
-            className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px] hidden sm:flex"
-          >
-            <Link href="/account/login" className="flex items-center gap-2 text-white">
-              Log In Resident
-              <LogIn className="h-4 w-4" />
-            </Link>
-          </Button>
+          {session ? (
+            <Button
+              variant="default"
+              onClick={() => signOut()}
+              className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px] hidden sm:flex"
+            >
+              <span className="flex items-center gap-2 text-white">
+                Logout
+                <LogOut className="h-4 w-4" />
+              </span>
+            </Button>
+          ) : (
+            <Button
+              variant="default"
+              asChild
+              className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px] hidden sm:flex"
+            >
+              <Link href="/account/login" className="flex items-center gap-2 text-white">
+                Log In
+                <LogIn className="h-4 w-4" />
+              </Link>
+            </Button>
+          )}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="p-2 text-gray-600"
@@ -80,16 +95,29 @@ const Navbar = () => {
               {item.label}
             </Link>
           ))}
-          <Button
-            variant="default"
-            asChild
-            className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px]"
-          >
-            <Link href="/account/login" className="flex items-center gap-2 text-white">
-              Log In Resident
-              <LogIn className="h-4 w-4" />
-            </Link>
-          </Button>
+          {session ? (
+            <Button
+              variant="default"
+              onClick={() => signOut()}
+              className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px]"
+            >
+              <span className="flex items-center gap-2 text-white">
+                Logout
+                <LogOut className="h-4 w-4" />
+              </span>
+            </Button>
+          ) : (
+            <Button
+              variant="default"
+              asChild
+              className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px]"
+            >
+              <Link href="/account/login" className="flex items-center gap-2 text-white">
+                Login
+                <LogIn className="h-4 w-4" />
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
 
@@ -107,20 +135,36 @@ const Navbar = () => {
                 {item.label}
               </Link>
             ))}
-            <Button
-              variant="default"
-              asChild
-              className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px] w-full sm:hidden"
-            >
-              <Link
-                href="/login"
-                className="flex items-center justify-center gap-2 text-white"
-                onClick={() => setIsMenuOpen(false)}
+            {session ? (
+              <Button
+                variant="default"
+                onClick={() => {
+                  signOut();
+                  setIsMenuOpen(false);
+                }}
+                className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px] w-full sm:hidden"
               >
-                Log In Resident
-                <LogIn className="h-4 w-4" />
-              </Link>
-            </Button>
+                <span className="flex items-center justify-center gap-2 text-white">
+                  Logout
+                  <LogOut className="h-4 w-4" />
+                </span>
+              </Button>
+            ) : (
+              <Button
+                variant="default"
+                asChild
+                className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px] w-full sm:hidden"
+              >
+                <Link
+                  href="/account/login"
+                  className="flex items-center justify-center gap-2 text-white"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Login
+                  <LogIn className="h-4 w-4" />
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
       )}
@@ -128,4 +172,4 @@ const Navbar = () => {
   )
 }
 
-export default Navbar 
+export default Navbar

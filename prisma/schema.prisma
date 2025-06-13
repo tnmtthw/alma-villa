@@ -24,7 +24,7 @@ model User {
   religion          String?
 
   // Contact Info
-  email             String?
+  email             String?   @unique
   mobileNumber      String?
   emergencyContact  String?
   emergencyNumber   String?
@@ -49,8 +49,6 @@ model User {
   capturedPhoto     String?
   
   // Credintial
-  // username          String?  @unique
-  username          String      @unique
   password          String
   role              String       @default("Unverified")
 
