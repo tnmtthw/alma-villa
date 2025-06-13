@@ -41,6 +41,31 @@ interface FormData {
   residencyLength: string;
 }
 
+const initialFormData: FormData = {
+  lastName: "",
+  firstName: "",
+  middleName: "",
+  suffix: "",
+  birthDate: "",
+  age: "",
+  gender: "",
+  civilStatus: "",
+  nationality: "",
+  religion: "",
+  email: "",
+  mobileNumber: "",
+  emergencyContact: "",
+  emergencyNumber: "",
+  houseNumber: "",
+  street: "",
+  purok: "",
+  barangay: "",
+  city: "",
+  province: "",
+  zipCode: "",
+  residencyLength: ""
+}
+
 const sampleData: FormData = {
   lastName: "Dela Cruz",
   firstName: "Juan",
@@ -67,65 +92,31 @@ const sampleData: FormData = {
 }
 
 export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
-  const [formData, setFormData] = useState<FormData>(() => {
-    // Try to load saved data from localStorage on initial render
-    if (typeof window !== 'undefined') {
-      const savedData = localStorage.getItem('residentInfoData')
-      return savedData ? JSON.parse(savedData) : {
-        lastName: "",
-        firstName: "",
-        middleName: "",
-        suffix: "",
-        birthDate: "",
-        age: "",
-        gender: "",
-        civilStatus: "",
-        nationality: "",
-        religion: "",
-        email: "",
-        mobileNumber: "",
-        emergencyContact: "",
-        emergencyNumber: "",
-        houseNumber: "",
-        street: "",
-        purok: "",
-        barangay: "",
-        city: "",
-        province: "",
-        zipCode: "",
-        residencyLength: ""
+  const [formData, setFormData] = useState<FormData>(initialFormData)
+  const [isClient, setIsClient] = useState(false)
+
+  // Set isClient to true after component mounts (client-side only)
+  useEffect(() => {
+    setIsClient(true)
+    
+    // Load saved data from localStorage only on client-side
+    const savedData = localStorage.getItem('residentInfoData')
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData)
+        setFormData(parsedData)
+      } catch (error) {
+        console.error('Error parsing saved resident data:', error)
       }
     }
-    return {
-      lastName: "",
-      firstName: "",
-      middleName: "",
-      suffix: "",
-      birthDate: "",
-      age: "",
-      gender: "",
-      civilStatus: "",
-      nationality: "",
-      religion: "",
-      email: "",
-      mobileNumber: "",
-      emergencyContact: "",
-      emergencyNumber: "",
-      houseNumber: "",
-      street: "",
-      purok: "",
-      barangay: "",
-      city: "",
-      province: "",
-      zipCode: "",
-      residencyLength: ""
-    }
-  })
+  }, [])
 
-  // Save to localStorage whenever form data changes
+  // Save to localStorage whenever form data changes (only on client-side)
   useEffect(() => {
-    localStorage.setItem('residentInfoData', JSON.stringify(formData))
-  }, [formData])
+    if (isClient) {
+      localStorage.setItem('residentInfoData', JSON.stringify(formData))
+    }
+  }, [formData, isClient])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target
@@ -169,12 +160,10 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
     return requiredFields.every(field => formData[field as keyof typeof formData].trim() !== '')
   }
 
-  // Clear saved data when moving to next step
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault()
     onNextAction()
   }
-
 
   const fillWithSampleData = () => {
     setFormData(sampleData)

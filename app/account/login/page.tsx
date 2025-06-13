@@ -90,7 +90,7 @@ export default function LoginPage() {
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold text-[#23479A] mb-2">
-              Residents Log in
+             Alma Villa Log in
             </h1>
             <p className="text-gray-600 text-sm">
               Welcome back! Please enter your details to continue.

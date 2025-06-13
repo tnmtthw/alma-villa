@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff, Mail, Info } from "lucide-react"
 
 interface CredentialsProps {
   onBackAction: () => void
@@ -265,27 +265,34 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Account Credentials */}
+        {/* Login Credentials Info */}
         <div className="space-y-6">
           <h3 className="text-lg font-medium text-gray-900">Login Credentials</h3>
 
-          <div className="space-y-4">
-            {/* Email/Username Display Field */}
-            <div>
-              <Label htmlFor="email" className="text-sm font-medium">Email Address / Username</Label>
-              <Input
-                id="email"
-                type="email"
-                value={userEmail}
-                className="mt-1 h-12 text-base bg-gray-50 cursor-not-allowed"
-                disabled
-                readOnly
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                This email address will be used as your username for login
-              </p>
+          {/* Email Note */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0">
+                <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full">
+                  <Mail className="w-4 h-4 text-blue-600" />
+                </div>
+              </div>
+              <div className="flex-1">
+                <h4 className="text-sm font-medium text-blue-900 mb-1">
+                  Your Login Username
+                </h4>
+                <p className="text-sm text-blue-800 mb-2">
+                  Your email address <strong className="font-semibold"></strong> will be used as your username to log into your account.
+                </p>
+                <div className="flex items-center gap-2 text-xs text-blue-700">
+                  <Info className="w-3 h-3" />
+                  <span>You can log in using either your email address </span>
+                </div>
+              </div>
             </div>
+          </div>
 
+          <div className="space-y-4">
             {/* Password Field */}
             <div>
               <Label htmlFor="password" className="text-sm font-medium">Password</Label>
@@ -374,14 +381,30 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
               )}
             </div>
 
-            <div className="mt-2 text-xs text-gray-500 leading-relaxed">
-              <strong>Password Requirements:</strong>
-              <ul className="list-disc list-inside mt-1 space-y-1">
-                <li>At least 8 characters long</li>
-                <li>Include uppercase letters (A-Z)</li>
-                <li>Include lowercase letters (a-z)</li>
-                <li>Include numbers (0-9)</li>
-                <li>Include special characters (!@#$%^&* etc.)</li>
+            {/* Password Requirements */}
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <h4 className="text-sm font-medium text-gray-900 mb-2">Password Requirements:</h4>
+              <ul className="text-xs text-gray-600 space-y-1">
+                <li className={`flex items-center gap-2 ${formData.password.length >= 8 ? 'text-green-600' : ''}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${formData.password.length >= 8 ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                  At least 8 characters long
+                </li>
+                <li className={`flex items-center gap-2 ${/[A-Z]/.test(formData.password) ? 'text-green-600' : ''}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${/[A-Z]/.test(formData.password) ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                  Include uppercase letters (A-Z)
+                </li>
+                <li className={`flex items-center gap-2 ${/[a-z]/.test(formData.password) ? 'text-green-600' : ''}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${/[a-z]/.test(formData.password) ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                  Include lowercase letters (a-z)
+                </li>
+                <li className={`flex items-center gap-2 ${/\d/.test(formData.password) ? 'text-green-600' : ''}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${/\d/.test(formData.password) ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                  Include numbers (0-9)
+                </li>
+                <li className={`flex items-center gap-2 ${/[!@#$%^&*(),.?":{}|<>]/.test(formData.password) ? 'text-green-600' : ''}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${/[!@#$%^&*(),.?":{}|<>]/.test(formData.password) ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                  Include special characters (!@#$%^&* etc.)
+                </li>
               </ul>
             </div>
           </div>
