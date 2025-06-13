@@ -239,12 +239,16 @@ const ChatBot = () => {
   if (!isOpen) {
     return (
       <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-20 right-6 bg-[#23479A] hover:bg-[#23479A]/90 text-white p-4 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-50"
-        aria-label="Open chat"
-      >
-        <Bot className="h-6 w-6" />
-      </button>
+      onClick={() => setIsOpen(true)}
+      className="fixed bottom-20 right-6 
+        bg-[#23479A] hover:bg-[#23479A]/90 
+        text-white p-4 rounded-full 
+        shadow-lg transition-all duration-300 
+        hover:scale-110 z-50 animate-bounce"
+      aria-label="Open chat"
+    >
+      <Bot className="h-6 w-6" />
+    </button>
     )
   }
 
