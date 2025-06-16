@@ -47,7 +47,7 @@ model User {
   // Face Verification
   capturedPhoto     String?
   
-  // Credintial
+  // Credentials
   password          String
   role              String       @default("Unverified")
 
