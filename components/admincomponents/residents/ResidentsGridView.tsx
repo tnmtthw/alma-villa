@@ -6,12 +6,12 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
-import { 
-  MoreVertical, 
-  Eye, 
-  Edit, 
-  Archive, 
-  Trash2, 
+import {
+  MoreVertical,
+  Eye,
+  Edit,
+  Archive,
+  Trash2,
   Shield,
   Mail,
   Phone,
@@ -48,9 +48,9 @@ export default function ResidentsGridView({
   onArchive,
   onDelete
 }: ResidentsGridViewProps) {
-  
+
   const handleRoleToggle = (resident: Resident) => {
-    const newRole = resident.role === "Admin" ? "Resident" : "Admin"
+    const newRole = resident.role === "Admin" ? "Verified" : "Admin"
     onUpdate({ ...resident, role: newRole })
   }
 
@@ -78,7 +78,7 @@ export default function ResidentsGridView({
           className="border-gray-300"
         />
         <span className="text-sm font-medium text-gray-700">
-          {selectedResidents.length > 0 
+          {selectedResidents.length > 0
             ? `${selectedResidents.length} of ${residents.length} selected`
             : `Select all ${residents.length} residents`
           }
@@ -88,13 +88,12 @@ export default function ResidentsGridView({
       {/* Grid Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {residents.map((resident) => (
-          <Card 
-            key={resident.id} 
-            className={`hover:shadow-lg transition-all duration-200 ${
-              selectedResidents.includes(resident.id) 
-                ? "ring-2 ring-[#23479A] border-[#23479A]" 
+          <Card
+            key={resident.id}
+            className={`hover:shadow-lg transition-all duration-200 ${selectedResidents.includes(resident.id)
+                ? "ring-2 ring-[#23479A] border-[#23479A]"
                 : "border-gray-200"
-            }`}
+              }`}
           >
             <CardContent className="p-6">
               {/* Header with Checkbox and Actions */}
@@ -127,7 +126,7 @@ export default function ResidentsGridView({
                       <Archive className="h-4 w-4 mr-2" />
                       Archive
                     </DropdownMenuItem>
-                    <DropdownMenuItem 
+                    <DropdownMenuItem
                       onClick={() => onDelete(resident)}
                       className="text-red-600"
                     >
@@ -153,12 +152,11 @@ export default function ResidentsGridView({
                     </div>
                   )}
                   {/* Role Badge */}
-                  <Badge 
-                    className={`absolute -bottom-1 -right-1 px-1.5 py-0.5 text-xs ${
-                      resident.role === "Admin" 
+                  <Badge
+                    className={`absolute -bottom-1 -right-1 px-1.5 py-0.5 text-xs ${resident.role === "Admin"
                         ? "bg-red-100 text-red-800 border-red-200"
                         : "bg-green-100 text-green-800 border-green-200"
-                    }`}
+                      }`}
                   >
                     {resident.role}
                   </Badge>

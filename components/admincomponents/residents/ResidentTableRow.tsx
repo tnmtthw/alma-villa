@@ -67,7 +67,7 @@ export default function ResidentTableRow({
     })
   }
 
-  const handleSetRole = (resident: Resident, role: "Admin" | "Resident") => {
+  const handleSetRole = (resident: Resident, role: "Admin" | "Verified") => {
     setConfirmModal({
       isOpen: true,
       type: role === "Admin" ? "role-admin" : "role-resident"
@@ -99,7 +99,7 @@ export default function ResidentTableRow({
         onUpdate({ ...resident, role: "Admin" })
         break
       case "role-resident":
-        onUpdate({ ...resident, role: "Resident" })
+        onUpdate({ ...resident, role: "Verified" })
         break
       case "archive":
         onArchive(resident)

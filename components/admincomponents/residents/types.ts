@@ -29,7 +29,7 @@ export interface Resident {
   backId: string
   capturedPhoto: string
   password: string
-  role: "Admin" | "Resident"
+  role: "Unverified" | "Verified" | "Admin" | "Rejected" | "Inactive"
   createdAt: string
 }
 

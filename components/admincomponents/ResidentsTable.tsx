@@ -1,7 +1,7 @@
 // app/components/admincomponents/ResidentsTable.tsx
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -20,7 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Search, Trash2, Clock, CheckCircle, XCircle, Archive } from "lucide-react"
+import { Search, Trash2, Clock, CheckCircle, XCircle, Archive, Loader2, AlertCircle } from "lucide-react"
 
 // Import components
 import ResidentsHeader from "./residents/ResidentHeader"
@@ -34,204 +34,27 @@ import { PendingResident } from "./residents/pendingTypes"
 import { DetailViewModal, PendingRegistrationReviewModal, ResidentViewModal } from "@/components/shared/modals/DetailViewModal"
 import { AddResidentModal, MassImportModal } from "./residents/ResidentModal"
 import ResidentsGridView from "./residents/ResidentsGridView"
+import useSWR from 'swr';
 
-// Sample verified residents data
-const sampleResidents: Resident[] = [
-  {
-    id: "1b800952-1e2a-40ff-908e-d7c0be8ae1fe",
-    lastName: "Dela Cruz",
-    firstName: "Juan",
-    middleName: "Santos",
-    suffix: "",
-    birthDate: "1990-01-15",
-    age: "33",
-    gender: "male",
-    civilStatus: "single",
-    nationality: "Filipino",
-    religion: "Catholic",
-    email: "juan.delacruz@email.com",
-    mobileNumber: "09123456789",
-    emergencyContact: "Maria Dela Cruz",
-    emergencyNumber: "09187654321",
-    houseNumber: "123",
-    street: "Maharlika Street",
-    purok: "Purok 1",
-    barangay: "San Antonio",
-    city: "Quezon City",
-    province: "Metro Manila",
-    zipCode: "1100",
-    residencyLength: "5",
-    type: "PhilSys ID/National ID",
-    frontId: "https://wq8gj23taekk62rr.public.blob.vercel-storage.com/AlmaVilla/idDocuments/1749777598717-front_id.jpg",
-    backId: "https://wq8gj23taekk62rr.public.blob.vercel-storage.com/AlmaVilla/idDocuments/1749777598719-back_id.jpg",
-    capturedPhoto: "https://wq8gj23taekk62rr.public.blob.vercel-storage.com/AlmaVilla/verifiedPhoto/1749777598716-captured_photo.jpg",
-    password: "$2b$12$XsEP53xHOrBMzd/YMhDwNuAIVdFPaAH4IskdkKnpePA5FLZuZQjcK",
-    role: "Admin",
-    createdAt: "2025-06-13T01:20:00.298Z"
-  },
-  {
-    id: "2c901063-2f3b-51ff-a19f-e8d1cf9bf2ff",
-    lastName: "Santos",
-    firstName: "Maria",
-    middleName: "Garcia",
-    suffix: "",
-    birthDate: "1995-08-22",
-    age: "28",
-    gender: "female",
-    civilStatus: "married",
-    nationality: "Filipino",
-    religion: "Catholic",
-    email: "maria.santos@email.com",
-    mobileNumber: "09234567890",
-    emergencyContact: "Carlos Santos",
-    emergencyNumber: "09298765432",
-    houseNumber: "456",
-    street: "Rizal Avenue",
-    purok: "Purok 2",
-    barangay: "San Antonio",
-    city: "Quezon City",
-    province: "Metro Manila",
-    zipCode: "1100",
-    residencyLength: "3",
-    type: "Driver's License",
-    frontId: "https://example.com/front2.jpg",
-    backId: "https://example.com/back2.jpg",
-    capturedPhoto: "https://example.com/photo2.jpg",
-    password: "$2b$12$example2",
-    role: "Resident",
-    createdAt: "2024-03-10T10:15:00.298Z"
+const fetcher = async (url: string | URL | Request) => {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error('Failed to fetch data');
   }
-]
+  return response.json();
+};
 
-// Sample pending registrations data
-const samplePendingResidents: PendingResident[] = [
-  {
-    id: "pending-001",
-    lastName: "Rivera",
-    firstName: "Elena",
-    middleName: "Santos",
-    suffix: "",
-    birthDate: "1995-08-20",
-    age: "29",
-    gender: "female",
-    civilStatus: "single",
-    nationality: "Filipino",
-    religion: "Catholic",
-    email: "elena.rivera@email.com",
-    mobileNumber: "09567890123",
-    emergencyContact: "Manuel Rivera",
-    emergencyNumber: "09567890124",
-    houseNumber: "789",
-    street: "Mabini Street",
-    purok: "Purok 4",
-    barangay: "San Antonio",
-    city: "Quezon City",
-    province: "Metro Manila",
-    zipCode: "1100",
-    residencyLength: "2",
-    type: "Driver's License",
-    frontId: "https://example.com/front1.jpg",
-    backId: "https://example.com/back1.jpg",
-    capturedPhoto: "https://example.com/photo1.jpg",
-    dateSubmitted: "2024-03-15T08:30:00.298Z",
-    status: "pending",
-    documents: {
-      frontId: { url: "https://example.com/front1.jpg", status: "submitted" },
-      backId: { url: "https://example.com/back1.jpg", status: "submitted" },
-      capturedPhoto: { url: "https://example.com/photo1.jpg", status: "pending" }
-    }
-  },
-  {
-    id: "pending-002",
-    lastName: "Tan",
-    firstName: "Marco",
-    middleName: "Lee",
-    suffix: "",
-    birthDate: "1989-04-12",
-    age: "35",
-    gender: "male",
-    civilStatus: "married",
-    nationality: "Filipino",
-    religion: "Buddhist",
-    email: "marco.tan@email.com",
-    mobileNumber: "09234567891",
-    emergencyContact: "Lisa Tan",
-    emergencyNumber: "09234567892",
-    houseNumber: "456",
-    street: "Rizal Avenue",
-    purok: "Purok 2",
-    barangay: "San Antonio",
-    city: "Quezon City",
-    province: "Metro Manila",
-    zipCode: "1100",
-    residencyLength: "1",
-    type: "Passport",
-    frontId: "https://example.com/front2.jpg",
-    backId: "https://example.com/back2.jpg",
-    capturedPhoto: "https://example.com/photo2.jpg",
-    dateSubmitted: "2024-03-14T10:15:00.298Z",
-    status: "under_review",
-    documents: {
-      frontId: { url: "https://example.com/front2.jpg", status: "approved" },
-      backId: { url: "https://example.com/back2.jpg", status: "rejected", notes: "Image quality too low" },
-      capturedPhoto: { url: "https://example.com/photo2.jpg", status: "submitted" }
-    }
-  }
-]
-
-// Sample rejected residents data
-const sampleRejectedResidents: PendingResident[] = [
-  {
-    id: "rejected-001",
-    lastName: "Garcia",
-    firstName: "Carlos",
-    middleName: "Rodriguez",
-    suffix: "Jr.",
-    birthDate: "1985-12-05",
-    age: "38",
-    gender: "male",
-    civilStatus: "divorced",
-    nationality: "Filipino",
-    religion: "Catholic",
-    email: "carlos.garcia@email.com",
-    mobileNumber: "09876543210",
-    emergencyContact: "Ana Garcia",
-    emergencyNumber: "09876543211",
-    houseNumber: "321",
-    street: "Luna Street",
-    purok: "Purok 5",
-    barangay: "San Antonio",
-    city: "Quezon City",
-    province: "Metro Manila",
-    zipCode: "1100",
-    residencyLength: "0",
-    type: "Voter's ID",
-    frontId: "https://example.com/front3.jpg",
-    backId: "https://example.com/back3.jpg",
-    capturedPhoto: "https://example.com/photo3.jpg",
-    dateSubmitted: "2024-03-10T14:20:00.298Z",
-    status: "rejected",
-    reviewNotes: "Documentation insufficient. Birth certificate and proof of address required.",
-    documents: {
-      frontId: { url: "https://example.com/front3.jpg", status: "rejected", notes: "Expired ID" },
-      backId: { url: "https://example.com/back3.jpg", status: "rejected", notes: "Not readable" },
-      capturedPhoto: { url: "https://example.com/photo3.jpg", status: "approved" }
-    }
-  }
-]
 
 export default function ResidentsTable() {
-  const [residents, setResidents] = useState<Resident[]>(sampleResidents)
-  const [pendingResidents, setPendingResidents] = useState<PendingResident[]>(samplePendingResidents)
-  const [rejectedResidents, setRejectedResidents] = useState<PendingResident[]>(sampleRejectedResidents)
-  const [archivedResidents, setArchivedResidents] = useState<Resident[]>([])
+  const [allResidents, setAllResidents] = useState<Resident[]>([])
   const [activeTab, setActiveTab] = useState<"residents" | "pending" | "rejected">("residents")
   const [searchTerm, setSearchTerm] = useState("")
   const [filterGender, setFilterGender] = useState("All")
   const [filterRole, setFilterRole] = useState("All")
   const [selectedResidents, setSelectedResidents] = useState<string[]>([])
   const [viewMode, setViewMode] = useState<"table" | "grid">("table")
-  
+  const [loading, setLoading] = useState(true)
+
   // Modal states
   const [selectedPendingResident, setSelectedPendingResident] = useState<PendingResident | null>(null)
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
@@ -240,12 +63,53 @@ export default function ResidentsTable() {
   const [isAddResidentModalOpen, setIsAddResidentModalOpen] = useState(false)
   const [isMassImportModalOpen, setIsMassImportModalOpen] = useState(false)
 
+  // Fetch residents data from API
+  const { data, error: swrError, isLoading: swrLoading, mutate } = useSWR(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user`, fetcher);
+
+  // Update residents when data changes
+  useEffect(() => {
+    if (data) {
+      setAllResidents(data)
+      setLoading(false)
+    }
+  }, [data])
+
+  // Function to refresh data
+  const fetchResidents = async () => {
+    try {
+      await mutate()
+    } catch (err: unknown) {
+      console.error('Error fetching residents:', err)
+    }
+  }
+
+  // Filter residents by role for different tabs
+  const residents = useMemo(() =>
+    allResidents.filter(r => r.role === "Verified" || r.role === "Admin"),
+    [allResidents]
+  )
+
+  const pendingResidents = useMemo(() =>
+    allResidents.filter(r => r.role === "Unverified"),
+    [allResidents]
+  )
+
+  const rejectedResidents = useMemo(() =>
+    allResidents.filter(r => r.role === "Rejected"),
+    [allResidents]
+  )
+
+  const archivedResidents = useMemo(() =>
+    allResidents.filter(r => r.role === "Inactive"),
+    [allResidents]
+  )
+
   // Calculate stats
   const stats: ResidentStats = useMemo(() => {
     const currentDate = new Date()
     const currentMonth = currentDate.getMonth()
     const currentYear = currentDate.getFullYear()
-    
+
     const newThisMonth = residents.filter(resident => {
       const createdDate = new Date(resident.createdAt)
       return createdDate.getMonth() === currentMonth && createdDate.getFullYear() === currentYear
@@ -253,7 +117,7 @@ export default function ResidentsTable() {
 
     return {
       total: residents.length,
-      active: residents.length,
+      active: residents.filter(r => r.role === "Verified").length,
       inactive: archivedResidents.length,
       newThisMonth,
       maleCount: residents.filter(r => r.gender === "male").length,
@@ -272,7 +136,7 @@ export default function ResidentsTable() {
   // Filter current data
   const filteredResidents = useMemo(() => {
     return residents.filter((resident) => {
-      const matchesSearch = 
+      const matchesSearch =
         resident.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         resident.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         resident.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -297,43 +161,88 @@ export default function ResidentsTable() {
     alert(`Editing ${resident.firstName} ${resident.lastName}`)
   }
 
-  const handleUpdateResident = (updatedResident: Resident) => {
-    setResidents(residents.map(r => 
-      r.id === updatedResident.id ? updatedResident : r
-    ))
-    
-    if (updatedResident.role !== residents.find(r => r.id === updatedResident.id)?.role) {
-      alert(`${updatedResident.firstName} ${updatedResident.lastName} role updated to ${updatedResident.role}`)
-    } else {
+  const handleUpdateResident = async (updatedResident: Resident) => {
+    try {
+      // Update API
+      const response = await fetch(`/api/user/set-role?id=${updatedResident.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...updatedResident,
+          role: updatedResident.role
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update resident')
+      }
+
+      // Refresh data from API
+      await fetchResidents()
+
       alert(`${updatedResident.firstName} ${updatedResident.lastName} account updated`)
+
+      // Close the view modal after update
+      setIsResidentViewModalOpen(false)
+      setSelectedResident(null)
+    } catch (error) {
+      console.error('Error updating resident:', error)
+      alert('Failed to update resident')
     }
-    
-    // Close the view modal after update
-    setIsResidentViewModalOpen(false)
-    setSelectedResident(null)
   }
 
-  const handleArchiveResident = (resident: Resident) => {
-    setArchivedResidents([...archivedResidents, resident])
-    setResidents(residents.filter(r => r.id !== resident.id))
-    setSelectedResidents(selectedResidents.filter(id => id !== resident.id))
-    
-    // Close the view modal after archiving
-    setIsResidentViewModalOpen(false)
-    setSelectedResident(null)
-    
-    alert(`${resident.firstName} ${resident.lastName} has been archived`)
+  const handleArchiveResident = async (resident: Resident) => {
+    try {
+      // Update API - change role to Inactive
+      const response = await fetch(`http://localhost:3000/api/user/${resident.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...resident,
+          role: 'Inactive'
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to archive resident')
+      }
+
+      // Refresh data from API
+      await fetchResidents()
+
+      // Close the view modal after archiving
+      setIsResidentViewModalOpen(false)
+      setSelectedResident(null)
+
+      alert(`${resident.firstName} ${resident.lastName} has been archived`)
+    } catch (error) {
+      console.error('Error archiving resident:', error)
+      alert('Failed to archive resident')
+    }
   }
 
-  const handleDeleteResident = (resident: Resident) => {
-    setResidents(residents.filter(r => r.id !== resident.id))
-    setSelectedResidents(selectedResidents.filter(id => id !== resident.id))
-    
-    // Close the view modal after deletion
-    setIsResidentViewModalOpen(false)
-    setSelectedResident(null)
-    
-    alert(`${resident.firstName} ${resident.lastName} has been permanently deleted`)
+  const handleDeleteResident = async (resident: Resident) => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/user/${resident.id}`, {
+        method: 'DELETE'
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete resident')
+      }
+
+      // Refresh data from API
+      await fetchResidents()
+
+      // Close the view modal after deletion
+      setIsResidentViewModalOpen(false)
+      setSelectedResident(null)
+
+      alert(`${resident.firstName} ${resident.lastName} has been permanently deleted`)
+    } catch (error) {
+      console.error('Error deleting resident:', error)
+      alert('Failed to delete resident')
+    }
   }
 
   const handleSelectAll = () => {
@@ -352,21 +261,50 @@ export default function ResidentsTable() {
     }
   }
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     if (confirm(`Delete ${selectedResidents.length} residents?`)) {
-      setResidents(residents.filter(r => !selectedResidents.includes(r.id)))
-      setSelectedResidents([])
-      alert(`${selectedResidents.length} residents deleted`)
+      try {
+        await Promise.all(selectedResidents.map(id =>
+          fetch(`http://localhost:3000/api/user/${id}`, { method: 'DELETE' })
+        ))
+
+        // Refresh data from API
+        await fetchResidents()
+        setSelectedResidents([])
+        alert(`${selectedResidents.length} residents deleted`)
+      } catch (error) {
+        console.error('Error deleting residents:', error)
+        alert('Failed to delete residents')
+      }
     }
   }
 
-  const handleBulkArchive = () => {
+  const handleBulkArchive = async () => {
     if (confirm(`Archive ${selectedResidents.length} residents?`)) {
-      const residentsToArchive = residents.filter(r => selectedResidents.includes(r.id))
-      setArchivedResidents([...archivedResidents, ...residentsToArchive])
-      setResidents(residents.filter(r => !selectedResidents.includes(r.id)))
-      setSelectedResidents([])
-      alert(`${residentsToArchive.length} residents archived`)
+      try {
+        await Promise.all(selectedResidents.map(id => {
+          const resident = allResidents.find(r => r.id === id)
+          if (resident) {
+            return fetch(`http://localhost:3000/api/user/${id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                ...resident,
+                role: 'Inactive'
+              })
+            })
+          }
+          return Promise.resolve()
+        }))
+
+        // Refresh data from API
+        await fetchResidents()
+        setSelectedResidents([])
+        alert(`${selectedResidents.length} residents archived`)
+      } catch (error) {
+        console.error('Error archiving residents:', error)
+        alert('Failed to archive residents')
+      }
     }
   }
 
@@ -376,42 +314,83 @@ export default function ResidentsTable() {
     setIsReviewModalOpen(true)
   }
 
-  const handleApprovePendingResident = (resident: PendingResident) => {
-    const newResident: Resident = {
-      ...resident,
-      role: "Resident",
-      password: "", // Will be set during account activation
-      createdAt: new Date().toISOString()
+  const handleApprovePendingResident = async (resident: PendingResident) => {
+    try {
+      const apiResident = allResidents.find(r => r.id === resident.id)
+      if (!apiResident) {
+        throw new Error('Resident not found')
+      }
+
+      const response = await fetch(`/api/user/set-role?id=${resident.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...apiResident,
+          role: 'Verified'
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to approve resident')
+      }
+
+      // Refresh data from API
+      await fetchResidents()
+
+      setIsReviewModalOpen(false)
+      setSelectedPendingResident(null)
+
+      alert(`${resident.firstName} ${resident.lastName} has been approved and added as a resident`)
+    } catch (error) {
+      console.error('Error approving resident:', error)
+      alert('Failed to approve resident')
     }
-    
-    setResidents([...residents, newResident])
-    setPendingResidents(pendingResidents.filter(r => r.id !== resident.id))
-    setIsReviewModalOpen(false)
-    setSelectedPendingResident(null)
-    
-    alert(`${resident.firstName} ${resident.lastName} has been approved and added as a resident`)
   }
 
-  const handleRejectPendingResident = (resident: PendingResident, reason: string) => {
-    const rejectedResident: PendingResident = {
-      ...resident,
-      status: "rejected",
-      reviewNotes: reason
+  const handleRejectPendingResident = async (resident: PendingResident, reason: string) => {
+    try {
+      const apiResident = allResidents.find(r => r.id === resident.id)
+      if (!apiResident) {
+        throw new Error('Resident not found')
+      }
+
+      const response = await fetch(`/api/user/set-role?id=${resident.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...apiResident,
+          role: 'Rejected'
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to reject resident')
+      }
+
+      // Refresh data from API
+      await fetchResidents()
+
+      setIsReviewModalOpen(false)
+      setSelectedPendingResident(null)
+
+      alert(`${resident.firstName} ${resident.lastName} application has been rejected`)
+    } catch (error) {
+      console.error('Error rejecting resident:', error)
+      alert('Failed to reject resident')
     }
-    
-    setRejectedResidents([...rejectedResidents, rejectedResident])
-    setPendingResidents(pendingResidents.filter(r => r.id !== resident.id))
-    setIsReviewModalOpen(false)
-    setSelectedPendingResident(null)
-    
-    alert(`${resident.firstName} ${resident.lastName} application has been rejected`)
   }
 
   // Role update handler for resident view modal
   const handleUpdateResidentRole = (resident: Resident, newRole: string) => {
-    const updatedResident: Resident = { 
-      ...resident, 
-      role: newRole as "Admin" | "Resident" 
+    // Map the display role to the actual role value
+    const roleMapping: { [key: string]: "Admin" | "Verified" } = {
+      "Regular Resident": "Verified",
+      "Admin": "Admin"
+    };
+
+    const updatedResident: Resident = {
+      ...resident,
+      role: roleMapping[newRole] || "Verified"
     }
     handleUpdateResident(updatedResident)
   }
@@ -428,10 +407,10 @@ export default function ResidentsTable() {
   const handleExport = () => {
     // Convert residents data to CSV
     const headers = [
-      "ID", "First Name", "Last Name", "Middle Name", "Email", "Mobile", 
+      "ID", "First Name", "Last Name", "Middle Name", "Email", "Mobile",
       "Gender", "Age", "Civil Status", "Address", "Role", "Date Registered"
     ]
-    
+
     const csvData = residents.map(resident => [
       resident.id,
       resident.firstName,
@@ -464,29 +443,87 @@ export default function ResidentsTable() {
     setIsAddResidentModalOpen(true)
   }
 
-  const handleAddResidentSubmit = (data: any) => {
-    const newResident: Resident = {
-      ...data,
-      id: `manual-${Date.now()}`,
-      type: "Manual Entry",
-      frontId: "",
-      backId: "",
-      capturedPhoto: "",
-      password: "",
-      createdAt: new Date().toISOString()
+  const handleAddResidentSubmit = async (data: any) => {
+    try {
+      const response = await fetch('http://localhost:3000/api/user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...data,
+          role: 'Verified',
+          type: 'Manual Entry',
+          frontId: '',
+          backId: '',
+          capturedPhoto: '',
+          password: ''
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to add resident')
+      }
+
+      // Refresh data from API
+      await fetchResidents()
+      alert(`${data.firstName} ${data.lastName} has been added successfully`)
+    } catch (error) {
+      console.error('Error adding resident:', error)
+      alert('Failed to add resident')
     }
-    
-    setResidents([...residents, newResident])
-    alert(`${data.firstName} ${data.lastName} has been added successfully`)
   }
 
-  const handleMassImport = (file: File) => {
-    // In a real implementation, you would parse the CSV/Excel file
-    // and process the data. For now, we'll just show a success message
-    alert(`File "${file.name}" uploaded successfully. Processing ${Math.floor(Math.random() * 50 + 10)} residents...`)
-    
-    // Simulate adding some residents from the import
-    // In production, you'd parse the file and validate the data
+  const handleMassImport = async (file: File) => {
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const response = await fetch('http://localhost:3000/api/user/import', {
+        method: 'POST',
+        body: formData
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to import residents')
+      }
+
+      alert(`File "${file.name}" uploaded successfully`)
+      // Refresh data after import
+      await fetchResidents()
+    } catch (error) {
+      console.error('Error importing residents:', error)
+      alert('Failed to import residents')
+    }
+  }
+
+  // Loading state
+  if (swrLoading || loading) {
+    return (
+      <div className="w-full min-h-screen bg-gray-50/30 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-[#23479A]" />
+          <p className="text-gray-600">Loading residents...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (swrError) {
+    return (
+      <div className="w-full min-h-screen bg-gray-50/30 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4 max-w-md text-center">
+          <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center">
+            <AlertCircle className="h-6 w-6 text-red-600" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Failed to load residents</h3>
+            <p className="text-gray-600 mb-4">{swrError instanceof Error ? swrError.message : 'An error occurred'}</p>
+            <Button onClick={fetchResidents} className="bg-[#23479A] hover:bg-[#1e3d8a]">
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   // Render different content based on active tab
@@ -510,67 +547,81 @@ export default function ResidentsTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {pendingResidents.map((resident) => (
-              <TableRow key={resident.id} className="border-b border-gray-50 hover:bg-gray-50/60">
-                <td className="w-12 px-6 py-4">
-                  <Checkbox className="border-gray-300" />
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-orange-500 text-white font-medium flex items-center justify-center">
-                      {resident.firstName[0]}{resident.lastName[0]}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">
-                        {resident.firstName} {resident.lastName}
-                      </p>
-                      <p className="text-sm text-gray-500">REG-{resident.id.slice(0, 8)}...</p>
-                    </div>
+            {pendingResidents.length === 0 ? (
+              <TableRow>
+                <td colSpan={9} className="text-center py-12">
+                  <div className="text-gray-400 mb-4">
+                    <Clock className="mx-auto h-12 w-12" />
                   </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="space-y-1">
-                    <div className="text-sm capitalize">{resident.age} years • {resident.gender}</div>
-                    <div className="text-sm text-gray-600">{resident.civilStatus} • {resident.religion}</div>
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="space-y-1">
-                    <div className="text-sm font-mono">{resident.mobileNumber}</div>
-                    <div className="text-sm text-gray-600 truncate max-w-[200px]">{resident.email}</div>
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="text-sm text-gray-600 line-clamp-2 max-w-[250px]">
-                    {resident.street}, {resident.purok}, {resident.barangay}
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="text-xs text-gray-500">3/3 Submitted</div>
-                </td>
-                <td className="px-6 py-4">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-50 text-yellow-700 border border-yellow-200">
-                    <Clock className="h-3 w-3 mr-1" />
-                    {resident.status === "pending" ? "Pending" : "Under Review"}
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="text-sm text-gray-600">
-                    {new Date(resident.dateSubmitted).toLocaleDateString()}
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                    onClick={() => handleReviewPendingResident(resident)}
-                  >
-                    Review
-                  </Button>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No pending registrations</h3>
+                  <p className="text-gray-500">All applications have been processed</p>
                 </td>
               </TableRow>
-            ))}
+            ) : (
+              pendingResidents.map((resident) => (
+                <TableRow key={resident.id} className="border-b border-gray-50 hover:bg-gray-50/60">
+                  <td className="w-12 px-6 py-4">
+                    <Checkbox className="border-gray-300" />
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-orange-500 text-white font-medium flex items-center justify-center">
+                        {resident.firstName[0]}{resident.lastName[0]}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900">
+                          {resident.firstName} {resident.lastName}
+                        </p>
+                        <p className="text-sm text-gray-500">REG-{resident.id.slice(0, 8)}...</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="space-y-1">
+                      <div className="text-sm capitalize">{resident.age} years • {resident.gender}</div>
+                      <div className="text-sm text-gray-600">{resident.civilStatus} • {resident.religion}</div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="space-y-1">
+                      <div className="text-sm font-mono">{resident.mobileNumber}</div>
+                      <div className="text-sm text-gray-600 truncate max-w-[200px]">{resident.email}</div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-600 line-clamp-2 max-w-[250px]">
+                      {resident.street}, {resident.purok}, {resident.barangay}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-xs text-gray-500">
+                      {resident.frontId && resident.backId && resident.capturedPhoto ? '3/3' : '0/3'} Submitted
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-50 text-yellow-700 border border-yellow-200">
+                      <Clock className="h-3 w-3 mr-1" />
+                      Unverified
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-600">
+                      {new Date(resident.createdAt).toLocaleDateString()}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                      onClick={() => handleReviewPendingResident(resident as any)}
+                    >
+                      Review
+                    </Button>
+                  </td>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
@@ -592,73 +643,79 @@ export default function ResidentsTable() {
               <TableHead className="font-medium text-gray-600">Address</TableHead>
               <TableHead className="font-medium text-gray-600">Status</TableHead>
               <TableHead className="font-medium text-gray-600">Rejected Date</TableHead>
-              <TableHead className="font-medium text-gray-600">Reason</TableHead>
               <TableHead className="w-12">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {rejectedResidents.map((resident) => (
-              <TableRow key={resident.id} className="border-b border-gray-50 hover:bg-gray-50/60">
-                <td className="w-12 px-6 py-4">
-                  <Checkbox className="border-gray-300" />
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-red-500 text-white font-medium flex items-center justify-center">
-                      {resident.firstName[0]}{resident.lastName[0]}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">
-                        {resident.firstName} {resident.lastName}
-                      </p>
-                      <p className="text-sm text-gray-500">REJ-{resident.id.slice(0, 8)}...</p>
-                    </div>
+            {rejectedResidents.length === 0 ? (
+              <TableRow>
+                <td colSpan={8} className="text-center py-12">
+                  <div className="text-gray-400 mb-4">
+                    <XCircle className="mx-auto h-12 w-12" />
                   </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="space-y-1">
-                    <div className="text-sm capitalize">{resident.age} years • {resident.gender}</div>
-                    <div className="text-sm text-gray-600">{resident.civilStatus} • {resident.religion}</div>
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="space-y-1">
-                    <div className="text-sm font-mono">{resident.mobileNumber}</div>
-                    <div className="text-sm text-gray-600 truncate max-w-[200px]">{resident.email}</div>
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="text-sm text-gray-600 line-clamp-2 max-w-[250px]">
-                    {resident.street}, {resident.purok}, {resident.barangay}
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-200">
-                    <XCircle className="h-3 w-3 mr-1" />
-                    Rejected
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="text-sm text-gray-600">
-                    {new Date(resident.dateSubmitted).toLocaleDateString()}
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="text-sm text-gray-600 max-w-[200px] truncate">
-                    {resident.reviewNotes || "No reason provided"}
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                  >
-                    View
-                  </Button>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No rejected applications</h3>
+                  <p className="text-gray-500">No applications have been rejected</p>
                 </td>
               </TableRow>
-            ))}
+            ) : (
+              rejectedResidents.map((resident) => (
+                <TableRow key={resident.id} className="border-b border-gray-50 hover:bg-gray-50/60">
+                  <td className="w-12 px-6 py-4">
+                    <Checkbox className="border-gray-300" />
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-red-500 text-white font-medium flex items-center justify-center">
+                        {resident.firstName[0]}{resident.lastName[0]}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900">
+                          {resident.firstName} {resident.lastName}
+                        </p>
+                        <p className="text-sm text-gray-500">REJ-{resident.id.slice(0, 8)}...</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="space-y-1">
+                      <div className="text-sm capitalize">{resident.age} years • {resident.gender}</div>
+                      <div className="text-sm text-gray-600">{resident.civilStatus} • {resident.religion}</div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="space-y-1">
+                      <div className="text-sm font-mono">{resident.mobileNumber}</div>
+                      <div className="text-sm text-gray-600 truncate max-w-[200px]">{resident.email}</div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-600 line-clamp-2 max-w-[250px]">
+                      {resident.street}, {resident.purok}, {resident.barangay}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-200">
+                      <XCircle className="h-3 w-3 mr-1" />
+                      Rejected
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-600">
+                      {new Date(resident.createdAt).toLocaleDateString()}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                    >
+                      View
+                    </Button>
+                  </td>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
@@ -705,7 +762,7 @@ export default function ResidentsTable() {
                   className="pl-10 border-gray-200 focus:border-[#23479A] focus:ring-[#23479A]/20"
                 />
               </div>
-              
+
               {/* Filter Controls */}
               <div className="flex items-center gap-3">
                 <Select value={filterGender} onValueChange={setFilterGender}>
@@ -718,7 +775,7 @@ export default function ResidentsTable() {
                     <SelectItem value="Female">Female</SelectItem>
                   </SelectContent>
                 </Select>
-                
+
                 {/* Only show role filter for residents tab */}
                 {activeTab === "residents" && (
                   <Select value={filterRole} onValueChange={setFilterRole}>
@@ -728,7 +785,7 @@ export default function ResidentsTable() {
                     <SelectContent>
                       <SelectItem value="All">All Roles</SelectItem>
                       <SelectItem value="Admin">Admin</SelectItem>
-                      <SelectItem value="Resident">Resident</SelectItem>
+                      <SelectItem value="Verified">Verified</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
@@ -790,7 +847,7 @@ export default function ResidentsTable() {
                       <TableHead className="font-medium text-gray-600">Details</TableHead>
                       <TableHead className="font-medium text-gray-600">Contact</TableHead>
                       <TableHead className="font-medium text-gray-600">Address</TableHead>
-                      <TableHead className="font-medium text-gray-600">Status</TableHead>
+                      <TableHead className="font-medium text-gray-600">Role</TableHead>
                       <TableHead className="w-12">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -798,14 +855,14 @@ export default function ResidentsTable() {
                     {filteredResidents.map((resident) => (
                       <ResidentTableRow
                         key={resident.id}
-                        resident={resident}
+                        resident={(resident)}
                         isSelected={selectedResidents.includes(resident.id)}
                         onSelect={handleSelectResident}
-                        onView={handleViewResident}
-                        onEdit={handleEditResident}
+                        onView={(r) => handleViewResident((resident))}
+                        onEdit={(r) => handleEditResident((resident))}
                         onUpdate={handleUpdateResident}
-                        onArchive={handleArchiveResident}
-                        onDelete={handleDeleteResident}
+                        onArchive={(r) => handleArchiveResident((resident))}
+                        onDelete={(r) => handleDeleteResident((resident))}
                       />
                     ))}
                   </TableBody>

@@ -51,7 +51,7 @@ export default function ConfirmationModals({
           confirmText: "Deactivate",
           confirmClass: "bg-orange-600 hover:bg-orange-700 text-white",
         }
-      
+
       case "activate":
         return {
           title: "Activate Resident Account",
@@ -60,7 +60,7 @@ export default function ConfirmationModals({
           confirmText: "Activate",
           confirmClass: "bg-green-600 hover:bg-green-700 text-white",
         }
-      
+
       case "role-admin":
         return {
           title: "Set Administrator Role",
@@ -69,7 +69,7 @@ export default function ConfirmationModals({
           confirmText: "Make Admin",
           confirmClass: "bg-yellow-600 hover:bg-yellow-700 text-white",
         }
-      
+
       case "role-resident":
         return {
           title: "Set Regular Resident Role",
@@ -78,7 +78,7 @@ export default function ConfirmationModals({
           confirmText: "Set as Resident",
           confirmClass: "bg-gray-600 hover:bg-gray-700 text-white",
         }
-      
+
       case "archive":
         return {
           title: "Archive Resident",
@@ -87,7 +87,7 @@ export default function ConfirmationModals({
           confirmText: "Archive",
           confirmClass: "bg-yellow-600 hover:bg-yellow-700 text-white",
         }
-      
+
       case "delete":
         return {
           title: "Delete Resident Permanently",
@@ -96,7 +96,7 @@ export default function ConfirmationModals({
           confirmText: "Delete Permanently",
           confirmClass: "bg-red-600 hover:bg-red-700 text-white",
         }
-      
+
       default:
         return {
           title: "Confirm Action",
@@ -122,9 +122,9 @@ export default function ConfirmationModals({
             {config.description}
           </AlertDialogDescription>
         </AlertDialogHeader>
-        
+
         <AlertDialogFooter className="gap-2">
-          <AlertDialogCancel 
+          <AlertDialogCancel
             onClick={onClose}
             className="border-gray-200 hover:bg-gray-50 text-gray-700"
           >

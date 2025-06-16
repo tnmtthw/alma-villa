@@ -33,7 +33,7 @@ interface ResidentActionsDropdownProps {
   onView: (resident: Resident) => void
   onEdit: (resident: Resident) => void
   onToggleStatus: (resident: Resident, status: "Active" | "Inactive") => void
-  onSetRole: (resident: Resident, role: "Admin" | "Resident") => void
+  onSetRole: (resident: Resident, role: "Admin" | "Verified") => void
   onArchive: (resident: Resident) => void
   onDelete: (resident: Resident) => void
 }
@@ -51,16 +51,16 @@ export default function ResidentActionsDropdown({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="sm" 
+        <Button
+          variant="ghost"
+          size="sm"
           className="h-8 w-8 p-0 hover:bg-gray-100 focus:ring-2 focus:ring-[#23479A] focus:ring-offset-1"
         >
           <MoreHorizontal className="h-4 w-4 text-gray-500" />
           <span className="sr-only">Open menu</span>
         </Button>
       </DropdownMenuTrigger>
-      
+
       <DropdownMenuContent align="end" className="w-56 bg-white border border-gray-200 shadow-lg">
         {/* View Action */}
         <DropdownMenuItem
@@ -70,7 +70,7 @@ export default function ResidentActionsDropdown({
           <Eye className="h-4 w-4 mr-3 text-blue-500" />
           <span className="text-gray-700">View Details</span>
         </DropdownMenuItem>
-        
+
         {/* Edit Action */}
         <DropdownMenuItem
           onClick={() => onEdit(resident)}
@@ -79,9 +79,9 @@ export default function ResidentActionsDropdown({
           <Edit className="h-4 w-4 mr-3 text-green-500" />
           <span className="text-gray-700">Edit Information</span>
         </DropdownMenuItem>
-        
+
         <DropdownMenuSeparator className="bg-gray-100" />
-        
+
         {/* Status Toggle */}
         <DropdownMenuItem
           onClick={() => onToggleStatus(resident, isActive ? "Inactive" : "Active")}
@@ -99,7 +99,7 @@ export default function ResidentActionsDropdown({
             </>
           )}
         </DropdownMenuItem>
-        
+
         {/* Role Management Sub-menu */}
         <DropdownMenuSub>
           <DropdownMenuSubTrigger className="hover:bg-gray-50 cursor-pointer focus:bg-gray-50">
@@ -108,19 +108,19 @@ export default function ResidentActionsDropdown({
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent className="w-48 bg-white border border-gray-200 shadow-lg">
             <DropdownMenuItem
-              onClick={() => onSetRole(resident, "Resident")}
+              onClick={() => onSetRole(resident, "Verified")}
               className="hover:bg-gray-50 cursor-pointer focus:bg-gray-50"
-              disabled={resident.role === "Resident"}
+              disabled={resident.role === "Verified"}
             >
               <User className="h-4 w-4 mr-3 text-gray-500" />
               <span className="text-gray-700">Regular Resident</span>
-              {resident.role === "Resident" && (
+              {resident.role === "Verified" && (
                 <div className="ml-auto">
                   <div className="h-2 w-2 rounded-full bg-green-500"></div>
                 </div>
               )}
             </DropdownMenuItem>
-            
+
             <DropdownMenuItem
               onClick={() => onSetRole(resident, "Admin")}
               className="hover:bg-gray-50 cursor-pointer focus:bg-gray-50"
@@ -136,9 +136,9 @@ export default function ResidentActionsDropdown({
             </DropdownMenuItem>
           </DropdownMenuSubContent>
         </DropdownMenuSub>
-        
+
         <DropdownMenuSeparator className="bg-gray-100" />
-        
+
         {/* Archive Action */}
         <DropdownMenuItem
           onClick={() => onArchive(resident)}
@@ -147,7 +147,7 @@ export default function ResidentActionsDropdown({
           <Archive className="h-4 w-4 mr-3 text-yellow-600" />
           <span className="text-gray-700">Archive Resident</span>
         </DropdownMenuItem>
-        
+
         {/* Delete Action */}
         <DropdownMenuItem
           onClick={() => onDelete(resident)}
