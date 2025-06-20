@@ -50,51 +50,77 @@ export function AddResidentModal({ isOpen, onClose, onSubmit }: AddResidentModal
     residencyLength: "",
     role: "Verified"
   })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit({
-      ...formData,
-      type: "Manual Entry",
-      frontId: "",
-      backId: "",
-      capturedPhoto: "",
-    })
-    setFormData({
-      firstName: "",
-      lastName: "",
-      middleName: "",
-      suffix: "",
-      birthDate: "",
-      age: "",
-      gender: "",
-      civilStatus: "",
-      nationality: "Filipino",
-      religion: "",
-      email: "",
-      mobileNumber: "",
-      emergencyContact: "",
-      emergencyNumber: "",
-      houseNumber: "",
-      street: "",
-      purok: "",
-      barangay: "Alma Villa",
-      city: "Gloria",
-      province: "Oriental Mindoro",
-      zipCode: "",
-      residencyLength: "",
-      role: "Verified"
-    })
-    onClose()
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await fetch("/api/admin/resident", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          ...formData,
+          type: "",
+          frontId: "",
+          backId: "",
+          capturedPhoto: "",
+        })
+      })
+      if (!response.ok) {
+        throw new Error("Failed to add resident. Please try again.")
+      }
+      const data = await response.json()
+      onSubmit(data)
+      setFormData({
+        firstName: "",
+        lastName: "",
+        middleName: "",
+        suffix: "",
+        birthDate: "",
+        age: "",
+        gender: "",
+        civilStatus: "",
+        nationality: "Filipino",
+        religion: "",
+        email: "",
+        mobileNumber: "",
+        emergencyContact: "",
+        emergencyNumber: "",
+        houseNumber: "",
+        street: "",
+        purok: "",
+        barangay: "Alma Villa",
+        city: "Gloria",
+        province: "Oriental Mindoro",
+        zipCode: "",
+        residencyLength: "",
+        role: "Verified"
+      })
+      onClose()
+    } catch (err: any) {
+      setError(err.message || "An error occurred.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <BaseModal isOpen={isOpen} onClose={onClose} title="Add New Resident" size="xl">
       <form onSubmit={handleSubmit} className="space-y-6">
+        {error && (
+          <div className="bg-red-100 text-red-700 p-2 rounded mb-2 text-sm">
+            {error}
+          </div>
+        )}
         {/* Personal Information */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-gray-900">Personal Information</h3>
@@ -286,9 +312,9 @@ export function AddResidentModal({ isOpen, onClose, onSubmit }: AddResidentModal
           <Button type="button" variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit" className="bg-[#23479A] hover:bg-[#1e3a82]">
+          <Button type="submit" className="bg-[#23479A] hover:bg-[#1e3a82]" disabled={loading}>
             <Plus className="h-4 w-4 mr-2" />
-            Add Resident
+            {loading ? "Adding..." : "Add Resident"}
           </Button>
         </div>
       </form>

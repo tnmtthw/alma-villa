@@ -445,17 +445,15 @@ export default function ResidentsTable() {
 
   const handleAddResidentSubmit = async (data: any) => {
     try {
-      const response = await fetch('http://localhost:3000/api/user', {
+      const response = await fetch('/api/admin/resident', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...data,
-          role: 'Verified',
-          type: 'Manual Entry',
-          frontId: '',
-          backId: '',
-          capturedPhoto: '',
-          password: ''
+          type: "Manual Entry",
+          frontId: "",
+          backId: "",
+          capturedPhoto: "",
         })
       })
 
