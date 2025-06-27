@@ -33,7 +33,7 @@ export const AccountVerifiedEmail = ({
                 <Container style={container}>
                     <Section style={headerContainer}>
                         <Img
-                            src="/assets/img/Logo.png"
+                            src="public/assets/img/Logo.png"
                             width="80"
                             height="80"
                             alt="Alma Villa Logo"
