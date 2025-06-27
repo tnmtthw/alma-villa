@@ -28,52 +28,90 @@ export const ImprovedVerificationEmail = ({
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             </Head>
             <Preview>
-                Your account has been created — pending admin approval.
+                Your registration has been received — pending admin approval.
             </Preview>
             <Body style={main}>
                 <Container style={container}>
                     <Section style={headerContainer}>
                         <Img
-                            src="https://wq8gj23taekk62rr.public.blob.vercel-storage.com/deku/logo-11qVd4r8k5tOjqMdgoZjW3KYsr3H2v.png"
-                            width="120"
-                            height="120"
+                            src="/assets/img/Logo.png"
+                            width="80"
+                            height="80"
                             alt="Alma Villa Logo"
                             style={logo}
                         />
-                        <Heading style={headerText}>Welcome to Alma Villa</Heading>
+                        <Heading style={headerText}>Alma Villa</Heading>
+                        <Text style={subHeaderText}>Barangay Portal</Text>
+                        <Heading style={titleText}>Registration Received</Heading>
+                    </Section>
+
+                    <Section style={statusContainer}>
+                        <div style={statusCard}>
+                            <div style={statusIcon}>⏳</div>
+                            <Text style={statusText}>Pending Admin Approval</Text>
+                        </div>
                     </Section>
 
                     <Section style={contentContainer}>
                         <Text style={greeting}>Hello {email},</Text>
 
                         <Text style={paragraph}>
-                            Your account has been successfully created. Please wait for an administrator to approve your account.
+                            Thank you for registering with the Barangay Alma Villa Portal. Your registration has been successfully received and is currently under review.
                         </Text>
 
-                        <Text style={paragraph}>
-                            You will receive another email once your account is approved and ready for use.
-                        </Text>
+                        <Section style={infoBox}>
+                            <Text style={infoTitle}>What happens next?</Text>
+                            <Text style={infoParagraph}>
+                                • Our barangay administrators will review your submitted documents
+                            </Text>
+                            <Text style={infoParagraph}>
+                                • Verification typically takes 2-3 working days
+                            </Text>
+                            <Text style={infoParagraph}>
+                                • You'll receive an email notification once approved
+                            </Text>
+                            <Text style={infoParagraph}>
+                                • After approval, you can access all barangay services
+                            </Text>
+                        </Section>
 
                         <Text style={paragraph}>
-                            Thank you for joining Alma Villa!
+                            Once your account is approved, you'll be able to:
+                        </Text>
+
+                        <Section style={servicesList}>
+                            <Text style={serviceItem}>📄 Request barangay certificates and clearances</Text>
+                            <Text style={serviceItem}>📝 Access downloadable forms</Text>
+                            <Text style={serviceItem}>📰 Stay updated with barangay news and announcements</Text>
+                            <Text style={serviceItem}>🏢 Apply for business permits</Text>
+                        </Section>
+
+                        <Text style={paragraph}>
+                            If you have any questions about your registration, please contact our office during business hours.
                         </Text>
 
                         <Text style={signature}>
-                            The Alma Villa Team
+                            The Alma Villa Barangay Team
                         </Text>
                     </Section>
 
                     <Section style={footerContainer}>
                         <Text style={footerText}>
-                            © 2025 Alma Villa. All rights reserved.
+                            © 2025 Barangay Alma Villa, Gloria, Oriental Mindoro. All rights reserved.
                         </Text>
                         <Text style={footerText}>
-                            123 Coffee Street, Manila, Philippines
+                            Barangay Alma Villa, Gloria, Oriental Mindoro
+                        </Text>
+                        <Text style={footerText}>
+                            Email: almavilla.gloria@gmail.com
+                        </Text>
+                        <Text style={footerText}>
+                            Office Hours: Monday - Friday: 8:00 AM - 5:00 PM | Saturday: 8:00 AM - 12:00 PM
                         </Text>
                         <Text style={footerLinks}>
                             <a href="#" style={footerLinkMobile}>Privacy Policy</a> &nbsp;•&nbsp;
                             <a href="#" style={footerLinkMobile}>Terms of Service</a> &nbsp;•&nbsp;
-                            <a href="#" style={footerLinkMobile}>Unsubscribe</a>
+                            <a href="#" style={footerLinkMobile}>Contact Us</a>
                         </Text>
                     </Section>
                 </Container>
@@ -86,9 +124,9 @@ export default ImprovedVerificationEmail;
 
 // Styles
 const main = {
-    backgroundColor: '#f5f5f5',
-    fontFamily: 'Arial, sans-serif',
-    color: '#333333',
+    backgroundColor: '#f8fafc',
+    fontFamily: 'Inter, Arial, sans-serif',
+    color: '#1f2937',
     margin: '0',
     padding: '0',
 };
@@ -101,79 +139,170 @@ const container = {
 };
 
 const headerContainer = {
-    backgroundColor: '#6F4E37',
-    padding: '30px 20px',
+    backgroundColor: '#23479A',
+    padding: '40px 20px',
     textAlign: 'center' as const,
+    backgroundImage: 'linear-gradient(135deg, #23479A 0%, #1e3a7a 100%)',
 };
 
 const logo = {
-    margin: '0 auto 20px',
+    margin: '0 auto 16px',
     backgroundColor: 'white',
-    borderRadius: '60px',
-    padding: '10px',
+    borderRadius: '50%',
+    padding: '12px',
+    border: '3px solid rgba(255, 255, 255, 0.2)',
 };
 
 const headerText = {
     color: '#ffffff',
-    fontSize: '24px',
+    fontSize: '28px',
     fontWeight: 'bold',
+    margin: '0 0 4px 0',
+    letterSpacing: '-0.5px',
+};
+
+const subHeaderText = {
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: '16px',
+    fontWeight: '500',
+    margin: '0 0 24px 0',
+    letterSpacing: '0.5px',
+};
+
+const titleText = {
+    color: '#ffffff',
+    fontSize: '22px',
+    fontWeight: '600',
     margin: '0',
+    padding: '16px 0 0 0',
+    borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+};
+
+const statusContainer = {
+    backgroundColor: '#ffffff',
+    padding: '20px',
     textAlign: 'center' as const,
+};
+
+const statusCard = {
+    backgroundColor: '#fef3c7',
+    border: '2px solid #f59e0b',
+    borderRadius: '12px',
+    padding: '20px',
+    display: 'inline-block',
+    textAlign: 'center' as const,
+    minWidth: '250px',
+};
+
+const statusIcon = {
+    fontSize: '32px',
+    marginBottom: '8px',
+};
+
+const statusText = {
+    fontSize: '16px',
+    fontWeight: '600',
+    color: '#92400e',
+    margin: '0',
 };
 
 const contentContainer = {
     backgroundColor: '#ffffff',
-    padding: '30px 25px',
-    borderRadius: '0 0 4px 4px',
+    padding: '40px 30px',
+    borderRadius: '0 0 8px 8px',
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
 };
 
 const greeting = {
     fontSize: '20px',
-    lineHeight: '26px',
-    fontWeight: 'bold',
-    color: '#333333',
-    marginBottom: '20px',
+    lineHeight: '28px',
+    fontWeight: '600',
+    color: '#1f2937',
+    marginBottom: '24px',
 };
 
 const paragraph = {
     fontSize: '16px',
-    lineHeight: '24px',
-    color: '#4a4a4a',
+    lineHeight: '26px',
+    color: '#4b5563',
     marginBottom: '20px',
+};
+
+const infoBox = {
+    backgroundColor: '#f0f9ff',
+    border: '1px solid #0284c7',
+    borderRadius: '8px',
+    padding: '24px',
+    margin: '24px 0',
+};
+
+const infoTitle = {
+    fontSize: '18px',
+    fontWeight: '600',
+    color: '#0c4a6e',
+    marginBottom: '16px',
+};
+
+const infoParagraph = {
+    fontSize: '14px',
+    lineHeight: '22px',
+    color: '#0369a1',
+    marginBottom: '8px',
+};
+
+const servicesList = {
+    backgroundColor: '#f9fafb',
+    borderRadius: '8px',
+    padding: '20px',
+    margin: '20px 0',
+};
+
+const serviceItem = {
+    fontSize: '15px',
+    lineHeight: '24px',
+    color: '#374151',
+    marginBottom: '12px',
+    display: 'block',
 };
 
 const signature = {
     fontSize: '16px',
-    fontWeight: 'bold',
-    color: '#555555',
-    marginTop: '25px',
+    fontWeight: '600',
+    color: '#374151',
+    marginTop: '32px',
+    paddingTop: '24px',
+    borderTop: '1px solid #e5e7eb',
 };
 
 const footerContainer = {
-    backgroundColor: '#f0f0f0',
-    padding: '20px',
-    borderRadius: '4px',
+    backgroundColor: '#f9fafb',
+    padding: '24px 20px',
+    borderRadius: '8px',
     textAlign: 'center' as const,
-    marginTop: '20px',
+    marginTop: '24px',
+    border: '1px solid #e5e7eb',
 };
 
 const footerText = {
     fontSize: '12px',
     lineHeight: '18px',
-    color: '#8898aa',
+    color: '#6b7280',
     margin: '4px 0',
 };
 
 const footerLinks = {
     fontSize: '12px',
     lineHeight: '18px',
-    color: '#8898aa',
+    color: '#6b7280',
     margin: '16px 0 0',
+    paddingTop: '16px',
+    borderTop: '1px solid #e5e7eb',
 };
 
 const footerLinkMobile = {
-    color: '#6F4E37',
+    color: '#23479A',
     textDecoration: 'none',
     display: 'inline-block',
-    padding: '5px',
+    padding: '4px 8px',
+    fontWeight: '500',
 };

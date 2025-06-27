@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react'
 import { MessageCircle, X, Send, Bot, User, Clock, FileText, Phone, MapPin } from 'lucide-react'
 
@@ -31,61 +32,80 @@ const ChatBot = () => {
       category: "general"
     },
     {
+      question: "Where is Barangay Alma Villa located?",
+      answer: "We are located at:\n\n📍 Barangay Alma Villa\nGloria, Oriental Mindoro\n\nYou can visit us during our office hours:\n🕐 Monday-Friday: 8:00 AM - 5:00 PM\n🕐 Saturday: 8:00 AM - 12:00 PM\n\nSee you soon! 😊",
+      keywords: ["location", "address", "where", "located", "gloria", "oriental", "mindoro", "direction", "find"],
+      category: "location"
+    },
+    {
       question: "How can I request a barangay certificate?",
-      answer: "Hi! To request documents like barangay certificates or clearances:\n\n1️⃣ Click 'Request Now' on our homepage\n2️⃣ Fill out your personal information\n3️⃣ Select the document type you need\n4️⃣ Submit your request\n\nYou'll get an email confirmation once submitted! 📄",
+      answer: "Hi! To request documents like barangay certificates or clearances:\n\n1️⃣ Click 'Request Now' on our homepage\n2️⃣ Fill out your personal information\n3️⃣ Select the document type you need\n4️⃣ Submit your request\n\nProcessing takes 2-3 working days and you'll get an email confirmation once submitted! 📄",
       keywords: ["certificate", "request", "document", "barangay", "clearance", "doc", "docs", "how", "get", "apply"],
       category: "services"
     },
     {
+      question: "What documents can I request?",
+      answer: "We offer various documents and services:\n\n📋 **Certificates:**\n• Barangay Clearance\n• Certificate of Residency\n• Certificate of Indigency\n• First Time Job Seeker Certificate\n• Solo Parent ID\n• Community Tax Certificate (Cedula)\n\n📋 **Permits:**\n• Barangay Business Permit\n\n📋 **Reports:**\n• Complaint/Blotter Report\n\nAll processing takes 2-3 working days! 🚀",
+      keywords: ["documents", "what", "available", "services", "list", "types", "kind", "which"],
+      category: "services"
+    },
+    {
+      question: "How do I create an account?",
+      answer: "Creating an account is easy! Here's how:\n\n1️⃣ Click 'Sign Up' on our website\n2️⃣ Fill out your personal information\n3️⃣ Upload your valid ID (front and back)\n4️⃣ Complete face verification\n5️⃣ Set up your login credentials\n\nAccount verification takes 2-3 working days, and we'll email you once it's approved! 🎉",
+      keywords: ["create", "account", "signup", "register", "registration", "sign up", "new account", "how to register"],
+      category: "registration"
+    },
+    {
       question: "What documents do I need for registration?",
-      answer: "For resident registration, you'll need:\n\n✅ Valid government ID (front and back)\n✅ Proof of residency\n✅ Birth certificate\n✅ Recent photo\n\nYou can also do face verification during registration. Pretty easy! 😄",
-      keywords: ["registration", "documents", "requirements", "ID", "proof", "need", "register", "signup"],
+      answer: "For resident registration, you'll need:\n\n✅ **Required Documents:**\n• Valid government ID (front and back)\n• Proof of residency (utility bills, lease contract)\n• Birth certificate\n• Recent photo (or face verification)\n\n✅ **Personal Information:**\n• Complete name and address\n• Contact details\n• Emergency contact information\n\nRegistration verification takes 2-3 working days! 😄",
+      keywords: ["registration", "documents", "requirements", "ID", "proof", "need", "register", "signup", "what need"],
       category: "registration"
     },
     {
       question: "How long does it take to process documents?",
-      answer: "Processing times:\n\n⏰ Barangay certificates: 1-2 business days\n⏰ Business permits: 3-5 business days\n⏰ Registration verification: 2-3 business days\n\nWe'll email you updates on your application! 📧",
-      keywords: ["processing", "time", "how long", "days", "wait", "take", "process"],
+      answer: "All our services have a standard processing time:\n\n⏰ **Processing Time: 2-3 working days**\n\nThis applies to:\n• All certificate requests\n• Business permit applications\n• Account registration verification\n• Document renewals\n\nWe'll email you updates throughout the process! 📧",
+      keywords: ["processing", "time", "how long", "days", "wait", "take", "process", "duration"],
       category: "services"
     },
     {
       question: "What is the contact information for Barangay Alma Villa?",
-      answer: "You can reach us at:\n\n📧 Email: almavilla.gloria@gmail.com\n📍 Location: Gloria, Oriental Mindoro\n📞 Phone: Coming soon!\n\nFeel free to visit us during office hours too! 😊",
-      keywords: ["contact", "phone", "email", "address", "location", "reach", "call"],
+      answer: "You can reach us at:\n\n📧 **Email:** almavilla.gloria@gmail.com\n📍 **Address:** Barangay Alma Villa, Gloria, Oriental Mindoro\n📞 **Phone:** Coming soon!\n\n🏢 **Office Hours:**\n• Monday-Friday: 8:00 AM - 5:00 PM\n• Saturday: 8:00 AM - 12:00 PM\n\nFeel free to visit us anytime during office hours! 😊",
+      keywords: ["contact", "phone", "email", "address", "location", "reach", "call", "info"],
       category: "contact"
     },
     {
       question: "How do I apply for a business permit?",
-      answer: "To apply for a business permit:\n\n1️⃣ Go to Services → Business Permit\n2️⃣ Fill out your business information\n3️⃣ Upload required documents\n4️⃣ Submit application\n\nProcessing takes 3-5 business days. Good luck with your business! 🏪",
+      answer: "To apply for a business permit:\n\n1️⃣ Go to Services → Business Permit\n2️⃣ Fill out your business information\n3️⃣ Upload required documents\n4️⃣ Submit application\n\nProcessing takes 2-3 working days. We'll keep you updated via email. Good luck with your business! 🏪",
       keywords: ["business", "permit", "apply", "license", "shop", "store"],
       category: "business"
     },
     {
       question: "Can I track my application status?",
-      answer: "Yes! You can track your application by:\n\n✅ Logging into your account\n✅ Going to the History page\n✅ Checking email notifications\n\nWe keep you updated every step of the way! 📱",
+      answer: "Yes! You can track your application by:\n\n✅ Logging into your account\n✅ Going to the History page\n✅ Checking email notifications\n\nRemember, all applications are processed within 2-3 working days. We keep you updated every step of the way! 📱",
       keywords: ["track", "status", "application", "history", "progress", "check"],
       category: "services"
     },
     {
       question: "What forms are available for download?",
-      answer: "We have various forms available on our Forms page:\n\n📋 Certificate application forms\n📋 Business permit forms\n📋 Clearance request forms\n📋 Other barangay service forms\n\nAll in PDF format for easy printing! 🖨️",
-      keywords: ["forms", "download", "PDF", "application", "form"],
+      answer: "We have various forms available on our Forms page:\n\n📋 **Available Forms:**\n• Barangay Clearance Application\n• Certificate of Residency Application\n• Certificate of Indigency Application\n• Business Permit Application\n• Community Tax Certificate Form\n• First Time Job Seeker Certificate\n• Solo Parent ID Application\n• Complaint/Blotter Report\n\nAll forms are in PDF format for easy printing! 🖨️",
+      keywords: ["forms", "download", "PDF", "application", "form", "printable"],
       category: "forms"
     }
   ]
 
   const quickSuggestions = [
-    "How to request documents?",
-    "Office hours", 
-    "Business permit",
-    "Contact info",
-    "Registration help"
+    "How to create account?",
+    "What documents needed?",
+    "Processing time", 
+    "Where are you located?",
+    "Available services",
+    "Contact information"
   ]
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
       addBotMessage(
-        "Hi there! 👋 I'm your Alma Villa assistant! I'm here to help you with:\n\n• Document requests\n• Office information\n• Registration help\n• Business permits\n• And much more!\n\nWhat can I help you with today? 😊",
+        "Hi there! 👋 I'm your Alma Villa assistant! \n\nI'm here to help you with:\n\n• 📋 Document requests & services\n• 🏢 Office information & location\n• 👤 Account registration help\n• 🏪 Business permits\n• ⏰ Processing times\n• 📞 Contact details\n\nAll our services are processed within 2-3 working days!\n\nWhat can I help you with today? 😊",
         quickSuggestions
       )
     }
@@ -128,30 +148,31 @@ const ChatBot = () => {
     const isGreeting = greetings.some(greeting => input.includes(greeting))
     
     if (isGreeting && input.length < 20) {
-      // If it's just a greeting, return a greeting response
       return {
         question: "greeting",
-        answer: "Hello there! 👋 Welcome to Alma Villa! How can I help you today?",
+        answer: "Hello there! 👋 Welcome to Barangay Alma Villa! \n\nI'm here to help you with our services, which are all processed within 2-3 working days. How can I assist you today?",
         keywords: [],
         category: "greeting"
       }
     }
     
-    // Handle casual questions
-    const casualPhrases = {
-      "how can i": ["request", "get", "apply", "do"],
-      "i want to": ["request", "get", "apply", "register"],
-      "i need": ["document", "certificate", "permit", "help"],
-      "can you help": ["request", "get", "apply"],
-      "how do i": ["request", "get", "apply", "register"]
+    // Handle common phrases and questions
+    const commonPatterns = {
+      "how long": ["processing", "time", "take", "process"],
+      "how can i": ["request", "get", "apply", "do", "create"],
+      "i want to": ["request", "get", "apply", "register", "create"],
+      "i need": ["document", "certificate", "permit", "help", "account"],
+      "can you help": ["request", "get", "apply", "create"],
+      "how do i": ["request", "get", "apply", "register", "create"],
+      "what do i need": ["documents", "requirements", "registration"],
+      "where": ["location", "address", "located", "find"]
     }
     
-    // Check for casual phrase patterns
-    for (const [phrase, keywords] of Object.entries(casualPhrases)) {
+    // Check for pattern matches
+    for (const [phrase, keywords] of Object.entries(commonPatterns)) {
       if (input.includes(phrase)) {
         for (const keyword of keywords) {
           if (input.includes(keyword)) {
-            // Find FAQ that matches this keyword
             for (const faq of faqs) {
               if (faq.keywords.includes(keyword)) {
                 return faq
@@ -162,14 +183,14 @@ const ChatBot = () => {
       }
     }
     
-    // Original matching logic
+    // Direct question matching
     for (const faq of faqs) {
       if (faq.question.toLowerCase().includes(input) || input.includes(faq.question.toLowerCase())) {
         return faq
       }
     }
 
-    // Keyword matching with better scoring
+    // Keyword matching with scoring
     let bestMatch: FAQ | null = null
     let maxMatches = 0
 
@@ -190,11 +211,17 @@ const ChatBot = () => {
   }
 
   const generateSuggestions = (category: string): string[] => {
-    const categoryFaqs = faqs.filter(faq => faq.category === category)
-    return categoryFaqs.slice(0, 3).map(faq => {
-      const words = faq.question.split(' ')
-      return words.slice(0, 3).join(' ') + (words.length > 3 ? '...' : '')
-    })
+    const suggestions: { [key: string]: string[] } = {
+      "services": ["What documents available?", "Processing time", "How to request?"],
+      "registration": ["What documents needed?", "How to create account?", "Processing time"],
+      "location": ["Office hours", "Contact information", "How to get there?"],
+      "contact": ["Office hours", "Where located?", "Available services"],
+      "business": ["What documents needed?", "Processing time", "How to apply?"],
+      "forms": ["Available services", "How to request?", "Processing time"],
+      "general": ["Available services", "Contact info", "Where located?"]
+    }
+    
+    return suggestions[category] || quickSuggestions.slice(0, 3)
   }
 
   const handleSendMessage = (text?: string) => {
@@ -210,10 +237,10 @@ const ChatBot = () => {
       
       if (match) {
         const suggestions = generateSuggestions(match.category)
-        addBotMessage(match.answer, suggestions.length > 0 ? suggestions : quickSuggestions)
+        addBotMessage(match.answer, suggestions)
       } else {
         addBotMessage(
-          "I'm sorry, I don't have specific information about that right now. 😅\n\nBut don't worry! You can:\n\n📧 Email us: almavilla.gloria@gmail.com\n🏢 Visit our office: Monday-Friday 8AM-5PM, Saturday 8AM-12PM\n💬 Try asking about our services, office hours, or document requests!\n\nIs there anything else I can help you with? 😊",
+          "I'm sorry, I don't have specific information about that right now. 😅\n\nBut don't worry! Here's how you can get help:\n\n📧 **Email us:** almavilla.gloria@gmail.com\n📍 **Visit us:** Barangay Alma Villa, Gloria, Oriental Mindoro\n🏢 **Office Hours:** Mon-Fri 8AM-5PM, Sat 8AM-12PM\n\n💡 **You can also ask about:**\n• Document requests & services\n• Account registration\n• Processing times (2-3 working days)\n• Office location & hours\n\nIs there anything else I can help you with? 😊",
           quickSuggestions
         )
       }
@@ -264,7 +291,7 @@ const ChatBot = () => {
           </div>
           <div>
             <h3 className="font-semibold text-base">Alma Villa Assistant</h3>
-            <p className="text-xs text-blue-100">Online now</p>
+            <p className="text-xs text-blue-100">Online • 2-3 days processing</p>
           </div>
         </div>
         <button
@@ -353,7 +380,7 @@ const ChatBot = () => {
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Type your question..."
+            placeholder="Ask about services, registration, or location..."
             className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#23479A]/20 focus:border-[#23479A] text-sm"
           />
           <button
