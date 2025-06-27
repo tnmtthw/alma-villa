@@ -7,14 +7,14 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Calendar, 
-  Users, 
-  Heart, 
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  Users,
+  Heart,
   Briefcase,
   Clock,
   Shield,
@@ -80,7 +80,7 @@ export function DetailViewModal({
   avatarFallback,
   headerBadge
 }: DetailViewModalProps) {
-  
+
   const renderFieldValue = (field: DetailField) => {
     const { value, type = 'text', badgeVariant = 'default', onClick } = field
 
@@ -95,36 +95,36 @@ export function DetailViewModal({
             {value}
           </Badge>
         )
-      
+
       case 'date':
         return new Date(value).toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'long',
           day: 'numeric'
         })
-      
+
       case 'email':
         return (
-          <a 
-            href={`mailto:${value}`} 
+          <a
+            href={`mailto:${value}`}
             className="text-[#23479A] hover:underline flex items-center gap-1"
           >
             <Mail className="h-3 w-3" />
             {value}
           </a>
         )
-      
+
       case 'phone':
         return (
-          <a 
-            href={`tel:${value}`} 
+          <a
+            href={`tel:${value}`}
             className="text-[#23479A] hover:underline flex items-center gap-1"
           >
             <Phone className="h-3 w-3" />
             {value}
           </a>
         )
-      
+
       case 'address':
         return (
           <div className="flex items-start gap-1">
@@ -132,7 +132,7 @@ export function DetailViewModal({
             <span>{value}</span>
           </div>
         )
-      
+
       case 'avatar':
         return (
           <Avatar className="h-12 w-12">
@@ -140,7 +140,7 @@ export function DetailViewModal({
             <AvatarFallback>{avatarFallback}</AvatarFallback>
           </Avatar>
         )
-      
+
       case 'status':
         const getStatusColor = (status: string) => {
           switch (status.toLowerCase()) {
@@ -160,7 +160,7 @@ export function DetailViewModal({
             {value.replace('_', ' ')}
           </Badge>
         )
-      
+
       case 'document':
         return (
           <div className="flex items-center gap-2">
@@ -185,13 +185,13 @@ export function DetailViewModal({
             </div>
           </div>
         )
-      
+
       case 'image':
         return (
           <div className="flex items-center gap-2">
-            <img 
-              src={value} 
-              alt="Document" 
+            <img
+              src={value}
+              alt="Document"
               className="h-16 w-16 object-cover rounded border"
             />
             <Button
@@ -205,11 +205,11 @@ export function DetailViewModal({
             </Button>
           </div>
         )
-      
+
       default:
         if (onClick) {
           return (
-            <button 
+            <button
               onClick={onClick}
               className="text-[#23479A] hover:underline text-left"
             >
@@ -281,7 +281,7 @@ export function DetailViewModal({
                   {section.title}
                 </h3>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {section.fields.map((field, fieldIndex) => (
                   <div key={fieldIndex} className={`space-y-1 ${field.className || ''}`}>
@@ -294,7 +294,7 @@ export function DetailViewModal({
                   </div>
                 ))}
               </div>
-              
+
               {sectionIndex < sections.length - 1 && (
                 <Separator className="mt-6" />
               )}
@@ -314,18 +314,17 @@ export function DetailViewModal({
                     key={index}
                     variant={action.variant || 'outline'}
                     onClick={action.onClick}
-                    className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all duration-200 ${
-                      action.variant === 'secondary' 
-                        ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 hover:border-blue-300' 
+                    className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all duration-200 ${action.variant === 'secondary'
+                        ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 hover:border-blue-300'
                         : 'border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
-                    }`}
+                      }`}
                   >
                     {action.icon}
                     {action.label}
                   </Button>
                 ))}
               </div>
-              
+
               {/* Primary Actions (right side) */}
               <div className="flex flex-wrap gap-3 w-full sm:w-auto">
                 {actions.filter(action => action.variant === 'destructive').map((action, index) => (
@@ -554,8 +553,8 @@ export function PendingRegistrationReviewModal({
       title: "Address Information",
       icon: <MapPin className="h-5 w-5" />,
       fields: [
-        { 
-          label: "Complete Address", 
+        {
+          label: "Complete Address",
           value: `${resident.houseNumber} ${resident.street}, ${resident.purok}, ${resident.barangay}, ${resident.city}, ${resident.province} ${resident.zipCode}`,
           type: 'address',
           className: 'md:col-span-2'
@@ -619,7 +618,7 @@ export function PendingRegistrationReviewModal({
           variant: 'outline'
         }}
       />
-      
+
       <RejectionReasonModal
         isOpen={isRejectionModalOpen}
         onClose={() => setIsRejectionModalOpen(false)}
@@ -680,8 +679,8 @@ export function ResidentViewModal({
       title: "Address Information",
       icon: <MapPin className="h-5 w-5" />,
       fields: [
-        { 
-          label: "Complete Address", 
+        {
+          label: "Complete Address",
           value: `${resident.houseNumber} ${resident.street}, ${resident.purok}, ${resident.barangay}, ${resident.city}, ${resident.province} ${resident.zipCode}`,
           type: 'address',
           className: 'md:col-span-2'
@@ -712,7 +711,7 @@ export function ResidentViewModal({
   ]
 
   const actions = []
-  
+
   // Secondary actions (left side)
   if (onEdit) {
     actions.push({

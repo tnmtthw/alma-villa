@@ -321,11 +321,11 @@ export default function ResidentsTable() {
         throw new Error('Resident not found')
       }
 
-      const response = await fetch(`/api/user/set-role?id=${resident.id}`, {
+      const response = await fetch(`/api/user/set-verified?id=${resident.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...apiResident,
+          email: resident.email,
           role: 'Verified'
         })
       })
