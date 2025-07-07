@@ -1,15 +1,11 @@
 import {
     Body,
     Container,
-    Column,
     Head,
     Heading,
-    Hr,
     Html,
     Img,
-    Link,
     Preview,
-    Row,
     Section,
     Text,
 } from '@react-email/components';
@@ -32,86 +28,68 @@ export const ImprovedVerificationEmail = ({
             </Preview>
             <Body style={main}>
                 <Container style={container}>
-                    <Section style={headerContainer}>
-                        <Img
-                            src="public/assets/img/Logo.png"
-                            width="80"
-                            height="80"
-                            alt="Alma Villa Logo"
-                            style={logo}
-                        />
-                        <Heading style={headerText}>Alma Villa</Heading>
-                        <Text style={subHeaderText}>Barangay Portal</Text>
-                        <Heading style={titleText}>Registration Received</Heading>
-                    </Section>
-
-                    <Section style={statusContainer}>
-                        <div style={statusCard}>
-                            <div style={statusIcon}>⏳</div>
-                            <Text style={statusText}>Pending Admin Approval</Text>
+                    {/* Logo at top */}
+                    <Section style={logoSection}>
+                        <div style={logoContainer}>
+                            <Img
+                                src="https://raw.githubusercontent.com/yourusername/alma-villa/main/public/assets/img/Logo.png"
+                                width="60"
+                                height="60"
+                                alt="Alma Villa Logo"
+                                style={logo}
+                            />
                         </div>
                     </Section>
 
-                    <Section style={contentContainer}>
-                        <Text style={greeting}>Hello {email},</Text>
-
-                        <Text style={paragraph}>
-                            Thank you for registering with the Barangay Alma Villa Portal. Your registration has been successfully received and is currently under review.
-                        </Text>
-
-                        <Section style={infoBox}>
-                            <Text style={infoTitle}>What happens next?</Text>
-                            <Text style={infoParagraph}>
-                                • Our barangay administrators will review your submitted documents
-                            </Text>
-                            <Text style={infoParagraph}>
-                                • Verification typically takes 2-3 working days
-                            </Text>
-                            <Text style={infoParagraph}>
-                                • You'll receive an email notification once approved
-                            </Text>
-                            <Text style={infoParagraph}>
-                                • After approval, you can access all barangay services
-                            </Text>
+                    {/* Main Card */}
+                    <Section style={card}>
+                        {/* Pending Icon */}
+                        <Section style={iconSection}>
+                            <div style={pendingIcon}>
+                                <div style={clockIcon}>⏳</div>
+                            </div>
                         </Section>
 
-                        <Text style={paragraph}>
-                            Once your account is approved, you'll be able to:
+                        {/* Main Content */}
+                        <Heading style={title}>Registration Received</Heading>
+                        
+                        <Text style={description}>
+                            Your registration has been received and is pending admin approval.
                         </Text>
 
-                        <Section style={servicesList}>
-                            <Text style={serviceItem}>📄 Request barangay certificates and clearances</Text>
+                        <Text style={emailText}>
+                            Account: {email}
+                        </Text>
+
+                        {/* Status Info */}
+                        <Section style={statusBox}>
+                            <Text style={statusTitle}>What happens next?</Text>
+                            <Text style={statusItem}>• Document review by barangay administrators</Text>
+                            <Text style={statusItem}>• Verification takes 2-3 working days</Text>
+                            <Text style={statusItem}>• Email notification once approved</Text>
+                            <Text style={statusItem}>• Full access to barangay services</Text>
+                        </Section>
+
+                        {/* Services List */}
+                        <Section style={servicesBox}>
+                            <Text style={servicesTitle}>Once approved, you can:</Text>
+                            <Text style={serviceItem}>📄 Request certificates and clearances</Text>
                             <Text style={serviceItem}>📝 Access downloadable forms</Text>
-                            <Text style={serviceItem}>📰 Stay updated with barangay news and announcements</Text>
+                            <Text style={serviceItem}>📰 View news and announcements</Text>
                             <Text style={serviceItem}>🏢 Apply for business permits</Text>
                         </Section>
 
-                        <Text style={paragraph}>
-                            If you have any questions about your registration, please contact our office during business hours.
-                        </Text>
-
-                        <Text style={signature}>
-                            The Alma Villa Barangay Team
+                        {/* Help Section */}
+                        <Text style={helpText}>
+                            Questions about your registration? <a href="mailto:almavilla.gloria@gmail.com" style={supportLink}>Contact support</a>
                         </Text>
                     </Section>
 
-                    <Section style={footerContainer}>
+                    {/* Footer */}
+                    <Section style={footer}>
                         <Text style={footerText}>
-                            © 2025 Barangay Alma Villa, Gloria, Oriental Mindoro. All rights reserved.
-                        </Text>
-                        <Text style={footerText}>
-                            Barangay Alma Villa, Gloria, Oriental Mindoro
-                        </Text>
-                        <Text style={footerText}>
-                            Email: almavilla.gloria@gmail.com
-                        </Text>
-                        <Text style={footerText}>
-                            Office Hours: Monday - Friday: 8:00 AM - 5:00 PM | Saturday: 8:00 AM - 12:00 PM
-                        </Text>
-                        <Text style={footerLinks}>
-                            <a href="#" style={footerLinkMobile}>Privacy Policy</a> &nbsp;•&nbsp;
-                            <a href="#" style={footerLinkMobile}>Terms of Service</a> &nbsp;•&nbsp;
-                            <a href="#" style={footerLinkMobile}>Contact Us</a>
+                            Barangay Alma Villa, Gloria, Oriental Mindoro<br/>
+                            Office Hours: Mon-Fri 8AM-5PM, Sat 8AM-12PM
                         </Text>
                     </Section>
                 </Container>
@@ -122,187 +100,161 @@ export const ImprovedVerificationEmail = ({
 
 export default ImprovedVerificationEmail;
 
-// Styles
+// Styles matching the card design
 const main = {
-    backgroundColor: '#f8fafc',
-    fontFamily: 'Inter, Arial, sans-serif',
-    color: '#1f2937',
-    margin: '0',
-    padding: '0',
+    backgroundColor: '#4F72C2',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    padding: '40px 20px',
+    minHeight: '100vh',
 };
 
 const container = {
     margin: '0 auto',
-    padding: '0',
-    width: '100%',
-    maxWidth: '600px',
+    maxWidth: '480px',
+    position: 'relative' as const,
 };
 
-const headerContainer = {
-    backgroundColor: '#23479A',
-    padding: '40px 20px',
+const logoSection = {
     textAlign: 'center' as const,
-    backgroundImage: 'linear-gradient(135deg, #23479A 0%, #1e3a7a 100%)',
-};
-
-const logo = {
-    margin: '0 auto 16px',
-    backgroundColor: 'white',
-    borderRadius: '50%',
-    padding: '12px',
-    border: '3px solid rgba(255, 255, 255, 0.2)',
-};
-
-const headerText = {
-    color: '#ffffff',
-    fontSize: '28px',
-    fontWeight: 'bold',
-    margin: '0 0 4px 0',
-    letterSpacing: '-0.5px',
-};
-
-const subHeaderText = {
-    color: 'rgba(255, 255, 255, 0.9)',
-    fontSize: '16px',
-    fontWeight: '500',
-    margin: '0 0 24px 0',
-    letterSpacing: '0.5px',
-};
-
-const titleText = {
-    color: '#ffffff',
-    fontSize: '22px',
-    fontWeight: '600',
-    margin: '0',
-    padding: '16px 0 0 0',
-    borderTop: '1px solid rgba(255, 255, 255, 0.2)',
-};
-
-const statusContainer = {
-    backgroundColor: '#ffffff',
-    padding: '20px',
-    textAlign: 'center' as const,
-};
-
-const statusCard = {
-    backgroundColor: '#fef3c7',
-    border: '2px solid #f59e0b',
-    borderRadius: '12px',
-    padding: '20px',
-    display: 'inline-block',
-    textAlign: 'center' as const,
-    minWidth: '250px',
-};
-
-const statusIcon = {
-    fontSize: '32px',
-    marginBottom: '8px',
-};
-
-const statusText = {
-    fontSize: '16px',
-    fontWeight: '600',
-    color: '#92400e',
-    margin: '0',
-};
-
-const contentContainer = {
-    backgroundColor: '#ffffff',
-    padding: '40px 30px',
-    borderRadius: '0 0 8px 8px',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-};
-
-const greeting = {
-    fontSize: '20px',
-    lineHeight: '28px',
-    fontWeight: '600',
-    color: '#1f2937',
-    marginBottom: '24px',
-};
-
-const paragraph = {
-    fontSize: '16px',
-    lineHeight: '26px',
-    color: '#4b5563',
     marginBottom: '20px',
 };
 
-const infoBox = {
-    backgroundColor: '#f0f9ff',
-    border: '1px solid #0284c7',
-    borderRadius: '8px',
-    padding: '24px',
-    margin: '24px 0',
+const logoContainer = {
+    backgroundColor: '#ffffff',
+    borderRadius: '50%',
+    width: '80px',
+    height: '80px',
+    margin: '0 auto',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
 };
 
-const infoTitle = {
-    fontSize: '18px',
+const logo = {
+    borderRadius: '50%',
+};
+
+const card = {
+    backgroundColor: '#ffffff',
+    borderRadius: '12px',
+    padding: '40px 30px',
+    textAlign: 'center' as const,
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+};
+
+const iconSection = {
+    marginBottom: '24px',
+};
+
+const pendingIcon = {
+    backgroundColor: '#FEF3C7',
+    borderRadius: '50%',
+    width: '64px',
+    height: '64px',
+    margin: '0 auto',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+};
+
+const clockIcon = {
+    fontSize: '32px',
+};
+
+const title = {
+    color: '#4F72C2',
+    fontSize: '28px',
+    fontWeight: '700',
+    margin: '0 0 16px 0',
+    textAlign: 'center' as const,
+};
+
+const description = {
+    color: '#6B7280',
+    fontSize: '16px',
+    lineHeight: '24px',
+    margin: '0 0 20px 0',
+    textAlign: 'center' as const,
+};
+
+const emailText = {
+    color: '#4F72C2',
+    fontSize: '16px',
     fontWeight: '600',
-    color: '#0c4a6e',
-    marginBottom: '16px',
+    margin: '0 0 32px 0',
+    textAlign: 'center' as const,
 };
 
-const infoParagraph = {
-    fontSize: '14px',
-    lineHeight: '22px',
-    color: '#0369a1',
-    marginBottom: '8px',
-};
-
-const servicesList = {
-    backgroundColor: '#f9fafb',
+const statusBox = {
+    backgroundColor: '#F0F9FF',
+    border: '1px solid #0EA5E9',
     borderRadius: '8px',
     padding: '20px',
-    margin: '20px 0',
+    margin: '24px 0',
+    textAlign: 'left' as const,
+};
+
+const statusTitle = {
+    color: '#0C4A6E',
+    fontSize: '16px',
+    fontWeight: '600',
+    margin: '0 0 12px 0',
+};
+
+const statusItem = {
+    color: '#0369A1',
+    fontSize: '14px',
+    lineHeight: '20px',
+    margin: '0 0 8px 0',
+};
+
+const servicesBox = {
+    backgroundColor: '#F9FAFB',
+    borderRadius: '8px',
+    padding: '20px',
+    margin: '24px 0',
+    textAlign: 'left' as const,
+};
+
+const servicesTitle = {
+    color: '#374151',
+    fontSize: '16px',
+    fontWeight: '600',
+    margin: '0 0 12px 0',
 };
 
 const serviceItem = {
-    fontSize: '15px',
-    lineHeight: '24px',
-    color: '#374151',
-    marginBottom: '12px',
-    display: 'block',
+    color: '#4B5563',
+    fontSize: '14px',
+    lineHeight: '20px',
+    margin: '0 0 8px 0',
 };
 
-const signature = {
-    fontSize: '16px',
-    fontWeight: '600',
-    color: '#374151',
-    marginTop: '32px',
-    paddingTop: '24px',
-    borderTop: '1px solid #e5e7eb',
-};
-
-const footerContainer = {
-    backgroundColor: '#f9fafb',
-    padding: '24px 20px',
-    borderRadius: '8px',
+const helpText = {
+    color: '#6B7280',
+    fontSize: '14px',
+    margin: '24px 0 0 0',
     textAlign: 'center' as const,
+};
+
+const supportLink = {
+    color: '#4F72C2',
+    textDecoration: 'none',
+    fontWeight: '600',
+};
+
+const footer = {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: '8px',
+    padding: '20px',
     marginTop: '24px',
-    border: '1px solid #e5e7eb',
+    textAlign: 'center' as const,
 };
 
 const footerText = {
-    fontSize: '12px',
-    lineHeight: '18px',
-    color: '#6b7280',
-    margin: '4px 0',
-};
-
-const footerLinks = {
-    fontSize: '12px',
-    lineHeight: '18px',
-    color: '#6b7280',
-    margin: '16px 0 0',
-    paddingTop: '16px',
-    borderTop: '1px solid #e5e7eb',
-};
-
-const footerLinkMobile = {
-    color: '#23479A',
-    textDecoration: 'none',
-    display: 'inline-block',
-    padding: '4px 8px',
-    fontWeight: '500',
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: '14px',
+    lineHeight: '20px',
+    margin: '0',
 };
