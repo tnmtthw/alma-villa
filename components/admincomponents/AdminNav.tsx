@@ -257,17 +257,17 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Navigation */}
-        <div className="p-4 pb-0">
-          <header className="bg-white/80 backdrop-blur-sm border border-gray-200/70 px-6 shadow-lg rounded-2xl">
-            <div className="flex items-center justify-between h-16">
+        <div className="p-2 md:p-4 pb-0">
+          <header className="bg-white/80 backdrop-blur-sm border border-gray-200/70 px-3 md:px-6 shadow-lg rounded-xl md:rounded-2xl">
+            <div className="flex items-center justify-between h-14 md:h-16">
               {/* Left side */}
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 md:gap-4">
                 {/* Mobile menu button */}
                 <button
                   onClick={toggleSidebar}
-                  className="lg:hidden flex items-center justify-center h-10 w-10 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="lg:hidden flex items-center justify-center h-8 w-8 md:h-10 md:w-10 rounded-lg hover:bg-gray-100 transition-colors"
                 >
-                  <Menu className="h-5 w-5" />
+                  <Menu className="h-4 w-4 md:h-5 md:w-5" />
                 </button>
 
                 {/* Collapsed sidebar expand button */}
@@ -286,48 +286,48 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
                   <input
                     type="text"
                     placeholder="Search..."
-                    className="pl-12 pr-4 py-3 w-80 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all duration-200 text-sm"
+                    className="pl-12 pr-4 py-3 w-60 lg:w-80 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all duration-200 text-sm"
                   />
                 </div>
               </div>
 
               {/* Right side */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 md:gap-2">
                 {/* Search button for mobile */}
-                <button className="md:hidden flex items-center justify-center h-10 w-10 rounded-lg hover:bg-gray-100 transition-colors">
-                  <Search className="h-5 w-5" />
+                <button className="md:hidden flex items-center justify-center h-8 w-8 rounded-lg hover:bg-gray-100 transition-colors">
+                  <Search className="h-4 w-4" />
                 </button>
 
                 {/* Notifications */}
-                <button className="relative flex items-center justify-center h-10 w-10 rounded-lg hover:bg-gray-100 transition-colors">
-                  <Bell className="h-5 w-5" />
-                  <span className="absolute -top-1 -right-1 h-5 w-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center border-2 border-white shadow-sm font-medium">
+                <button className="relative flex items-center justify-center h-8 w-8 md:h-10 md:w-10 rounded-lg hover:bg-gray-100 transition-colors">
+                  <Bell className="h-4 w-4 md:h-5 md:w-5" />
+                  <span className="absolute -top-1 -right-1 h-4 w-4 md:h-5 md:w-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center border-2 border-white shadow-sm font-medium">
                     3
                   </span>
                 </button>
 
                 {/* Help */}
-                <button className="flex items-center justify-center h-10 w-10 rounded-lg hover:bg-gray-100 transition-colors">
-                  <HelpCircle className="h-5 w-5" />
+                <button className="hidden sm:flex items-center justify-center h-8 w-8 md:h-10 md:w-10 rounded-lg hover:bg-gray-100 transition-colors">
+                  <HelpCircle className="h-4 w-4 md:h-5 md:w-5" />
                 </button>
 
                 {/* Profile Dropdown */}
                 <div className="relative" ref={profileDropdownRef}>
                   <button
                     onClick={() => setIsProfileOpen(!isProfileOpen)}
-                    className="relative h-10 w-10 rounded-lg hover:ring-2 hover:ring-blue-500/30 hover:ring-offset-2 transition-all ml-2"
+                    className="relative h-8 w-8 md:h-10 md:w-10 rounded-lg hover:ring-2 hover:ring-blue-500/30 hover:ring-offset-2 transition-all ml-1 md:ml-2"
                   >
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-md">
-                      <User className="h-5 w-5 text-white" />
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-md">
+                      <User className="h-4 w-4 md:h-5 md:w-5 text-white" />
                     </div>
                   </button>
 
                   {/* Profile Dropdown Menu */}
                   {isProfileOpen && (
-                    <div className="absolute right-0 mt-3 w-72 bg-white rounded-2xl shadow-xl border border-gray-200/70 py-2 z-50 backdrop-blur-sm">
-                      <div className="px-6 py-4 border-b border-gray-200/70">
-                        <p className="text-sm font-semibold text-gray-900">{adminName}</p>
-                        <p className="text-xs text-gray-500 mt-1">{adminEmail}</p>
+                    <div className="absolute right-0 mt-3 w-64 md:w-72 bg-white rounded-2xl shadow-xl border border-gray-200/70 py-2 z-50 backdrop-blur-sm">
+                      <div className="px-4 md:px-6 py-3 md:py-4 border-b border-gray-200/70">
+                        <p className="text-sm font-semibold text-gray-900 truncate">{adminName}</p>
+                        <p className="text-xs text-gray-500 mt-1 truncate">{adminEmail}</p>
                         <p className="text-xs text-blue-600 font-medium mt-1">{adminRole}</p>
                       </div>
                       <div className="py-2">
@@ -374,7 +374,7 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto p-4 pt-4">
+        <main className="flex-1 overflow-auto p-2 md:p-4 pt-2 md:pt-4">
           {children}
         </main>
       </div>

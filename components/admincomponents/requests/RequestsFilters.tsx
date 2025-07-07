@@ -33,23 +33,23 @@ export default function RequestsFilters({
 }: RequestsFiltersProps) {
   return (
     <Card>
-      <CardContent className="p-6">
-        <div className="flex flex-col lg:flex-row gap-4">
+      <CardContent className="p-4 md:p-6">
+        <div className="flex flex-col space-y-4">
           {/* Search */}
-          <div className="flex-1 relative">
+          <div className="w-full relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Search by name, email, document type, or request ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-10 w-full"
             />
           </div>
 
           {/* Filters */}
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -65,7 +65,7 @@ export default function RequestsFilters({
             </Select>
 
             <Select value={documentTypeFilter} onValueChange={setDocumentTypeFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Document Type" />
               </SelectTrigger>
               <SelectContent>
@@ -79,7 +79,7 @@ export default function RequestsFilters({
             </Select>
 
             <Select value={urgentFilter} onValueChange={setUrgentFilter}>
-              <SelectTrigger className="w-[120px]">
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Priority" />
               </SelectTrigger>
               <SelectContent>
@@ -89,9 +89,10 @@ export default function RequestsFilters({
               </SelectContent>
             </Select>
 
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button variant="outline" className="flex items-center justify-center gap-2 w-full">
               <Filter className="h-4 w-4" />
-              Advanced
+              <span className="hidden sm:inline">Advanced</span>
+              <span className="sm:hidden">More</span>
             </Button>
           </div>
         </div>

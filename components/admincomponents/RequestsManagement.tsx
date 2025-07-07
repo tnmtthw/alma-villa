@@ -262,27 +262,28 @@ export default function RequestsManagement() {
   ]
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Document Requests</h1>
-          <p className="text-gray-600 mt-1">Manage and process document requests from residents</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Document Requests</h1>
+          <p className="text-gray-600 mt-1 text-sm md:text-base">Manage and process document requests from residents</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <Button variant="outline" className="flex items-center justify-center gap-2 w-full sm:w-auto">
             <Download className="h-4 w-4" />
-            Export
+            <span className="hidden sm:inline">Export</span>
           </Button>
-          <Button className="bg-[#23479A] hover:bg-[#23479A]/90 flex items-center gap-2">
+          <Button className="bg-[#23479A] hover:bg-[#23479A]/90 flex items-center justify-center gap-2 w-full sm:w-auto">
             <Plus className="h-4 w-4" />
-            Manual Request
+            <span className="hidden sm:inline">Manual Request</span>
+            <span className="sm:hidden">Add Request</span>
           </Button>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-8 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 md:gap-4">
         {statsConfig.map((stat, index) => (
           <StatsCard
             key={index}
@@ -309,49 +310,53 @@ export default function RequestsManagement() {
       {/* Requests Table */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Document Requests ({filteredRequests.length})</CardTitle>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <CardTitle className="text-lg md:text-xl">Document Requests ({filteredRequests.length})</CardTitle>
             <div className="flex items-center gap-2">
               <Button 
                 variant="outline" 
                 size="sm"
                 onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-                className="flex items-center gap-1"
+                className="flex items-center gap-1 w-full sm:w-auto"
               >
                 <ArrowUpDown className="h-3 w-3" />
-                Sort: {sortOrder === "asc" ? "Oldest" : "Newest"}
+                <span className="hidden sm:inline">Sort: {sortOrder === "asc" ? "Oldest" : "Newest"}</span>
+                <span className="sm:hidden">{sortOrder === "asc" ? "Oldest" : "Newest"}</span>
               </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Request Details</TableHead>
-                <TableHead>User</TableHead>
-                <TableHead>Document</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Request Date</TableHead>
-                <TableHead>Est. Completion</TableHead>
-                <TableHead>Fee</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredRequests.map((request) => (
-                <RequestTableRow
-                  key={request.id}
-                  request={request}
-                  onViewDetails={handleViewDetails}
-                  onUpdateStatus={handleUpdateStatus}
-                  onPaymentReview={handlePaymentReview}
-                  getStatusConfig={getStatusConfig}
-                  formatDate={formatDate}
-                />
-              ))}
-            </TableBody>
-          </Table>
+          {/* Mobile-responsive table wrapper */}
+          <div className="overflow-x-auto">
+            <Table className="min-w-[800px]">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[120px]">Request Details</TableHead>
+                  <TableHead className="min-w-[120px]">User</TableHead>
+                  <TableHead className="min-w-[120px]">Document</TableHead>
+                  <TableHead className="min-w-[100px]">Status</TableHead>
+                  <TableHead className="min-w-[120px]">Request Date</TableHead>
+                  <TableHead className="min-w-[120px]">Est. Completion</TableHead>
+                  <TableHead className="min-w-[80px]">Fee</TableHead>
+                  <TableHead className="min-w-[100px]">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredRequests.map((request) => (
+                  <RequestTableRow
+                    key={request.id}
+                    request={request}
+                    onViewDetails={handleViewDetails}
+                    onUpdateStatus={handleUpdateStatus}
+                    onPaymentReview={handlePaymentReview}
+                    getStatusConfig={getStatusConfig}
+                    formatDate={formatDate}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          </div>
 
           {/* Empty State */}
           {filteredRequests.length === 0 && (

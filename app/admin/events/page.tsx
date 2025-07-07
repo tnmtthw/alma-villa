@@ -237,16 +237,16 @@ export default function EventsPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Events & Announcements</h1>
-          <p className="text-gray-600 mt-1">Manage homepage announcements, events, and notices</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Events & Announcements</h1>
+          <p className="text-gray-600 mt-1 text-sm md:text-base">Manage homepage announcements, events, and notices</p>
         </div>
         <Button 
           onClick={handleCreateEvent}
-          className="bg-[#23479A] hover:bg-[#23479A]/90"
+          className="bg-[#23479A] hover:bg-[#23479A]/90 w-full sm:w-auto"
         >
           <Plus className="h-4 w-4 mr-2" />
           Create Event
@@ -254,51 +254,51 @@ export default function EventsPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 md:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Events</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+                <p className="text-xs md:text-sm font-medium text-gray-600">Total Events</p>
+                <p className="text-lg md:text-2xl font-bold text-gray-900">{stats.total}</p>
               </div>
-              <Calendar className="h-8 w-8 text-blue-600" />
+              <Calendar className="h-6 w-6 md:h-8 md:w-8 text-blue-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 md:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Published</p>
-                <p className="text-2xl font-bold text-green-600">{stats.published}</p>
+                <p className="text-xs md:text-sm font-medium text-gray-600">Published</p>
+                <p className="text-lg md:text-2xl font-bold text-green-600">{stats.published}</p>
               </div>
-              <Eye className="h-8 w-8 text-green-600" />
+              <Eye className="h-6 w-6 md:h-8 md:w-8 text-green-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 md:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Drafts</p>
-                <p className="text-2xl font-bold text-gray-600">{stats.draft}</p>
+                <p className="text-xs md:text-sm font-medium text-gray-600">Drafts</p>
+                <p className="text-lg md:text-2xl font-bold text-gray-600">{stats.draft}</p>
               </div>
-              <Edit className="h-8 w-8 text-gray-600" />
+              <Edit className="h-6 w-6 md:h-8 md:w-8 text-gray-600" />
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-3 md:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Urgent</p>
-                <p className="text-2xl font-bold text-red-600">{stats.urgent}</p>
+                <p className="text-xs md:text-sm font-medium text-gray-600">Urgent</p>
+                <p className="text-lg md:text-2xl font-bold text-red-600">{stats.urgent}</p>
               </div>
-              <AlertTriangle className="h-8 w-8 text-red-600" />
+              <AlertTriangle className="h-6 w-6 md:h-8 md:w-8 text-red-600" />
             </div>
           </CardContent>
         </Card>
@@ -306,23 +306,23 @@ export default function EventsPage() {
 
       {/* Filters and Search */}
       <Card>
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row gap-4">
+        <CardContent className="p-4 md:p-6">
+          <div className="flex flex-col gap-4">
             {/* Search */}
-            <div className="flex-1 relative">
+            <div className="w-full relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Search events and announcements..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 w-full"
               />
             </div>
 
             {/* Filters */}
-            <div className="flex gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-3">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -334,7 +334,7 @@ export default function EventsPage() {
               </Select>
 
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -348,7 +348,7 @@ export default function EventsPage() {
               </Select>
 
               <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Priority" />
                 </SelectTrigger>
                 <SelectContent>
@@ -364,79 +364,83 @@ export default function EventsPage() {
       </Card>
 
       {/* Events List */}
-      <div className="space-y-4">
+      <div className="space-y-3 md:space-y-4">
         {filteredEvents.map((event) => (
           <Card key={event.id} className="hover:shadow-md transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-4 flex-1">
+            <CardContent className="p-4 md:p-6">
+              <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                <div className="flex items-start gap-3 md:gap-4 flex-1">
                   {/* Priority Icon */}
-                  <div className="mt-1">
+                  <div className="mt-1 flex-shrink-0">
                     {getPriorityIcon(event.priority)}
                   </div>
 
                   {/* Event Details */}
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <h3 className="font-semibold text-gray-900 text-lg">{event.title}</h3>
-                        {getStatusBadge(event.status)}
-                        <Badge variant="outline" className={`${event.categoryColor} border-transparent`}>
-                          {event.category}
-                        </Badge>
+                  <div className="flex-1 space-y-2 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                        <h3 className="font-semibold text-gray-900 text-base md:text-lg">{event.title}</h3>
+                        <div className="flex items-center gap-2">
+                          {getStatusBadge(event.status)}
+                          <Badge variant="outline" className={`${event.categoryColor} border-transparent text-xs`}>
+                            {event.category}
+                          </Badge>
+                        </div>
                       </div>
                     </div>
 
-                    <p className="text-gray-600 text-sm leading-relaxed">{event.excerpt}</p>
+                    <p className="text-gray-600 text-xs md:text-sm leading-relaxed">{event.excerpt}</p>
 
-                    <div className="flex items-center gap-6 text-sm text-gray-500">
+                    <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-4 md:gap-6 text-xs md:text-sm text-gray-500">
                       <div className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        {formatDate(event.date)}
+                        <Calendar className="h-3 w-3 md:h-4 md:w-4" />
+                        <span className="truncate">{formatDate(event.date)}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        {event.time}
+                        <Clock className="h-3 w-3 md:h-4 md:w-4" />
+                        <span className="truncate">{event.time}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <MapPin className="h-4 w-4" />
-                        {event.location}
+                        <MapPin className="h-3 w-3 md:h-4 md:w-4" />
+                        <span className="truncate">{event.location}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Eye className="h-4 w-4" />
-                        {event.views || 0} views
+                        <Eye className="h-3 w-3 md:h-4 md:w-4" />
+                        <span>{event.views || 0} views</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Actions */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuItem onClick={() => handleEditEvent(event.id)}>
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleToggleStatus(event.id)}>
-                      <Eye className="h-4 w-4 mr-2" />
-                      {event.status === "published" ? "Unpublish" : "Publish"}
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                      onClick={() => handleDeleteEvent(event.id)}
-                      className="text-red-600"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <div className="flex justify-end lg:justify-start">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-white">
+                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                      <DropdownMenuItem onClick={() => handleEditEvent(event.id)}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleToggleStatus(event.id)}>
+                        <Eye className="h-4 w-4 mr-2" />
+                        {event.status === "published" ? "Unpublish" : "Publish"}
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
+                        onClick={() => handleDeleteEvent(event.id)}
+                        className="text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
             </CardContent>
           </Card>

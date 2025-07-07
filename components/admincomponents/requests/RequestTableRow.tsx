@@ -17,7 +17,8 @@ import {
   FileText,
   RefreshCw,
   CreditCard,
-  Download
+  Download,
+  Edit
 } from "lucide-react"
 
 // Import types
@@ -68,102 +69,84 @@ export default function RequestTableRow({
   const StatusIcon = statusConfig.icon
 
   return (
-    <TableRow className="hover:bg-gray-50">
-      <TableCell>
+    <TableRow className="hover:bg-gray-50/50">
+      {/* Request Details */}
+      <TableCell className="p-3 md:p-4">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <p className="font-medium text-gray-900">{request.id}</p>
-            {request.urgentRequest && (
-              <Badge variant="destructive" className="text-xs">
-                <AlertTriangle className="h-3 w-3 mr-1" />
-                Urgent
-              </Badge>
-            )}
-          </div>
-          <p className="text-sm text-gray-600">{request.purpose}</p>
-        </div>
-      </TableCell>
-
-      <TableCell>
-        <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src="" />
-            <AvatarFallback className="bg-[#23479A]/10 text-[#23479A]">
-              {request.userFullName.split(' ').map(n => n[0]).join('').toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <p className="font-medium text-gray-900">{request.userFullName}</p>
-            <p className="text-sm text-gray-600">{request.userEmail}</p>
-          </div>
-        </div>
-      </TableCell>
-
-      <TableCell>
-        <div className="space-y-1">
-          <p className="font-medium text-gray-900">{request.documentType}</p>
-          <div className="flex items-center gap-1 text-sm text-gray-600">
-            <FileText className="h-3 w-3" />
-            {request.attachments.length} attachment{request.attachments.length !== 1 ? 's' : ''}
-          </div>
-        </div>
-      </TableCell>
-
-      <TableCell>
-        <Badge className={`${statusConfig.color} border-transparent`}>
-          <StatusIcon className="h-3 w-3 mr-1" />
-          {statusConfig.label}
-        </Badge>
-      </TableCell>
-
-      <TableCell>
-        <div className="space-y-1">
-          <p className="text-sm text-gray-900">{formatDate(request.requestDate)}</p>
-          <p className="text-xs text-gray-500">Updated: {formatDate(request.lastUpdated)}</p>
-        </div>
-      </TableCell>
-
-      <TableCell>
-        <p className="text-sm text-gray-900">{formatDate(request.estimatedCompletion)}</p>
-      </TableCell>
-
-      <TableCell>
-        <div className="space-y-1">
-          <p className="font-medium text-gray-900">{request.fee}</p>
-          {request.paymentReference && (
-            <p className="text-xs text-green-600">Payment submitted</p>
+          <p className="font-medium text-gray-900 text-sm md:text-base">{request.id}</p>
+          <p className="text-xs md:text-sm text-gray-600">{request.purpose}</p>
+          {request.urgentRequest && (
+            <Badge className="bg-red-100 text-red-800 text-xs">
+              <AlertTriangle className="h-3 w-3 mr-1" />
+              Urgent
+            </Badge>
           )}
         </div>
       </TableCell>
 
-      <TableCell>
+      {/* User */}
+      <TableCell className="p-3 md:p-4">
+        <div className="space-y-1">
+          <p className="font-medium text-gray-900 text-sm md:text-base">{request.userFullName}</p>
+          <p className="text-xs md:text-sm text-gray-600">{request.userEmail}</p>
+        </div>
+      </TableCell>
+
+      {/* Document */}
+      <TableCell className="p-3 md:p-4">
+        <div className="space-y-1">
+          <p className="font-medium text-gray-900 text-sm md:text-base">{request.documentType}</p>
+          <p className="text-xs md:text-sm text-gray-600">Fee: {request.fee}</p>
+        </div>
+      </TableCell>
+
+      {/* Status */}
+      <TableCell className="p-3 md:p-4">
+        <Badge className={`${statusConfig.color} text-xs`}>
+          <StatusIcon className="h-3 w-3 mr-1" />
+          <span className="hidden sm:inline">{statusConfig.label}</span>
+          <span className="sm:hidden">{statusConfig.label.split(' ')[0]}</span>
+        </Badge>
+      </TableCell>
+
+      {/* Request Date */}
+      <TableCell className="p-3 md:p-4">
+        <p className="text-xs md:text-sm text-gray-900">{formatDate(request.requestDate)}</p>
+      </TableCell>
+
+      {/* Estimated Completion */}
+      <TableCell className="p-3 md:p-4">
+        <p className="text-xs md:text-sm text-gray-900">{formatDate(request.estimatedCompletion)}</p>
+      </TableCell>
+
+      {/* Fee */}
+      <TableCell className="p-3 md:p-4">
+        <p className="font-medium text-gray-900 text-sm md:text-base">{request.fee}</p>
+      </TableCell>
+
+      {/* Actions */}
+      <TableCell className="p-3 md:p-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
+            <Button variant="outline" size="sm" className="h-8 w-8 p-0">
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="bg-white">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem onClick={() => onViewDetails(request)}>
-              <Eye className="h-4 w-4 mr-2" />
+              <Eye className="mr-2 h-4 w-4" />
               View Details
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onUpdateStatus(request)}>
-              <RefreshCw className="h-4 w-4 mr-2" />
+              <Edit className="mr-2 h-4 w-4" />
               Update Status
             </DropdownMenuItem>
-            {request.paymentProof && (
+            {request.status === "payment_pending" && (
               <DropdownMenuItem onClick={() => onPaymentReview(request)}>
-                <CreditCard className="h-4 w-4 mr-2" />
+                <CreditCard className="mr-2 h-4 w-4" />
                 Review Payment
               </DropdownMenuItem>
             )}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <Download className="h-4 w-4 mr-2" />
-              Download PDF
-            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </TableCell>

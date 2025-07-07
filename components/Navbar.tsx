@@ -3,21 +3,24 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { LogIn, LogOut, Menu, X } from "lucide-react"
+import { LogIn, LogOut, Menu, X, Home, Settings, FileText, Newspaper } from "lucide-react"
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import { useSession, signOut } from 'next-auth/react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 interface MenuItem {
   href: string
   label: string
+  icon: React.ElementType
 }
 
 const menuItems: MenuItem[] = [
-  { href: "/", label: "Home" },
-  { href: "/services", label: "Services" },
-  { href: "/forms", label: "Forms" },
-  { href: "/news", label: "News" },
+  { href: "/", label: "Home", icon: Home },
+  { href: "/services", label: "Services", icon: Settings },
+  { href: "/forms", label: "Forms", icon: FileText },
+  { href: "/news", label: "News", icon: Newspaper },
 ]
 
 const Navbar = () => {
@@ -42,47 +45,72 @@ const Navbar = () => {
               height={40}
               className="object-contain"
             />
-            <span className="text-xl font-semibold" style={{ color: '#23479A' }}>Alma Villa</span>
+            <span className="text-lg md:text-xl font-semibold" style={{ color: '#23479A' }}>Alma Villa</span>
           </Link>
         </div>
 
         {/* Mobile Menu Button */}
-        <div className="flex items-center gap-4 lg:hidden">
-          {session ? (
-            <Button
-              variant="default"
-              onClick={() => signOut()}
-              className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px] hidden sm:flex"
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="lg:hidden h-9 w-9 p-0"
             >
-              <span className="flex items-center gap-2 text-white">
-                Logout
-                <LogOut className="h-4 w-4" />
-              </span>
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle menu</span>
             </Button>
-          ) : (
-            <Button
-              variant="default"
-              asChild
-              className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px] hidden sm:flex"
-            >
-              <Link href="/account/login" className="flex items-center gap-2 text-white">
-                Log In
-                <LogIn className="h-4 w-4" />
-              </Link>
-            </Button>
-          )}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="p-2 text-gray-600"
-            aria-label="Toggle menu"
+          </SheetTrigger>
+          <SheetContent 
+            side="right" 
+            className="w-[280px] p-0 bg-white border-l border-gray-200 shadow-lg"
           >
-            {isMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
-          </button>
-        </div>
+            <SheetHeader className="p-6 border-b border-gray-200 bg-white">
+              <SheetTitle className="text-gray-900 text-left">Menu</SheetTitle>
+            </SheetHeader>
+            <ScrollArea className="h-[calc(100vh-4rem)] bg-white">
+              <div className="p-6 space-y-1 bg-white">
+                {menuItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex items-center px-3 py-3 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-[#23479A] transition-colors duration-200 w-full"
+                  >
+                    <item.icon className="mr-3 h-5 w-5" />
+                    {item.label}
+                  </Link>
+                ))}
+                
+                {/* Mobile Auth Button */}
+                <div className="pt-4 border-t border-gray-200">
+                  {session ? (
+                    <Button
+                      variant="default"
+                      onClick={() => signOut()}
+                      className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px] w-full"
+                    >
+                      <span className="flex items-center gap-2 text-white">
+                        Logout
+                        <LogOut className="h-4 w-4" />
+                      </span>
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="default"
+                      asChild
+                      className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px] w-full"
+                    >
+                      <Link href="/account/login" className="flex items-center gap-2 text-white">
+                        Login
+                        <LogIn className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </ScrollArea>
+          </SheetContent>
+        </Sheet>
 
         {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center space-x-6">
@@ -124,47 +152,42 @@ const Navbar = () => {
       {/* Mobile Navigation Dropdown */}
       {isMenuOpen && (
         <div className="lg:hidden">
-          <div className="flex flex-col space-y-4 px-4 py-6 bg-white border-t">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-50 border-t">
             {menuItems.map((item) => (
               <Link
                 key={item.label}
                 href={item.href}
-                className="text-sm font-medium text-gray-600 hover:text-[#23479A]"
+                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-[#23479A] hover:bg-gray-100 rounded-md transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
                 {item.label}
               </Link>
             ))}
-            {session ? (
-              <Button
-                variant="default"
-                onClick={() => {
-                  signOut();
-                  setIsMenuOpen(false);
-                }}
-                className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px] w-full sm:hidden"
-              >
-                <span className="flex items-center justify-center gap-2 text-white">
-                  Logout
-                  <LogOut className="h-4 w-4" />
-                </span>
-              </Button>
-            ) : (
-              <Button
-                variant="default"
-                asChild
-                className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px] w-full sm:hidden"
-              >
-                <Link
-                  href="/account/login"
-                  className="flex items-center justify-center gap-2 text-white"
-                  onClick={() => setIsMenuOpen(false)}
+            <div className="border-t border-gray-200 pt-4 pb-3">
+              {session ? (
+                <Button
+                  variant="default"
+                  onClick={() => signOut()}
+                  className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px] w-full mx-3"
                 >
-                  Login
-                  <LogIn className="h-4 w-4" />
-                </Link>
-              </Button>
-            )}
+                  <span className="flex items-center gap-2 text-white">
+                    Logout
+                    <LogOut className="h-4 w-4" />
+                  </span>
+                </Button>
+              ) : (
+                <Button
+                  variant="default"
+                  asChild
+                  className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px] w-full mx-3"
+                >
+                  <Link href="/account/login" className="flex items-center gap-2 text-white">
+                    Login
+                    <LogIn className="h-4 w-4" />
+                  </Link>
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       )}
