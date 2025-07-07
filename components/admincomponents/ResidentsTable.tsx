@@ -5,6 +5,7 @@ import { useState, useMemo, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   Select,
@@ -20,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Search, Trash2, Clock, CheckCircle, XCircle, Archive, Loader2, AlertCircle } from "lucide-react"
+import { Search, Trash2, Clock, CheckCircle, XCircle, Archive, Loader2, AlertCircle, AlertTriangle, X } from "lucide-react"
 
 // Import components
 import ResidentsHeader from "./residents/ResidentHeader"
@@ -62,6 +63,24 @@ export default function ResidentsTable() {
   const [isResidentViewModalOpen, setIsResidentViewModalOpen] = useState(false)
   const [isAddResidentModalOpen, setIsAddResidentModalOpen] = useState(false)
   const [isMassImportModalOpen, setIsMassImportModalOpen] = useState(false)
+  
+  // Enhanced Delete Modal State
+  const [deleteModalState, setDeleteModalState] = useState({
+    isOpen: false,
+    resident: null as Resident | null,
+    isDeleting: false,
+    confirmText: "",
+    error: ""
+  })
+
+  // Bulk Delete Modal State
+  const [bulkDeleteModalState, setBulkDeleteModalState] = useState({
+    isOpen: false,
+    residentCount: 0,
+    isDeleting: false,
+    confirmText: "",
+    error: ""
+  })
 
   // Fetch residents data from API
   const { data, error: swrError, isLoading: swrLoading, mutate } = useSWR(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user`, fetcher);
@@ -222,8 +241,22 @@ export default function ResidentsTable() {
   }
 
   const handleDeleteResident = async (resident: Resident) => {
+    setDeleteModalState({
+      isOpen: true,
+      resident,
+      isDeleting: false,
+      confirmText: "",
+      error: ""
+    })
+  }
+
+  const executeDeleteResident = async () => {
+    if (!deleteModalState.resident) return
+
+    setDeleteModalState(prev => ({ ...prev, isDeleting: true, error: "" }))
+
     try {
-      const response = await fetch(`http://localhost:3000/api/user/${resident.id}`, {
+      const response = await fetch(`http://localhost:3000/api/user/${deleteModalState.resident.id}`, {
         method: 'DELETE'
       })
 
@@ -234,14 +267,28 @@ export default function ResidentsTable() {
       // Refresh data from API
       await fetchResidents()
 
-      // Close the view modal after deletion
+      // Close the view modal after deletion if open
       setIsResidentViewModalOpen(false)
       setSelectedResident(null)
 
-      alert(`${resident.firstName} ${resident.lastName} has been permanently deleted`)
+      // Close delete modal and reset state
+      setDeleteModalState({
+        isOpen: false,
+        resident: null,
+        isDeleting: false,
+        confirmText: "",
+        error: ""
+      })
+
+      // Show success message (you can replace this with a proper toast notification)
+      alert(`${deleteModalState.resident.firstName} ${deleteModalState.resident.lastName} has been permanently deleted`)
     } catch (error) {
       console.error('Error deleting resident:', error)
-      alert('Failed to delete resident')
+      setDeleteModalState(prev => ({ 
+        ...prev, 
+        isDeleting: false, 
+        error: 'Failed to delete resident. Please try again.' 
+      }))
     }
   }
 
@@ -262,20 +309,44 @@ export default function ResidentsTable() {
   }
 
   const handleBulkDelete = async () => {
-    if (confirm(`Delete ${selectedResidents.length} residents?`)) {
-      try {
-        await Promise.all(selectedResidents.map(id =>
-          fetch(`http://localhost:3000/api/user/${id}`, { method: 'DELETE' })
-        ))
+    setBulkDeleteModalState({
+      isOpen: true,
+      residentCount: selectedResidents.length,
+      isDeleting: false,
+      confirmText: "",
+      error: ""
+    })
+  }
 
-        // Refresh data from API
-        await fetchResidents()
-        setSelectedResidents([])
-        alert(`${selectedResidents.length} residents deleted`)
-      } catch (error) {
-        console.error('Error deleting residents:', error)
-        alert('Failed to delete residents')
-      }
+  const executeBulkDelete = async () => {
+    setBulkDeleteModalState(prev => ({ ...prev, isDeleting: true, error: "" }))
+
+    try {
+      await Promise.all(selectedResidents.map(id =>
+        fetch(`http://localhost:3000/api/user/${id}`, { method: 'DELETE' })
+      ))
+
+      // Refresh data from API
+      await fetchResidents()
+      setSelectedResidents([])
+      
+      // Close modal and reset state
+      setBulkDeleteModalState({
+        isOpen: false,
+        residentCount: 0,
+        isDeleting: false,
+        confirmText: "",
+        error: ""
+      })
+
+      alert(`${bulkDeleteModalState.residentCount} residents deleted successfully`)
+    } catch (error) {
+      console.error('Error deleting residents:', error)
+      setBulkDeleteModalState(prev => ({ 
+        ...prev, 
+        isDeleting: false, 
+        error: 'Failed to delete residents. Please try again.' 
+      }))
     }
   }
 
@@ -980,6 +1051,236 @@ export default function ResidentsTable() {
         onClose={() => setIsMassImportModalOpen(false)}
         onImport={handleMassImport}
       />
+
+      {/* Enhanced Delete Confirmation Modal */}
+      {deleteModalState.isOpen && deleteModalState.resident && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div className="flex items-center gap-3">
+                <div className="bg-red-100 p-2 rounded-lg">
+                  <AlertTriangle className="h-5 w-5 text-red-600" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">Delete Resident Account</h2>
+                  <p className="text-sm text-gray-500">This action cannot be undone</p>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setDeleteModalState({ isOpen: false, resident: null, isDeleting: false, confirmText: "", error: "" })}
+                className="h-8 w-8 p-0 hover:bg-gray-100"
+                disabled={deleteModalState.isDeleting}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-6">
+              {/* Warning */}
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div className="flex">
+                  <AlertTriangle className="h-5 w-5 text-red-400 mt-0.5" />
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-red-800">
+                      Permanent Deletion Warning
+                    </h3>
+                    <div className="mt-2 text-sm text-red-700">
+                      <p>You are about to permanently delete:</p>
+                      <p className="font-semibold mt-1">
+                        {deleteModalState.resident.firstName} {deleteModalState.resident.lastName}
+                      </p>
+                      <p className="mt-2">This will:</p>
+                      <ul className="list-disc list-inside mt-1 space-y-1">
+                        <li>Remove all personal information</li>
+                        <li>Delete all document submissions</li>
+                        <li>Remove access to all services</li>
+                        <li>Cannot be recovered or undone</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Confirmation Input */}
+              <div className="space-y-3">
+                <Label className="block text-sm font-medium text-gray-700">
+                  To confirm deletion, type <span className="font-mono bg-gray-100 px-1 rounded">DELETE</span> below:
+                </Label>
+                <Input
+                  value={deleteModalState.confirmText}
+                  onChange={(e) => setDeleteModalState(prev => ({ ...prev, confirmText: e.target.value }))}
+                  placeholder="Type DELETE to confirm"
+                  className={`font-mono ${deleteModalState.error ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : 'focus:border-red-500 focus:ring-red-500/20'}`}
+                  disabled={deleteModalState.isDeleting}
+                />
+                {deleteModalState.confirmText && deleteModalState.confirmText !== "DELETE" && (
+                  <p className="text-sm text-red-600 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    Please type "DELETE" exactly as shown
+                  </p>
+                )}
+              </div>
+
+              {/* Error Message */}
+              {deleteModalState.error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                  <p className="text-sm text-red-600 flex items-center gap-1">
+                    <AlertCircle className="h-4 w-4" />
+                    {deleteModalState.error}
+                  </p>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                <Button
+                  variant="outline"
+                  onClick={() => setDeleteModalState({ isOpen: false, resident: null, isDeleting: false, confirmText: "", error: "" })}
+                  disabled={deleteModalState.isDeleting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={executeDeleteResident}
+                  disabled={deleteModalState.confirmText !== "DELETE" || deleteModalState.isDeleting}
+                  className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-50"
+                >
+                  {deleteModalState.isDeleting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Permanently
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+                     </div>
+         </div>
+       )}
+
+      {/* Enhanced Bulk Delete Confirmation Modal */}
+      {bulkDeleteModalState.isOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div className="flex items-center gap-3">
+                <div className="bg-red-100 p-2 rounded-lg">
+                  <AlertTriangle className="h-5 w-5 text-red-600" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">Bulk Delete Residents</h2>
+                  <p className="text-sm text-gray-500">This action cannot be undone</p>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setBulkDeleteModalState({ isOpen: false, residentCount: 0, isDeleting: false, confirmText: "", error: "" })}
+                className="h-8 w-8 p-0 hover:bg-gray-100"
+                disabled={bulkDeleteModalState.isDeleting}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-6">
+              {/* Warning */}
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div className="flex">
+                  <AlertTriangle className="h-5 w-5 text-red-400 mt-0.5" />
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-red-800">
+                      Bulk Deletion Warning
+                    </h3>
+                    <div className="mt-2 text-sm text-red-700">
+                      <p>You are about to permanently delete:</p>
+                      <p className="font-semibold mt-1 text-lg">
+                        {bulkDeleteModalState.residentCount} resident{bulkDeleteModalState.residentCount > 1 ? 's' : ''}
+                      </p>
+                      <p className="mt-2">This will permanently remove:</p>
+                      <ul className="list-disc list-inside mt-1 space-y-1">
+                        <li>All personal information for {bulkDeleteModalState.residentCount} residents</li>
+                        <li>All document submissions</li>
+                        <li>All service access records</li>
+                        <li>This action cannot be recovered or undone</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Confirmation Input */}
+              <div className="space-y-3">
+                <Label className="block text-sm font-medium text-gray-700">
+                  To confirm bulk deletion, type <span className="font-mono bg-gray-100 px-1 rounded">DELETE ALL</span> below:
+                </Label>
+                <Input
+                  value={bulkDeleteModalState.confirmText}
+                  onChange={(e) => setBulkDeleteModalState(prev => ({ ...prev, confirmText: e.target.value }))}
+                  placeholder="Type DELETE ALL to confirm"
+                  className={`font-mono ${bulkDeleteModalState.error ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : 'focus:border-red-500 focus:ring-red-500/20'}`}
+                  disabled={bulkDeleteModalState.isDeleting}
+                />
+                {bulkDeleteModalState.confirmText && bulkDeleteModalState.confirmText !== "DELETE ALL" && (
+                  <p className="text-sm text-red-600 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    Please type "DELETE ALL" exactly as shown
+                  </p>
+                )}
+              </div>
+
+              {/* Error Message */}
+              {bulkDeleteModalState.error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                  <p className="text-sm text-red-600 flex items-center gap-1">
+                    <AlertCircle className="h-4 w-4" />
+                    {bulkDeleteModalState.error}
+                  </p>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                <Button
+                  variant="outline"
+                  onClick={() => setBulkDeleteModalState({ isOpen: false, residentCount: 0, isDeleting: false, confirmText: "", error: "" })}
+                  disabled={bulkDeleteModalState.isDeleting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={executeBulkDelete}
+                  disabled={bulkDeleteModalState.confirmText !== "DELETE ALL" || bulkDeleteModalState.isDeleting}
+                  className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-50"
+                >
+                  {bulkDeleteModalState.isDeleting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Deleting {bulkDeleteModalState.residentCount} residents...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete {bulkDeleteModalState.residentCount} Residents
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

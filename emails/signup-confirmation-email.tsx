@@ -32,7 +32,7 @@ export const ImprovedVerificationEmail = ({
                     <Section style={logoSection}>
                         <div style={logoContainer}>
                             <Img
-                                src="https://raw.githubusercontent.com/yourusername/alma-villa/main/public/assets/img/Logo.png"
+                                src="https://i.ibb.co/cKwSMjNP/Logo.png"
                                 width="60"
                                 height="60"
                                 alt="Alma Villa Logo"
