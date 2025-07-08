@@ -3,8 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { LogIn, LogOut, Menu, X, Home, Settings, FileText, Newspaper } from "lucide-react"
-import { useState, useEffect } from "react"
+import { LogIn, LogOut, Menu, Home, Settings, FileText, Newspaper } from "lucide-react"
 import { usePathname } from "next/navigation"
 import { useSession, signOut } from 'next-auth/react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
@@ -24,7 +23,6 @@ const menuItems: MenuItem[] = [
 ]
 
 const Navbar = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const pathname = usePathname()
   const isDashboard = pathname?.startsWith("/dashboard")
   const { data: session } = useSession();
@@ -148,49 +146,6 @@ const Navbar = () => {
           )}
         </div>
       </div>
-
-      {/* Mobile Navigation Dropdown */}
-      {isMenuOpen && (
-        <div className="lg:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-50 border-t">
-            {menuItems.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-[#23479A] hover:bg-gray-100 rounded-md transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
-            <div className="border-t border-gray-200 pt-4 pb-3">
-              {session ? (
-                <Button
-                  variant="default"
-                  onClick={() => signOut()}
-                  className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px] w-full mx-3"
-                >
-                  <span className="flex items-center gap-2 text-white">
-                    Logout
-                    <LogOut className="h-4 w-4" />
-                  </span>
-                </Button>
-              ) : (
-                <Button
-                  variant="default"
-                  asChild
-                  className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px] w-full mx-3"
-                >
-                  <Link href="/account/login" className="flex items-center gap-2 text-white">
-                    Login
-                    <LogIn className="h-4 w-4" />
-                  </Link>
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </nav>
   )
 }
