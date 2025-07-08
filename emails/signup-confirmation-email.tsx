@@ -125,14 +125,17 @@ const logoContainer = {
     width: '80px',
     height: '80px',
     margin: '0 auto',
-    display: 'flex',
+    display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+    position: 'relative' as const,
 };
 
 const logo = {
     borderRadius: '50%',
+    display: 'block',
+    margin: '0 auto',
 };
 
 const card = {
@@ -153,13 +156,22 @@ const pendingIcon = {
     width: '64px',
     height: '64px',
     margin: '0 auto',
-    display: 'flex',
+    display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative' as const,
 };
 
 const clockIcon = {
-    fontSize: '32px',
+    fontSize: '28px',
+    lineHeight: '1',
+    textAlign: 'center' as const,
+    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    height: '100%',
 };
 
 const title = {
