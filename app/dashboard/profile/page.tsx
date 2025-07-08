@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -31,8 +32,18 @@ import {
 } from "lucide-react"
 
 export default function UserProfile() {
+  const searchParams = useSearchParams()
   const [isEditing, setIsEditing] = useState(false)
   const [activeTab, setActiveTab] = useState("personal")
+  
+  // Set active tab based on URL parameter
+  useEffect(() => {
+    const tabParam = searchParams.get("tab")
+    if (tabParam && ["personal", "contact", "security", "settings"].includes(tabParam)) {
+      setActiveTab(tabParam)
+    }
+  }, [searchParams])
+
   const [showChangePassword, setShowChangePassword] = useState(false)
   const [showPasswords, setShowPasswords] = useState({
     current: false,
