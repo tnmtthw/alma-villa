@@ -56,27 +56,96 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
             className="mb-8"
           >
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-              Alma Villa
+              Alma Villa Verifast
             </h1>
             <p className="text-blue-100 text-sm md:text-base">
               Barangay Management System
             </p>
           </motion.div>
 
-          {/* Loading Animation */}
+          {/* Flying Documents Animation */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.6 }}
             className="flex flex-col items-center"
           >
-            {/* Spinner */}
-            <div className="relative mb-4">
+            {/* Document Container */}
+            <div className="relative w-32 h-20 mb-6 overflow-hidden">
+              {/* Document 1 */}
               <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full"
-              />
+                animate={{
+                  x: [-100, 150],
+                  y: [0, -10, 0],
+                  rotate: [0, 5, 0]
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: 0
+                }}
+                className="absolute top-2 left-0"
+              >
+                <div className="w-8 h-10 bg-white rounded-sm shadow-lg flex flex-col">
+                  <div className="h-2 bg-blue-200 rounded-t-sm"></div>
+                  <div className="flex-1 p-1 space-y-0.5">
+                    <div className="h-0.5 bg-gray-300 rounded"></div>
+                    <div className="h-0.5 bg-gray-300 rounded w-3/4"></div>
+                    <div className="h-0.5 bg-gray-300 rounded w-1/2"></div>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Document 2 */}
+              <motion.div
+                animate={{
+                  x: [-120, 130],
+                  y: [5, -5, 5],
+                  rotate: [0, -3, 0]
+                }}
+                transition={{
+                  duration: 2.2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: 0.5
+                }}
+                className="absolute top-6 left-0"
+              >
+                <div className="w-8 h-10 bg-white rounded-sm shadow-lg flex flex-col">
+                  <div className="h-2 bg-green-200 rounded-t-sm"></div>
+                  <div className="flex-1 p-1 space-y-0.5">
+                    <div className="h-0.5 bg-gray-300 rounded"></div>
+                    <div className="h-0.5 bg-gray-300 rounded w-2/3"></div>
+                    <div className="h-0.5 bg-gray-300 rounded w-3/4"></div>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Document 3 */}
+              <motion.div
+                animate={{
+                  x: [-80, 170],
+                  y: [-5, 10, -5],
+                  rotate: [0, 2, 0]
+                }}
+                transition={{
+                  duration: 1.8,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: 1
+                }}
+                className="absolute top-0 left-0"
+              >
+                <div className="w-8 h-10 bg-white rounded-sm shadow-lg flex flex-col">
+                  <div className="h-2 bg-purple-200 rounded-t-sm"></div>
+                  <div className="flex-1 p-1 space-y-0.5">
+                    <div className="h-0.5 bg-gray-300 rounded"></div>
+                    <div className="h-0.5 bg-gray-300 rounded w-4/5"></div>
+                    <div className="h-0.5 bg-gray-300 rounded w-1/2"></div>
+                  </div>
+                </div>
+              </motion.div>
             </div>
 
             {/* Loading Text */}
@@ -86,7 +155,7 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
               transition={{ duration: 1.5, repeat: Infinity }}
               className="text-white/80 text-sm"
             >
-              Loading...
+              Processing documents...
             </motion.p>
           </motion.div>
 
@@ -160,27 +229,96 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
           className="mb-8"
         >
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-            Alma Villa
+            Alma Villa Verifast
           </h1>
           <p className="text-blue-100 text-sm md:text-base">
             Barangay Management System
           </p>
         </motion.div>
 
-        {/* Loading Animation */}
+        {/* Flying Documents Animation */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.6 }}
           className="flex flex-col items-center"
         >
-          {/* Spinner */}
-          <div className="relative mb-4">
+          {/* Document Container */}
+          <div className="relative w-32 h-20 mb-6 overflow-hidden">
+            {/* Document 1 */}
             <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full"
-            />
+              animate={{
+                x: [-100, 150],
+                y: [0, -10, 0],
+                rotate: [0, 5, 0]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0
+              }}
+              className="absolute top-2 left-0"
+            >
+              <div className="w-8 h-10 bg-white rounded-sm shadow-lg flex flex-col">
+                <div className="h-2 bg-blue-200 rounded-t-sm"></div>
+                <div className="flex-1 p-1 space-y-0.5">
+                  <div className="h-0.5 bg-gray-300 rounded"></div>
+                  <div className="h-0.5 bg-gray-300 rounded w-3/4"></div>
+                  <div className="h-0.5 bg-gray-300 rounded w-1/2"></div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Document 2 */}
+            <motion.div
+              animate={{
+                x: [-120, 130],
+                y: [5, -5, 5],
+                rotate: [0, -3, 0]
+              }}
+              transition={{
+                duration: 2.2,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0.5
+              }}
+              className="absolute top-6 left-0"
+            >
+              <div className="w-8 h-10 bg-white rounded-sm shadow-lg flex flex-col">
+                <div className="h-2 bg-green-200 rounded-t-sm"></div>
+                <div className="flex-1 p-1 space-y-0.5">
+                  <div className="h-0.5 bg-gray-300 rounded"></div>
+                  <div className="h-0.5 bg-gray-300 rounded w-2/3"></div>
+                  <div className="h-0.5 bg-gray-300 rounded w-3/4"></div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Document 3 */}
+            <motion.div
+              animate={{
+                x: [-80, 170],
+                y: [-5, 10, -5],
+                rotate: [0, 2, 0]
+              }}
+              transition={{
+                duration: 1.8,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1
+              }}
+              className="absolute top-0 left-0"
+            >
+              <div className="w-8 h-10 bg-white rounded-sm shadow-lg flex flex-col">
+                <div className="h-2 bg-purple-200 rounded-t-sm"></div>
+                <div className="flex-1 p-1 space-y-0.5">
+                  <div className="h-0.5 bg-gray-300 rounded"></div>
+                  <div className="h-0.5 bg-gray-300 rounded w-4/5"></div>
+                  <div className="h-0.5 bg-gray-300 rounded w-1/2"></div>
+                </div>
+              </div>
+            </motion.div>
           </div>
 
           {/* Loading Text */}
@@ -190,7 +328,7 @@ export default function SplashScreen({ onFinish }: SplashScreenProps) {
             transition={{ duration: 1.5, repeat: Infinity }}
             className="text-white/80 text-sm"
           >
-            Loading...
+            Processing documents...
           </motion.p>
         </motion.div>
 

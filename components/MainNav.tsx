@@ -4,7 +4,8 @@ import Link from "next/link"
 import Image from "next/image"
 import { signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,7 +33,7 @@ import {
   User2,
   HelpCircle,
   Moon,
-  ChevronDown
+  ChevronDown,
 } from "lucide-react"
 import { useState, useEffect } from "react"
 
@@ -74,10 +75,17 @@ export function MainNav() {
   const userName = "Juan Dela Cruz"
   const userEmail = "juan.delacruz@email.com"
   const [mounted, setMounted] = useState(false)
+  const [isDarkMode, setIsDarkMode] = useState(false)
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode)
+    // Here you would implement actual dark mode functionality
+    // document.documentElement.classList.toggle('dark')
+  }
 
   return (
     <nav className="w-full border-b bg-white sticky top-0 z-50">
@@ -148,47 +156,101 @@ export function MainNav() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button 
-                  variant="outline" 
-                  className="h-9 rounded-full px-2 md:px-3 border-0 hover:bg-gray-50 transition-colors duration-200"
+                  variant="ghost" 
+                  className="h-10 rounded-xl px-3 hover:bg-gray-50 transition-colors duration-200"
                 >
-                  <User2 className="h-5 w-5 mr-1 md:mr-2 text-gray-600" />
-                  <span className="text-sm font-medium text-gray-700 hidden sm:block mr-1">
-                    {userName.split(' ')[0]}
-                  </span>
-                  <ChevronDown className="h-3 w-3 text-gray-500" />
+                  <div className="flex items-center space-x-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src="/placeholder-avatar.jpg" alt={userName} />
+                      <AvatarFallback className="bg-[#23479A] text-white text-xs font-medium">
+                        {userName.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="hidden sm:block">
+                      <span className="text-sm font-medium text-gray-700">
+                        {userName.split(' ')[0]}
+                      </span>
+                    </div>
+                    <ChevronDown className="h-4 w-4 text-gray-500" />
+                  </div>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 
-                className="w-56 bg-white" 
+                className="w-64 bg-white border border-gray-200 shadow-lg rounded-xl p-0 mt-2" 
                 align="end" 
                 forceMount
               >
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{userName}</p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {userEmail}
-                    </p>
+                {/* User Info Section */}
+                <div className="px-4 py-3 border-b border-gray-100">
+                  <div className="flex items-center space-x-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src="/placeholder-avatar.jpg" alt={userName} />
+                      <AvatarFallback className="bg-[#23479A] text-white text-sm font-medium">
+                        {userName.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">{userName}</p>
+                      <p className="text-xs text-gray-500 truncate">{userEmail}</p>
+                    </div>
+                    <Badge variant="secondary" className="bg-[#23479A] text-white text-xs px-2 py-1 rounded-full">
+                      PRO
+                    </Badge>
                   </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/dashboard/profile" className="flex items-center w-full">
-                    <User2 className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/dashboard/profile?tab=settings" className="flex items-center w-full">
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => signOut()}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
+                </div>
+
+                {/* Menu Items */}
+                <div className="py-2">
+                  <DropdownMenuItem asChild className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors">
+                    <Link href="/dashboard/profile" className="flex items-center w-full">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 mr-3">
+                        <User2 className="h-4 w-4 text-gray-600" />
+                      </div>
+                      <span className="text-sm font-medium text-gray-700">Profile Settings</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuItem asChild className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors">
+                    <Link href="/help" className="flex items-center w-full">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 mr-3">
+                        <HelpCircle className="h-4 w-4 text-gray-600" />
+                      </div>
+                      <span className="text-sm font-medium text-gray-700">Help Center</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuItem onClick={toggleDarkMode} className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors">
+                    <div className="flex items-center w-full">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 mr-3">
+                        <Moon className="h-4 w-4 text-gray-600" />
+                      </div>
+                      <span className="text-sm font-medium text-gray-700">
+                        {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+                      </span>
+                    </div>
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuItem asChild className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors">
+                    <Link href="/upgrade" className="flex items-center w-full">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 mr-3">
+                        <Settings className="h-4 w-4 text-gray-600" />
+                      </div>
+                      <span className="text-sm font-medium text-gray-700">Upgrade Plan</span>
+                    </Link>
+                  </DropdownMenuItem>
+                </div>
+
+                {/* Sign Out Section */}
+                <div className="border-t border-gray-100 py-2">
+                  <DropdownMenuItem onClick={() => signOut()} className="px-4 py-3 hover:bg-red-50 cursor-pointer transition-colors text-red-600 hover:text-red-700">
+                    <div className="flex items-center w-full">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-red-100 mr-3">
+                        <LogOut className="h-4 w-4 text-red-600" />
+                      </div>
+                      <span className="text-sm font-medium">Sign Out</span>
+                    </div>
+                  </DropdownMenuItem>
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
