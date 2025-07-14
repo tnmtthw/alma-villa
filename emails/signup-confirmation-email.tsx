@@ -30,24 +30,32 @@ export const ImprovedVerificationEmail = ({
                 <Container style={container}>
                     {/* Logo at top */}
                     <Section style={logoSection}>
-                        <div style={logoContainer}>
-                            <Img
-                                src="https://i.ibb.co/cKwSMjNP/Logo.png"
-                                width="60"
-                                height="60"
-                                alt="Alma Villa Logo"
-                                style={logo}
-                            />
-                        </div>
+                        <table style={logoTable}>
+                            <tr>
+                                <td style={logoContainer}>
+                                    <Img
+                                        src="https://i.ibb.co/cKwSMjNP/Logo.png"
+                                        width="60"
+                                        height="60"
+                                        alt="Alma Villa Logo"
+                                        style={logo}
+                                    />
+                                </td>
+                            </tr>
+                        </table>
                     </Section>
 
                     {/* Main Card */}
                     <Section style={card}>
                         {/* Pending Icon */}
                         <Section style={iconSection}>
-                            <div style={pendingIcon}>
-                                <div style={clockIcon}>⏳</div>
-                            </div>
+                            <table style={iconTable}>
+                                <tr>
+                                    <td style={pendingIcon}>
+                                        <span style={clockIcon}>⏳</span>
+                                    </td>
+                                </tr>
+                            </table>
                         </Section>
 
                         {/* Main Content */}
@@ -119,23 +127,29 @@ const logoSection = {
     marginBottom: '20px',
 };
 
+const logoTable = {
+    width: '80px',
+    height: '80px',
+    margin: '0 auto',
+    borderCollapse: 'collapse' as const,
+};
+
 const logoContainer = {
     backgroundColor: '#ffffff',
     borderRadius: '50%',
     width: '80px',
     height: '80px',
-    margin: '0 auto',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    textAlign: 'center' as const,
+    verticalAlign: 'middle' as const,
     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-    position: 'relative' as const,
+    border: 'none',
+    padding: '0',
 };
 
 const logo = {
     borderRadius: '50%',
-    display: 'block',
-    margin: '0 auto',
+    display: 'inline-block',
+    verticalAlign: 'middle',
 };
 
 const card = {
@@ -150,28 +164,31 @@ const iconSection = {
     marginBottom: '24px',
 };
 
+const iconTable = {
+    width: '64px',
+    height: '64px',
+    margin: '0 auto',
+    borderCollapse: 'collapse' as const,
+};
+
 const pendingIcon = {
     backgroundColor: '#FEF3C7',
     borderRadius: '50%',
     width: '64px',
     height: '64px',
-    margin: '0 auto',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative' as const,
+    textAlign: 'center' as const,
+    verticalAlign: 'middle' as const,
+    border: 'none',
+    padding: '0',
 };
 
 const clockIcon = {
-    fontSize: '28px',
-    lineHeight: '1',
+    fontSize: '24px',
+    lineHeight: '64px',
     textAlign: 'center' as const,
-    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-    height: '100%',
+    fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif',
+    display: 'inline-block',
+    verticalAlign: 'middle',
 };
 
 const title = {
