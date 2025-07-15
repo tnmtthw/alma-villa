@@ -19,7 +19,21 @@ export const { handlers, signIn, signOut, auth, update } = NextAuth({
           }),
         });
       
-        if (!res.ok) return null;
+        if (!res.ok) {
+          const errorData = await res.json();
+          
+          // Handle account lockout
+          if (res.status === 423) {
+            throw new Error(`LOCKED:${errorData.timeLeft}:${errorData.error}`);
+          }
+          
+          // Handle failed attempts
+          if (res.status === 401 && errorData.attemptsLeft !== undefined) {
+            throw new Error(`ATTEMPTS:${errorData.attemptsLeft}:${errorData.error}`);
+          }
+          
+          return null;
+        }
       
         const user = await res.json();
       

@@ -51,5 +51,10 @@ model User {
   password          String
   role              String       @default("Unverified")
 
+  // Login attempt tracking
+  loginAttempts     Int          @default(0)
+  lastFailedLogin   DateTime?
+  lockedUntil       DateTime?
+
   createdAt         DateTime     @default(now())
 }
