@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useState, useEffect } from "react"
-import { Eye, EyeOff, User, Lock, Clock } from "lucide-react"
+import { Eye, EyeOff, User, Lock, Clock, Shield, AlertTriangle } from "lucide-react"
 import Image from "next/image"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -19,6 +19,7 @@ export default function LoginPage() {
   const [isLocked, setIsLocked] = useState(false)
   const [cooldownTime, setCooldownTime] = useState(0)
   const [attemptsLeft, setAttemptsLeft] = useState(3)
+  const [isCheckingStatus, setIsCheckingStatus] = useState(false)
   const router = useRouter()
 
   // Reset state when email changes significantly
@@ -29,78 +30,82 @@ export default function LoginPage() {
     setAttemptsLeft(3)
   }
 
-  // Check lockout status on component mount and when email changes
-  useEffect(() => {
-    const checkLockoutStatus = async () => {
-      if (!email || email.length < 3) return // Only check for valid email inputs
-      
-      try {
-        const response = await fetch("/api/auth/check-lockout", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        })
+  // Real-time lockout status checker
+  const checkLockoutStatus = async (userEmail = email) => {
+    if (!userEmail || userEmail.length < 3) return
+    
+    setIsCheckingStatus(true)
+    try {
+      const response = await fetch("/api/auth/check-lockout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: userEmail }),
+      })
 
-        const result = await response.json()
+      const result = await response.json()
 
-        if (response.status === 423) {
-          // User is still locked
-          setIsLocked(true)
-          setCooldownTime(result.timeLeft || 0)
-          setErrorMessage(result.error)
-        } else if (response.status === 200) {
-          // User is not locked, but may have some failed attempts
-          setIsLocked(false)
-          setAttemptsLeft(result.attemptsLeft)
-          // Don't clear error message here, let it stay if there was a previous error
+      if (response.status === 423 || result.isLocked) {
+        // User is locked
+        setIsLocked(true)
+        setCooldownTime(result.timeLeft || 0)
+        setAttemptsLeft(0)
+        setErrorMessage(result.error || "Account temporarily locked")
+      } else if (response.ok) {
+        // User is not locked
+        setIsLocked(false)
+        setCooldownTime(0)
+        setAttemptsLeft(result.attemptsLeft || 3)
+        if (result.loginAttempts > 0) {
+          setErrorMessage(`${result.loginAttempts} previous failed attempts. ${result.attemptsLeft} attempts remaining.`)
         }
-      } catch (error) {
-        // Silent fail - don't show error for status check
       }
+    } catch (error) {
+      console.error("Error checking lockout status:", error)
+    } finally {
+      setIsCheckingStatus(false)
     }
+  }
 
-    // Reset state when email is cleared or too short
-    if (!email || email.length < 3) {
-      resetLoginState()
-      return
-    }
-
-    // Check status when component mounts or email changes (with debounce)
+  // Check lockout status when email changes
+  useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (email && email.includes('@')) {
-        checkLockoutStatus()
+        checkLockoutStatus(email)
       }
     }, 500) // Debounce for 500ms
 
     return () => clearTimeout(timeoutId)
   }, [email])
 
-  // Countdown timer effect
+  // Countdown timer for lockout
   useEffect(() => {
-    if (cooldownTime > 0) {
-      const timer = setInterval(() => {
-        setCooldownTime((prev) => {
+    let timer: NodeJS.Timeout
+    if (isLocked && cooldownTime > 0) {
+      timer = setInterval(() => {
+        setCooldownTime(prev => {
           if (prev <= 1) {
             setIsLocked(false)
-            setErrorMessage("")
             setAttemptsLeft(3)
+            setErrorMessage("")
+            // Recheck status after lockout expires
+            setTimeout(() => checkLockoutStatus(), 100)
             return 0
           }
           return prev - 1
         })
       }, 1000)
-
-      return () => clearInterval(timer)
     }
-  }, [cooldownTime])
+    return () => clearInterval(timer)
+  }, [isLocked, cooldownTime])
 
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault()
     setIsLoading(true)
     setErrorMessage("")
 
-    // Check if account is locked
+    // Check if account is locked before attempting
     if (isLocked && cooldownTime > 0) {
+      setErrorMessage(`Account is locked. Try again in ${cooldownTime} seconds.`)
       setIsLoading(false)
       return
     }
@@ -119,25 +124,49 @@ export default function LoginPage() {
           const [, timeLeft, message] = response.error.split(":", 3)
           setIsLocked(true)
           setCooldownTime(parseInt(timeLeft) || 60)
-          setErrorMessage(message)
+          setAttemptsLeft(0)
+          setErrorMessage(message || "Account temporarily locked due to too many failed attempts")
+          
+          // Visual feedback for immediate lockout
+          setTimeout(() => {
+            setErrorMessage(`🔒 Account locked for ${timeLeft} seconds due to too many failed attempts`)
+          }, 100)
+          
         } else if (response.error.startsWith("ATTEMPTS:")) {
           const [, attemptsLeft, message] = response.error.split(":", 3)
-          setAttemptsLeft(parseInt(attemptsLeft))
-          setErrorMessage(`${message}. ${attemptsLeft} attempts remaining.`)
-        } else if (response.error === "Configuration") {
+          const remainingAttempts = parseInt(attemptsLeft) || 0
+          setAttemptsLeft(remainingAttempts)
+          setIsLocked(false)
+          
+          if (remainingAttempts === 0) {
+            setErrorMessage("Too many failed attempts. Account will be locked.")
+            // Recheck status immediately for potential lockout
+            setTimeout(() => checkLockoutStatus(), 200)
+          } else {
+            setErrorMessage(`${message}. ${remainingAttempts} attempt${remainingAttempts === 1 ? '' : 's'} remaining.`)
+          }
+          
+        } else if (response.error === "Unverified") {
           setErrorMessage("Your account is not verified. Please check your email to verify your account.")
         } else if (response.error === "CredentialsSignin") {
           setErrorMessage("Invalid email or password. Please try again.")
         } else {
-          setErrorMessage("Something went wrong. Please try again.")
+          setErrorMessage(response.error || "Something went wrong. Please try again.")
         }
+        
+        // After any failed attempt, recheck status for real-time updates
+        setTimeout(() => checkLockoutStatus(), 300)
+        
       } else if (response?.ok) {
         // Reset all states on successful login
         setAttemptsLeft(3)
         setIsLocked(false)
         setCooldownTime(0)
+        setErrorMessage("")
+        
+        // Small delay for better UX
         setTimeout(() => {
-          router.replace("/admin")
+          router.replace("/dashboard") // Changed from /admin to /dashboard for regular users
         }, 500)
       } else {
         setErrorMessage("Something went wrong. Please try again.")
@@ -162,56 +191,75 @@ export default function LoginPage() {
             backgroundSize: 'contain',
             backgroundPosition: 'bottom',
             backgroundRepeat: 'repeat-x',
-            opacity: '0.15'
+            opacity: '0.1'
           }}
         />
       </div>
 
-      {/* Login Container */}
-      <div className="relative min-h-screen flex items-center justify-center p-4">
-        <div className="bg-white rounded-[2px] shadow-xl w-full max-w-md p-8">
-          {/* Logo */}
-          <div className="flex justify-center -mt-20 mb-6">
-            <div className="bg-white rounded-full p-3 shadow-lg">
+      {/* Login Content */}
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
+        <div className="w-full max-w-md bg-white rounded-lg shadow-xl p-8">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="flex justify-center mb-4">
               <Image
                 src="/assets/img/Logo.png"
                 alt="Alma Villa Logo"
-                width={80}
-                height={80}
+                width={60}
+                height={60}
                 className="object-contain"
               />
             </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back</h1>
+            <p className="text-gray-600">Sign in to your Alma Villa account</p>
           </div>
 
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-[#23479A] mb-2">
-             Alma Villa Log in
-            </h1>
-            <p className="text-gray-600 text-sm">
-              Welcome back! Please enter your details to continue.
-            </p>
-          </div>
+          {/* Real-time Status Indicator */}
+          {isCheckingStatus && (
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-[2px] text-blue-600 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                <span>Checking account status...</span>
+              </div>
+            </div>
+          )}
 
-          {/* Error Message */}
+          {/* Error Messages */}
           {errorMessage && (
             <div className={`mb-4 p-3 rounded-[2px] text-sm ${
-              isLocked 
+              isLocked
+                ? "bg-red-50 border border-red-200 text-red-600"
+                : attemptsLeft <= 1 && attemptsLeft > 0
                 ? "bg-orange-50 border border-orange-200 text-orange-600" 
                 : "bg-red-50 border border-red-200 text-red-600"
             }`}>
-              {errorMessage}
+              <div className="flex items-center gap-2">
+                {isLocked ? (
+                  <Lock className="h-4 w-4" />
+                ) : attemptsLeft <= 1 ? (
+                  <AlertTriangle className="h-4 w-4" />
+                ) : (
+                  <Shield className="h-4 w-4" />
+                )}
+                <span>{errorMessage}</span>
+              </div>
             </div>
           )}
 
           {/* Cooldown Timer */}
           {isLocked && cooldownTime > 0 && (
-            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-[2px] text-blue-600 text-sm">
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-[2px] text-red-600 text-sm">
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
                 <span>
-                  Account locked. Try again in <strong>{cooldownTime}</strong> seconds.
+                  🔒 Account locked. Try again in <strong className="font-mono">{cooldownTime}</strong> seconds.
                 </span>
+              </div>
+              <div className="mt-2 w-full bg-red-100 rounded-full h-1.5">
+                <div 
+                  className="bg-red-600 h-1.5 rounded-full transition-all duration-1000 ease-linear"
+                  style={{ width: `${(cooldownTime / 60) * 100}%` }}
+                ></div>
               </div>
             </div>
           )}
@@ -219,7 +267,12 @@ export default function LoginPage() {
           {/* Attempts Warning */}
           {!isLocked && attemptsLeft < 3 && attemptsLeft > 0 && (
             <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-[2px] text-yellow-600 text-sm">
-              <strong>Warning:</strong> {attemptsLeft} attempt{attemptsLeft === 1 ? '' : 's'} remaining before account lockout.
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                <span>
+                  <strong>Warning:</strong> {attemptsLeft} attempt{attemptsLeft === 1 ? '' : 's'} remaining before account lockout.
+                </span>
+              </div>
             </div>
           )}
 
@@ -239,7 +292,7 @@ export default function LoginPage() {
                   placeholder="Enter your email address"
                   className="w-full pl-10 pr-4 py-2 border rounded-[2px] focus:ring-2 focus:ring-[#23479A]/20 focus:border-[#23479A]"
                   required
-                  disabled={isLoading || isLocked}
+                  disabled={isLoading}
                 />
               </div>
             </div>
@@ -299,7 +352,7 @@ export default function LoginPage() {
               disabled={isLoading || isLocked}
             >
               {isLocked && cooldownTime > 0 
-                ? `Locked (${cooldownTime}s)` 
+                ? `🔒 Locked (${cooldownTime}s)` 
                 : isLoading 
                   ? "Signing in..." 
                   : "Sign in"

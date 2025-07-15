@@ -10,50 +10,61 @@ export const { handlers, signIn, signOut, auth, update } = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/signin`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: credentials?.email,
-            password: credentials?.password,
-          }),
-        });
-      
-        if (!res.ok) {
-          const errorData = await res.json();
-          
-          // Handle account lockout
-          if (res.status === 423) {
-            throw new Error(`LOCKED:${errorData.timeLeft}:${errorData.error}`);
-          }
-          
-          // Handle failed attempts
-          if (res.status === 401 && errorData.attemptsLeft !== undefined) {
-            throw new Error(`ATTEMPTS:${errorData.attemptsLeft}:${errorData.error}`);
-          }
-          
-          return null;
-        }
-      
-        const user = await res.json();
-      
-        if (user.role === "Unverified") {
-          throw new Error("Unverified");
-        }
+        try {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/signin`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: credentials?.email,
+              password: credentials?.password,
+            }),
+          });
         
-        if (user) {
-          return {
-            id: user.id,
-            name: user.name,
-            email: credentials.email,
-            role: user.role,
-            address: user.address,
-            bio: user.bio,
-            phone: user.phone
-          };
+          // Get response data first
+          const responseData = await res.json();
+          
+          // Handle different response statuses
+          if (!res.ok) {
+            // Handle account lockout (423)
+            if (res.status === 423) {
+              throw new Error(`LOCKED:${responseData.timeLeft}:${responseData.error}`);
+            }
+            
+            // Handle failed attempts (401)
+            if (res.status === 401 && responseData.attemptsLeft !== undefined) {
+              throw new Error(`ATTEMPTS:${responseData.attemptsLeft}:${responseData.error}`);
+            }
+            
+            // Handle other errors
+            throw new Error(responseData.error || "Authentication failed");
+          }
+
+          // Successful response - check user status
+          const user = responseData;
+          
+          // IMPORTANT: Check verification status ONLY after confirming no lockout
+          if (user.role === "Unverified") {
+            throw new Error("Unverified");
+          }
+          
+          if (user) {
+            return {
+              id: user.id,
+              name: user.name || `${user.firstName} ${user.lastName}`.trim() || user.email,
+              email: credentials.email,
+              role: user.role,
+              address: user.address,
+              bio: user.bio,
+              phone: user.phone
+            };
+          }
+        
+          return null;
+
+        } catch (error) {
+          // Re-throw our custom errors (LOCKED, ATTEMPTS, Unverified)
+          throw error;
         }
-      
-        return null;
       }      
     }),
   ],

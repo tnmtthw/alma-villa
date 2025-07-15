@@ -1,72 +1,125 @@
 import { NextResponse } from 'next/server';
 import { compare } from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
+import { LOGIN_SECURITY, loginSecurityUtils } from '@/lib/utils';
 
 export async function POST(req: Request) {
-  const { email, password } = await req.json();
+  try {
+    const { email, password } = await req.json();
 
-  const user = await prisma.user.findUnique({ where: { email } });
-
-  if (!user) {
-    return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
-  }
-
-  // Check if account is currently locked
-  const now = new Date();
-  if (user.lockedUntil && user.lockedUntil > now) {
-    const timeLeft = Math.ceil((user.lockedUntil.getTime() - now.getTime()) / 1000);
-    return NextResponse.json({ 
-      error: 'Account temporarily locked due to too many failed attempts', 
-      timeLeft,
-      isLocked: true 
-    }, { status: 423 });
-  }
-
-  const isPasswordValid = await compare(password, user.password);
-
-  if (!isPasswordValid) {
-    // Increment failed login attempts
-    const newAttempts = (user.loginAttempts || 0) + 1;
-    const updateData: any = {
-      loginAttempts: newAttempts,
-      lastFailedLogin: now,
-    };
-
-    // Lock account for 1 minute after 3 failed attempts
-    if (newAttempts >= 3) {
-      updateData.lockedUntil = new Date(now.getTime() + 60 * 1000); // 1 minute from now
+    // Validate input
+    if (!email || !password) {
+      return NextResponse.json({ 
+        error: 'Email and password are required' 
+      }, { status: 400 });
     }
 
-    await prisma.user.update({
-      where: { email },
-      data: updateData,
-    });
+    const user = await prisma.user.findUnique({ where: { email } });
 
-    if (newAttempts >= 3) {
+    if (!user) {
+      // Return same error message to prevent email enumeration
       return NextResponse.json({ 
-        error: 'Too many failed attempts. Account locked for 1 minute.', 
-        timeLeft: 60,
+        error: 'Invalid email or password' 
+      }, { status: 401 });
+    }
+
+    const now = new Date();
+    
+    // Check if account is currently locked
+    if (user.lockedUntil && user.lockedUntil > now) {
+      const timeLeft = Math.ceil((user.lockedUntil.getTime() - now.getTime()) / 1000);
+      console.log(`Login attempt blocked - Account locked: ${email}, Time left: ${timeLeft}s`);
+      
+      return NextResponse.json({ 
+        error: 'Account temporarily locked due to too many failed attempts', 
+        timeLeft,
         isLocked: true 
       }, { status: 423 });
     }
 
+          // If lockout period has expired, clear the lockout
+      if (user.lockedUntil && loginSecurityUtils.isLockoutExpired(user.lockedUntil)) {
+        await prisma.user.update({
+          where: { email },
+          data: {
+            loginAttempts: 0,
+            lockedUntil: null,
+            lastFailedLogin: null,
+          },
+        });
+        console.log(`Lockout expired and cleared for: ${email}`);
+      }
+
+    const isPasswordValid = await compare(password, user.password);
+
+          if (!isPasswordValid) {
+        // Increment failed login attempts
+        const newAttempts = (user.loginAttempts || 0) + 1;
+        const attemptsLeft = loginSecurityUtils.getAttemptsRemaining(newAttempts);
+        
+        const updateData: any = {
+          loginAttempts: newAttempts,
+          lastFailedLogin: now,
+        };
+
+        // Lock account after maximum attempts reached
+        if (loginSecurityUtils.shouldLockAccount(newAttempts)) {
+          updateData.lockedUntil = loginSecurityUtils.getLockoutEndTime(now);
+          
+          console.log(`Account locked after ${LOGIN_SECURITY.MAX_ATTEMPTS} failed attempts: ${email}`);
+          
+          await prisma.user.update({
+            where: { email },
+            data: updateData,
+          });
+
+          return NextResponse.json({ 
+            error: `Too many failed attempts. Account locked for ${LOGIN_SECURITY.LOCKOUT_DURATION_MINUTES} minute(s).`, 
+            timeLeft: LOGIN_SECURITY.LOCKOUT_DURATION_MS / 1000,
+            isLocked: true 
+          }, { status: 423 });
+        }
+
+        // Update attempts count
+        await prisma.user.update({
+          where: { email },
+          data: updateData,
+        });
+
+        console.log(`Failed login attempt ${newAttempts}/${LOGIN_SECURITY.MAX_ATTEMPTS} for: ${email}`);
+
+        return NextResponse.json({ 
+          error: 'Invalid email or password',
+          attemptsLeft
+        }, { status: 401 });
+      }
+
+    // Successful login - Reset all security counters
+    if (user.loginAttempts > 0 || user.lockedUntil || user.lastFailedLogin) {
+      await prisma.user.update({
+        where: { email },
+        data: {
+          loginAttempts: 0,
+          lastFailedLogin: null,
+          lockedUntil: null,
+        },
+      });
+      console.log(`Login successful - Security counters reset for: ${email}`);
+    }
+
+    console.log(`Successful login: ${email}`);
     return NextResponse.json({ 
-      error: 'Invalid email or password',
-      attemptsLeft: 3 - newAttempts 
-    }, { status: 401 });
-  }
+      message: 'Login successful', 
+      id: user.id, 
+      email: user.email, 
+      role: user.role,
+      name: `${user.firstName} ${user.lastName}`.trim() || user.email
+    }, { status: 200 });
 
-  // Reset login attempts on successful login
-  if (user.loginAttempts > 0) {
-    await prisma.user.update({
-      where: { email },
-      data: {
-        loginAttempts: 0,
-        lastFailedLogin: null,
-        lockedUntil: null,
-      },
-    });
+  } catch (error) {
+    console.error('Login error:', error);
+    return NextResponse.json({ 
+      error: 'Internal server error' 
+    }, { status: 500 });
   }
-
-  return NextResponse.json({ message: 'Login successful', id: user.id, email: user.email, role: user.role,}, { status: 200 });
 }
