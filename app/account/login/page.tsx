@@ -166,7 +166,8 @@ export default function LoginPage() {
         
         // Small delay for better UX
         setTimeout(() => {
-          router.replace("/dashboard") // Changed from /admin to /dashboard for regular users
+          // Role-based redirect logic
+          checkAndRedirectUser()
         }, 500)
       } else {
         setErrorMessage("Something went wrong. Please try again.")
@@ -176,6 +177,35 @@ export default function LoginPage() {
       setErrorMessage("Something went wrong. Please try again.")
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  // Function to check user role and redirect accordingly
+  const checkAndRedirectUser = async () => {
+    try {
+      // Get session to determine user role
+      const response = await fetch('/api/auth/session')
+      const session = await response.json()
+      
+      if (session?.user?.role) {
+        const userRole = session.user.role
+        
+        if (userRole === "Admin") {
+          router.replace("/admin")
+        } else if (userRole === "Verified" || userRole === "User") {
+          router.replace("/dashboard") 
+        } else {
+          // For other roles like "Unverified", redirect to homepage
+          router.replace("/")
+        }
+      } else {
+        // Fallback to dashboard if role is unclear
+        router.replace("/dashboard")
+      }
+    } catch (error) {
+      console.error("Error checking user role:", error)
+      // Fallback redirect
+      router.replace("/dashboard")
     }
   }
 
