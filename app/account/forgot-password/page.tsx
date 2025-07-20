@@ -22,21 +22,28 @@ export default function ForgotPasswordPage() {
     setErrorMessage("")
 
     try {
-      // Simulate API call to send reset email
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      // Here you would typically call your password reset API
-      // const response = await fetch('/api/auth/forgot-password', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ email })
-      // })
-      
-      // For now, we'll simulate success
+      const response = await fetch(`/api/auth/forgot-password?email=${encodeURIComponent(email)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          setErrorMessage("No account found with this email address.")
+        } else if (response.status === 500) {
+          setErrorMessage("Email service is currently unavailable. Please try again later.")
+        } else {
+          setErrorMessage(data.error || "Something went wrong. Please try again.")
+        }
+        return
+      }
+
       setIsSubmitted(true)
     } catch (err) {
       console.error("Password reset error:", err)
-      setErrorMessage("Something went wrong. Please try again.")
+      setErrorMessage("Network error. Please check your connection and try again.")
     } finally {
       setIsLoading(false)
     }
@@ -77,8 +84,8 @@ export default function ForgotPasswordPage() {
 
           {/* Back to Login Link */}
           <div className="mb-6">
-            <Link 
-              href="/account/login" 
+            <Link
+              href="/account/login"
               className="inline-flex items-center text-sm text-[#23479A] hover:text-[#23479A]/80 transition-colors"
             >
               <ArrowLeft className="h-4 w-4 mr-1" />
@@ -151,7 +158,7 @@ export default function ForgotPasswordPage() {
                     <CheckCircle className="h-12 w-12 text-green-600" />
                   </div>
                 </div>
-                
+
                 <div>
                   <h1 className="text-2xl font-bold text-[#23479A] mb-2">
                     Check your email
@@ -183,7 +190,7 @@ export default function ForgotPasswordPage() {
                   >
                     Resend email
                   </Button>
-                  
+
                   <Button
                     onClick={() => router.push("/account/login")}
                     className="w-full bg-[#23479A] hover:bg-[#23479A]/90 text-white rounded-[2px]"

@@ -56,5 +56,7 @@ model User {
   lastFailedLogin   DateTime?
   lockedUntil       DateTime?
 
+  resetToken  String?      @unique
+
   createdAt         DateTime     @default(now())
 }
