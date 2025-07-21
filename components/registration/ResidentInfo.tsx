@@ -33,7 +33,7 @@ interface FormData {
   emergencyNumber: string;
   houseNumber: string;
   street: string;
-  purok: string;
+  purok: string; // Keep as purok for backend compatibility (display as Sitio)
   barangay: string;
   city: string;
   province: string;
@@ -58,8 +58,8 @@ const initialFormData: FormData = {
   emergencyNumber: "",
   houseNumber: "",
   street: "",
-  purok: "",
-  barangay: "",
+  purok: "", // Keep as purok for backend compatibility
+  barangay: "Alma Villa Gloria", // Default value
   city: "",
   province: "",
   zipCode: "",
@@ -69,22 +69,22 @@ const initialFormData: FormData = {
 const sampleData: FormData = {
   lastName: "Dela Cruz",
   firstName: "Juan",
-  middleName: "Santos",
+  middleName: "Santos", // Optional
   suffix: "",
   birthDate: "1990-01-15",
-  age: "33",
+  age: "35", // Will be calculated automatically
   gender: "male",
   civilStatus: "single",
   nationality: "Filipino",
   religion: "Catholic",
   email: "juan.delacruz@email.com",
-  mobileNumber: "09123456789",
+  mobileNumber: "+639123456789", // 11 digits with +63
   emergencyContact: "Maria Dela Cruz",
-  emergencyNumber: "09187654321",
+  emergencyNumber: "+639187654321",
   houseNumber: "123",
   street: "Maharlika Street",
-  purok: "Purok 1",
-  barangay: "San Antonio",
+  purok: "Sitio 1", // Keep as purok for backend compatibility
+  barangay: "Alma Villa Gloria", // Default value
   city: "Quezon City",
   province: "Metro Manila",
   zipCode: "1100",
@@ -118,12 +118,71 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
     }
   }, [formData, isClient])
 
+  // Calculate age automatically when birthDate changes
+  const calculateAge = (birthDate: string): string => {
+    if (!birthDate) return ""
+    
+    const today = new Date()
+    const birth = new Date(birthDate)
+    let age = today.getFullYear() - birth.getFullYear()
+    const monthDiff = today.getMonth() - birth.getMonth()
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--
+    }
+    
+    return age.toString()
+  }
+
+  // Format mobile number with +63 and numbers only
+  const formatMobileNumber = (value: string): string => {
+    // Remove all non-digit characters
+    const digits = value.replace(/\D/g, '')
+    
+    // If it starts with 63, keep it as is
+    if (digits.startsWith('63')) {
+      const withoutCountryCode = digits.slice(2)
+      // Limit to 10 digits after country code (total 12: +63 + 10)
+      const limited = withoutCountryCode.slice(0, 10)
+      return `+63${limited}`
+    }
+    
+    // If it starts with 0, replace with +63
+    if (digits.startsWith('0')) {
+      const withoutZero = digits.slice(1)
+      // Limit to 10 digits after removing 0 (total 11: +63 + 10)
+      const limited = withoutZero.slice(0, 10)
+      return `+63${limited}`
+    }
+    
+    // If it's just digits, add +63
+    // Limit to 10 digits (total 11: +63 + 10)
+    const limited = digits.slice(0, 10)
+    return limited ? `+63${limited}` : ""
+  }
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [id]: value
-    }))
+    
+    if (id === 'birthDate') {
+      const age = calculateAge(value)
+      setFormData(prev => ({
+        ...prev,
+        [id]: value,
+        age: age
+      }))
+    } else if (id === 'mobileNumber' || id === 'emergencyNumber') {
+      const formatted = formatMobileNumber(value)
+      setFormData(prev => ({
+        ...prev,
+        [id]: formatted
+      }))
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [id]: value
+      }))
+    }
   }
 
   const handleSelectChange = (value: string, id: string) => {
@@ -137,7 +196,7 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
     const requiredFields = [
       'lastName',
       'firstName',
-      'middleName',
+      // middleName is now optional
       'birthDate',
       'age',
       'gender',
@@ -149,7 +208,7 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
       'emergencyNumber',
       'houseNumber',
       'street',
-      'purok',
+      'purok', // Keep as purok for backend compatibility
       'barangay',
       'city',
       'province',
@@ -157,7 +216,10 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
       'residencyLength'
     ]
 
-    return requiredFields.every(field => formData[field as keyof typeof formData].trim() !== '')
+    return requiredFields.every(field => {
+      const value = formData[field as keyof typeof formData]
+      return value !== undefined && value !== null && value.toString().trim() !== ''
+    })
   }
 
   const handleNext = (e: React.FormEvent) => {
@@ -218,12 +280,11 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                   />
                 </div>
                 <div className="col-span-2">
-                  <Label htmlFor="middleName">Middle Name</Label>
+                  <Label htmlFor="middleName">Middle Name (Optional)</Label>
                   <Input
                     id="middleName"
                     placeholder="Enter middle name"
                     className="mt-1"
-                    required
                     value={formData.middleName}
                     onChange={handleInputChange}
                   />
@@ -247,6 +308,7 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                     required
                     value={formData.birthDate}
                     onChange={handleInputChange}
+                    max="2025-12-31"
                   />
                 </div>
                 <div>
@@ -254,10 +316,11 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                   <Input
                     id="age"
                     type="number"
-                    className="mt-1"
+                    className="mt-1 bg-gray-100"
                     required
                     value={formData.age}
-                    onChange={handleInputChange}
+                    readOnly
+                    placeholder="Calculated from birth date"
                   />
                 </div>
                 <div>
@@ -341,14 +404,16 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="mobileNumber">Mobile Number (optional)</Label>
+                  <Label htmlFor="mobileNumber">Mobile Number (Optional)</Label>
                   <Input
                     id="mobileNumber"
-                    placeholder="Enter mobile number"
+                    placeholder="+639123456789 (11 digits)"
                     className="mt-1"
                     value={formData.mobileNumber}
                     onChange={handleInputChange}
+                    maxLength={13} // +63 + 10 digits
                   />
+                  <p className="text-xs text-gray-500 mt-1">Format: +63 followed by 10 digits</p>
                 </div>
                 <div>
                   <Label htmlFor="emergencyContact">Emergency Contact Person</Label>
@@ -365,12 +430,14 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                   <Label htmlFor="emergencyNumber">Emergency Contact Number</Label>
                   <Input
                     id="emergencyNumber"
-                    placeholder="Enter contact number"
+                    placeholder="+639123456789 (11 digits)"
                     className="mt-1"
                     required
                     value={formData.emergencyNumber}
                     onChange={handleInputChange}
+                    maxLength={13} // +63 + 10 digits
                   />
+                  <p className="text-xs text-gray-500 mt-1">Format: +63 followed by 10 digits</p>
                 </div>
               </div>
             </div>
@@ -396,10 +463,10 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="purok">Purok/Zone Number</Label>
+                    <Label htmlFor="purok">Sitio</Label>
                     <Input
                       id="purok"
-                      placeholder="Enter purok/zone"
+                      placeholder="Enter sitio"
                       className="mt-1"
                       required
                       value={formData.purok}
@@ -422,12 +489,13 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                   <Label htmlFor="barangay">Barangay</Label>
                   <Input
                     id="barangay"
-                    placeholder="Enter barangay"
-                    className="mt-1"
+                    className="mt-1 bg-gray-100"
                     required
                     value={formData.barangay}
-                    onChange={handleInputChange}
+                    readOnly
+                    placeholder="Alma Villa Gloria"
                   />
+                  <p className="text-xs text-gray-500 mt-1">Default barangay name</p>
                 </div>
                 <div>
                   <Label htmlFor="city">City/Municipality</Label>

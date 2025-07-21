@@ -382,7 +382,7 @@ export function RejectionReasonModal({
     'Insufficient proof of residency',
     'Failed identity verification',
     'Application contains false information',
-    'Missing required documents',
+   
     'Other (specify below)'
   ]
 

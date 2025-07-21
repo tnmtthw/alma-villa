@@ -56,7 +56,7 @@ export async function PATCH(request: Request) {
     const mailOptions = {
       from: gmailUser,
       to: email,
-      subject: 'Reset your B-Dazzle Cafe password',
+      subject: 'Reset Alma Villa Verifast Password',
       html: emailHtml,
     };
 
