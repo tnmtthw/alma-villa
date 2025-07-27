@@ -31,7 +31,7 @@ interface FormData {
   mobileNumber: string;
   emergencyContact: string;
   emergencyNumber: string;
-  houseNumber: string;
+  houseNumber: string; // Keep for backend compatibility but don't display
   street: string;
   purok: string; // Keep as purok for backend compatibility (display as Sitio)
   barangay: string;
@@ -56,13 +56,13 @@ const initialFormData: FormData = {
   mobileNumber: "",
   emergencyContact: "",
   emergencyNumber: "",
-  houseNumber: "",
-  street: "",
+  houseNumber: "N/A", // Hidden field - set default value for backend
+  street: "N/A", // Hidden field - set default value for backend
   purok: "", // Keep as purok for backend compatibility
-  barangay: "Alma Villa Gloria", // Default value
-  city: "",
-  province: "",
-  zipCode: "",
+  barangay: "Alma Villa", // Default value
+  city: "Gloria", // Auto-filled municipality
+  province: "Oriental Mindoro", // Auto-filled province
+  zipCode: "5209", // Auto-filled ZIP code
   residencyLength: ""
 }
 
@@ -81,13 +81,13 @@ const sampleData: FormData = {
   mobileNumber: "+639123456789", // 11 digits with +63
   emergencyContact: "Maria Dela Cruz",
   emergencyNumber: "+639187654321",
-  houseNumber: "123",
-  street: "Maharlika Street",
+  houseNumber: "N/A", // Hidden field - set default value for backend
+  street: "N/A", // Hidden field - set default value for backend
   purok: "Sitio 1", // Keep as purok for backend compatibility
-  barangay: "Alma Villa Gloria", // Default value
-  city: "Quezon City",
-  province: "Metro Manila",
-  zipCode: "1100",
+  barangay: "Alma Villa", // Default value
+  city: "Gloria", // Auto-filled municipality
+  province: "Oriental Mindoro", // Auto-filled province
+  zipCode: "5209", // Auto-filled ZIP code
   residencyLength: "5"
 }
 
@@ -104,7 +104,17 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
     if (savedData) {
       try {
         const parsedData = JSON.parse(savedData)
-        setFormData(parsedData)
+        // Ensure auto-filled fields maintain their values
+        const updatedData = {
+          ...parsedData,
+          barangay: "Alma Villa",
+          city: "Gloria",
+          province: "Oriental Mindoro",
+          zipCode: "5209",
+          houseNumber: parsedData.houseNumber || "N/A",
+          street: parsedData.street || "N/A"
+        }
+        setFormData(updatedData)
       } catch (error) {
         console.error('Error parsing saved resident data:', error)
       }
@@ -114,7 +124,17 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
   // Save to localStorage whenever form data changes (only on client-side)
   useEffect(() => {
     if (isClient) {
-      localStorage.setItem('residentInfoData', JSON.stringify(formData))
+      // Ensure critical fields are always maintained during data updates
+      const dataToSave = {
+        ...formData,
+        houseNumber: formData.houseNumber || "N/A", // Ensure this is never empty
+        street: formData.street || "N/A", // Ensure this is never empty
+        barangay: "Alma Villa", // Always enforce correct barangay
+        city: "Gloria", // Always enforce correct municipality
+        province: "Oriental Mindoro", // Always enforce correct province
+        zipCode: "5209" // Always enforce correct ZIP
+      }
+      localStorage.setItem('residentInfoData', JSON.stringify(dataToSave))
     }
   }, [formData, isClient])
 
@@ -196,7 +216,7 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
     const requiredFields = [
       'lastName',
       'firstName',
-      // middleName is now optional
+      // middleName is optional
       'birthDate',
       'age',
       'gender',
@@ -206,24 +226,53 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
       'email',
       'emergencyContact',
       'emergencyNumber',
-      'houseNumber',
-      'street',
+      // houseNumber and street are auto-filled, don't validate user input
       'purok', // Keep as purok for backend compatibility
-      'barangay',
-      'city',
-      'province',
-      'zipCode',
+      // barangay, city, province, zipCode are auto-filled, don't validate user input
       'residencyLength'
     ]
 
-    return requiredFields.every(field => {
+    // Validate user-inputted fields only
+    const userFieldsValid = requiredFields.every(field => {
       const value = formData[field as keyof typeof formData]
       return value !== undefined && value !== null && value.toString().trim() !== ''
     })
+
+    // Ensure auto-filled fields are present (they should always be)
+    const autoFieldsPresent = 
+      formData.barangay === "Alma Villa" &&
+      formData.city === "Gloria" &&
+      formData.province === "Oriental Mindoro" &&
+      formData.zipCode === "5209" &&
+      (formData.houseNumber === "N/A" || formData.houseNumber !== "") &&
+      (formData.street === "N/A" || formData.street !== "")
+
+    return userFieldsValid && autoFieldsPresent
   }
 
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Ensure all required backend fields are properly set before proceeding
+    const completeFormData = {
+      ...formData,
+      // Ensure these fields are always set for backend compatibility
+      houseNumber: formData.houseNumber || "N/A", // Default for hidden field
+      street: formData.street || "N/A", // Default for hidden field
+      barangay: "Alma Villa", // Fixed barangay
+      city: "Gloria", // Fixed municipality  
+      province: "Oriental Mindoro", // Fixed province
+      zipCode: "5209" // Fixed ZIP code
+    }
+    
+    // Update the stored data with complete information
+    if (isClient) {
+      localStorage.setItem('residentInfoData', JSON.stringify(completeFormData))
+    }
+    
+    // Log for verification during development (remove in production)
+    console.log('Registration Data Being Collected:', completeFormData)
+    
     onNextAction()
   }
 
@@ -450,38 +499,14 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
               </h3>
 
               <div className="grid grid-cols-1 gap-3">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label htmlFor="houseNumber">House/Unit Number</Label>
-                    <Input
-                      id="houseNumber"
-                      placeholder="Enter house/unit number"
-                      className="mt-1"
-                      required
-                      value={formData.houseNumber}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="purok">Sitio</Label>
-                    <Input
-                      id="purok"
-                      placeholder="Enter sitio"
-                      className="mt-1"
-                      required
-                      value={formData.purok}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                </div>
                 <div>
-                  <Label htmlFor="street">Street/Subdivision Name</Label>
+                  <Label htmlFor="purok">Sitio</Label>
                   <Input
-                    id="street"
-                    placeholder="Enter street name"
+                    id="purok"
+                    placeholder="Enter sitio"
                     className="mt-1"
                     required
-                    value={formData.street}
+                    value={formData.purok}
                     onChange={handleInputChange}
                   />
                 </div>
@@ -493,43 +518,46 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                     required
                     value={formData.barangay}
                     readOnly
-                    placeholder="Alma Villa Gloria"
+                    placeholder="Alma Villa"
                   />
                   <p className="text-xs text-gray-500 mt-1">Default barangay name</p>
                 </div>
                 <div>
-                  <Label htmlFor="city">City/Municipality</Label>
+                  <Label htmlFor="city">Municipality</Label>
                   <Input
                     id="city"
-                    placeholder="Enter city"
-                    className="mt-1"
+                    className="mt-1 bg-gray-100"
                     required
                     value={formData.city}
-                    onChange={handleInputChange}
+                    readOnly
+                    placeholder="Gloria"
                   />
+                  <p className="text-xs text-gray-500 mt-1">Default municipality name</p>
                 </div>
                 <div>
                   <Label htmlFor="province">Province</Label>
                   <Input
                     id="province"
-                    placeholder="Enter province"
-                    className="mt-1"
+                    className="mt-1 bg-gray-100"
                     required
                     value={formData.province}
-                    onChange={handleInputChange}
+                    readOnly
+                    placeholder="Oriental Mindoro"
                   />
+                  <p className="text-xs text-gray-500 mt-1">Default province name</p>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label htmlFor="zipCode">ZIP Code</Label>
                     <Input
                       id="zipCode"
-                      placeholder="Enter ZIP code"
-                      className="mt-1"
+                      className="mt-1 bg-gray-100"
                       required
                       value={formData.zipCode}
-                      onChange={handleInputChange}
+                      readOnly
+                      placeholder="5209"
                     />
+                    <p className="text-xs text-gray-500 mt-1">Default ZIP code</p>
                   </div>
                   <div>
                     <Label htmlFor="residencyLength">Length of Residency (years)</Label>

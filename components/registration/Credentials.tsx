@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Eye, EyeOff, Mail, Info } from "lucide-react"
+import { Eye, EyeOff, Mail, Info, AlertCircle } from "lucide-react"
 
 interface CredentialsProps {
   onBackAction: () => void
@@ -60,11 +60,31 @@ async function uploadImage(base64Data: string, imageName: string, folder: string
   return result.url;
 }
 
+// Error Alert Component
+const ErrorAlert = ({ message, onClose }: { message: string; onClose: () => void }) => (
+  <div className="mb-6 border border-red-200 bg-red-50 rounded-lg p-4">
+    <div className="flex items-start">
+      <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" />
+      <div className="flex-1">
+        <h3 className="text-sm font-medium text-red-800 mb-1">Registration Error</h3>
+        <p className="text-sm text-red-700">{message}</p>
+      </div>
+      <button
+        onClick={onClose}
+        className="ml-2 text-red-600 hover:text-red-800 focus:outline-none"
+      >
+        ×
+      </button>
+    </div>
+  </div>
+);
+
 export default function Credentials({ onBackAction: onBack, onCompleteAction: onComplete }: CredentialsProps) {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [userEmail, setUserEmail] = useState("")
+  const [errorMessage, setErrorMessage] = useState("")
   const [agreeToTerms, setAgreeToTerms] = useState(() => {
     // Try to load saved terms acceptance from sessionStorage
     if (typeof window !== 'undefined') {
@@ -135,18 +155,27 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
   // Check if passwords match
   const passwordsMatch = formData.password === formData.confirmPassword && formData.confirmPassword !== ""
 
+  const showError = (message: string) => {
+    setErrorMessage(message)
+  }
+
+  const hideError = () => {
+    setErrorMessage("")
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    hideError(); // Clear any previous errors
 
     // Validate password
     if (!isPasswordValid(formData.password)) {
-      alert("Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters");
+      showError("Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters");
       return;
     }
 
     // Check if passwords match
     if (!passwordsMatch) {
-      alert("Passwords do not match");
+      showError("Passwords do not match");
       return;
     }
 
@@ -161,7 +190,7 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
       const residentInfo = savedResidentInfo ? JSON.parse(savedResidentInfo) : null;
 
       if (!residentInfo || !capturedPhoto) {
-        alert("Missing resident info or photo. Please complete previous steps.");
+        showError("Missing resident info or photo. Please complete previous steps.");
         return;
       }
 
@@ -220,24 +249,36 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
         body: JSON.stringify(signupData)
       });
 
+      const result = await signupRes.json();
+
       if (!signupRes.ok) {
-        const errorText = await signupRes.text();
-        console.error("Signup error response:", errorText);
+        console.error("Signup error response:", result);
 
-        let errorMessage = "Unknown error";
-        try {
-          const errorJson = JSON.parse(errorText);
-          errorMessage = errorJson.message || errorText;
-        } catch {
-          errorMessage = errorText;
+        // Handle specific error cases with user-friendly messages
+        switch (result.code) {
+          case 'EMAIL_EXISTS':
+            showError(`Email Already Exists: This email address "${userEmail}" is already registered. Please use a different email or try logging in.`);
+            break;
+          case 'DUPLICATE_DATA':
+            showError('Duplicate Information: Some information you provided already exists in our system.');
+            break;
+          case 'INVALID_DATA':
+            showError('Invalid Information: Please check your information and try again.');
+            break;
+          case 'EMAIL_SEND_FAILED':
+            showError('Account Created: Your account was created successfully, but we could not send the confirmation email. Please contact support.');
+            // You might still want to proceed since account was created
+            setTimeout(() => {
+              onComplete();
+            }, 3000);
+            break;
+          default:
+            showError(result.message || 'Registration failed. Please try again later.');
         }
-
-        alert("Signup failed: " + errorMessage);
         return;
       }
 
-      const signupResult = await signupRes.json();
-      console.log("Signup successful:", signupResult);
+      console.log("Signup successful:", result);
 
       // Clear temporary storage
       localStorage.removeItem('residentInfoData');
@@ -251,7 +292,7 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
       onComplete();
     } catch (err) {
       console.error("Unexpected error during signup:", err);
-      alert("Something went wrong. Please try again.");
+      showError("Network error: Unable to connect to the server. Please check your internet connection and try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -263,6 +304,11 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
         <h2 className="text-xl sm:text-2xl font-semibold text-gray-900">Account Setup</h2>
         <p className="text-sm text-gray-500 mt-1">Create your login credentials and accept the terms of service.</p>
       </div>
+
+      {/* Error Alert */}
+      {errorMessage && (
+        <ErrorAlert message={errorMessage} onClose={hideError} />
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Login Credentials Info */}
@@ -282,11 +328,11 @@ export default function Credentials({ onBackAction: onBack, onCompleteAction: on
                   Your Login Username
                 </h4>
                 <p className="text-sm text-blue-800 mb-2">
-                  Your email address <strong className="font-semibold"></strong> will be used as your username to log into your account.
+                  Your email address <strong className="font-semibold">{userEmail}</strong> will be used as your username to log into your account.
                 </p>
                 <div className="flex items-center gap-2 text-xs text-blue-700">
                   <Info className="w-3 h-3" />
-                  <span>You can log in using either your email address </span>
+                  <span>You can log in using your email address</span>
                 </div>
               </div>
             </div>

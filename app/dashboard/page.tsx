@@ -155,7 +155,7 @@ export default function DashboardPage() {
         {/* Hero Section with Background - Mobile Optimized */}
         <div className="relative bg-[#23479A] pt-16">
           {/* Background Pattern */}
-          <div 
+          <div
             className="absolute inset-x-0 bottom-0 hidden sm:block"
             style={{
               backgroundImage: 'url(/assets/img/herosection.png)',
@@ -165,7 +165,7 @@ export default function DashboardPage() {
               opacity: '0.15'
             }}
           />
-          
+
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[400px] sm:h-[420px] flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8 lg:gap-12 relative z-10 py-8">
             {/* Mobile-optimized repeated background silhouette */}
             <div
@@ -187,7 +187,7 @@ export default function DashboardPage() {
                 Here's what's happening with your residence account.
               </p>
               <Link href="/dashboard/request">
-                <Button 
+                <Button
                   className="mt-4 sm:mt-8 bg-white text-[#23479A] hover:bg-white/90 flex items-center gap-2 mx-auto md:mx-0 w-full sm:w-auto justify-center"
                 >
                   <Plus className="h-4 w-4" />
@@ -195,13 +195,25 @@ export default function DashboardPage() {
                 </Button>
               </Link>
             </div>
-            <div className="relative w-full md:w-1/2 flex justify-center z-10">
+            <div className="relative w-full md:w-1/2 flex justify-center items-center z-10 p-4">
               <img
-                src="/assets/img/dashboardhero.png"
+                src="/assets/img/Group.png"
                 alt="Dashboard Hero"
-                width={400}
-                height={400}
-                className="object-contain max-w-[180px] sm:max-w-[220px] md:max-w-[320px] lg:max-w-[400px] w-full h-auto"
+                className="
+                            w-full h-auto
+                            object-contain
+                            max-w-[280px] xs:max-w-[320px]
+                            sm:max-w-[400px] 
+                            md:max-w-[500px] 
+                            lg:max-w-[600px] 
+                            xl:max-w-[700px]
+                            2xl:max-w-[800px]
+                            transition-all duration-300 ease-in-out
+                          "
+                style={{
+                  maxHeight: '80vh',
+                  aspectRatio: 'auto'
+                }}
               />
             </div>
           </div>
@@ -386,15 +398,15 @@ export default function DashboardPage() {
                   <p className="text-blue-100 text-base sm:text-lg">Our team is here to assist you with any questions or concerns.</p>
                 </div>
                 <div className="flex flex-col w-full sm:w-auto sm:flex-row gap-3 sm:gap-3">
-                  <Button 
-                    variant="secondary" 
+                  <Button
+                    variant="secondary"
                     size="lg"
                     className="bg-white text-[#23479A] hover:bg-gray-100 font-semibold px-6 sm:px-8 w-full sm:w-auto"
                   >
                     Contact Support
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="lg"
                     className="border-white text-white hover:bg-white/10 font-semibold px-6 sm:px-8 w-full sm:w-auto"
                   >
