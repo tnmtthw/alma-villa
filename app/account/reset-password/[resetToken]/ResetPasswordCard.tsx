@@ -224,7 +224,7 @@ export default function ResetPasswordCard({ resetToken }: { resetToken: string }
                         </p>
 
                         <button
-                            onClick={() => router.push('/')}
+                            onClick={() => router.push('/account/login')}
                             className="w-full bg-[#23479A] text-white py-3 px-4 rounded-md hover:bg-[#1e3d8a] transition-colors font-medium"
                         >
                             Sign In
