@@ -50,17 +50,17 @@ const Navbar = () => {
         {/* Mobile Menu Button */}
         <Sheet>
           <SheetTrigger asChild>
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               className="lg:hidden h-9 w-9 p-0"
             >
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent 
-            side="right" 
+          <SheetContent
+            side="right"
             className="w-[280px] p-0 bg-white border-l border-gray-200 shadow-lg"
           >
             <SheetHeader className="p-6 border-b border-gray-200 bg-white">
@@ -78,7 +78,7 @@ const Navbar = () => {
                     {item.label}
                   </Link>
                 ))}
-                
+
                 {/* Mobile Auth Button */}
                 <div className="pt-4 border-t border-gray-200">
                   {session ? (

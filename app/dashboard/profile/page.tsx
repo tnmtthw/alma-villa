@@ -30,12 +30,19 @@ import {
   Key,
   Check
 } from "lucide-react"
+import { useSession } from "next-auth/react"
+import useSWR from 'swr'
+
+const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) => fetch(...args).then((res) => res.json());
 
 export default function UserProfile() {
   const searchParams = useSearchParams()
   const [isEditing, setIsEditing] = useState(false)
   const [activeTab, setActiveTab] = useState("personal")
-  
+  const { data: session } = useSession()
+
+  const { data } = useSWR(`/api/user?id=${session?.user.id}`, fetcher)
+
   // Set active tab based on URL parameter
   useEffect(() => {
     const tabParam = searchParams.get("tab")
@@ -69,18 +76,18 @@ export default function UserProfile() {
   })
 
   const [formData, setFormData] = useState({
-    firstName: "Juan",
-    lastName: "Dela Cruz",
-    email: "juan.delacruz@email.com",
-    phone: "+63 912 345 6789",
-    address: "123 Maharlika Street, Purok 1",
-    barangay: "Alma Villa",
-    city: "Gloria",
-    province: "Oriental Mindoro",
-    zipCode: "5204",
-    birthDate: "1990-01-15",
-    gender: "Male",
-    civilStatus: "Single",
+    firstName: data?.firstName,
+    lastName: data?.lastName,
+    email: data?.email,
+    phone: data?.mobileNumber,
+    address: data?.street,
+    barangay: data?.barangay,
+    city: data?.city,
+    province: data?.province,
+    zipCode: data?.zipCode,
+    birthDate: data?.birthDate,
+    gender: data?.Male,
+    civilStatus: data?.civilStatus,
     occupation: "Software Developer",
     bio: "Resident of Barangay Alma Villa, actively participating in community events and local governance initiatives."
   })
@@ -104,7 +111,7 @@ export default function UserProfile() {
       ...prev,
       [field]: value
     }))
-    
+
     // Clear errors when user starts typing
     setPasswordErrors(prev => ({
       ...prev,
@@ -121,9 +128,9 @@ export default function UserProfile() {
       number: /[0-9]/.test(password),
       special: /[^A-Za-z0-9]/.test(password)
     }
-    
+
     strength = Object.values(checks).filter(Boolean).length
-    
+
     return {
       score: strength,
       checks,
@@ -167,15 +174,15 @@ export default function UserProfile() {
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!validatePasswords()) return
 
     setIsChangingPassword(true)
-    
+
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000))
-      
+
       // Here you would call your password change API
       // const response = await fetch('/api/auth/change-password', {
       //   method: 'POST',
@@ -185,15 +192,15 @@ export default function UserProfile() {
       //     newPassword: passwordData.newPassword
       //   })
       // })
-      
+
       // Reset form and close modal on success
       setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
       setPasswordErrors({ current: "", new: "", confirm: "" })
       setShowChangePassword(false)
-      
+
       // Show success message (you could use a toast notification)
       alert("Password changed successfully!")
-      
+
     } catch (error) {
       setPasswordErrors(prev => ({
         ...prev,
@@ -221,12 +228,10 @@ export default function UserProfile() {
         checked={checked}
         onChange={(e) => onCheckedChange(e.target.checked)}
       />
-      <div className={`relative w-11 h-6 rounded-full transition-colors duration-200 ease-in-out ${
-        checked ? 'bg-[#23479A]' : 'bg-gray-200'
-      }`}>
-        <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-200 ease-in-out ${
-          checked ? 'translate-x-5' : 'translate-x-0'
-        }`} />
+      <div className={`relative w-11 h-6 rounded-full transition-colors duration-200 ease-in-out ${checked ? 'bg-[#23479A]' : 'bg-gray-200'
+        }`}>
+        <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-200 ease-in-out ${checked ? 'translate-x-5' : 'translate-x-0'
+          }`} />
       </div>
     </label>
   )
@@ -244,9 +249,8 @@ export default function UserProfile() {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
-        className={`w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#23479A] focus:border-transparent appearance-none ${
-          disabled ? 'bg-gray-50 text-gray-500' : 'bg-white'
-        }`}
+        className={`w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#23479A] focus:border-transparent appearance-none ${disabled ? 'bg-gray-50 text-gray-500' : 'bg-white'
+          }`}
       >
         {placeholder && <option value="">{placeholder}</option>}
         {options.map((option) => (
@@ -273,9 +277,8 @@ export default function UserProfile() {
       disabled={disabled}
       placeholder={placeholder}
       rows={rows}
-      className={`w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#23479A] focus:border-transparent resize-none ${
-        disabled ? 'bg-gray-50 text-gray-500' : 'bg-white'
-      }`}
+      className={`w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#23479A] focus:border-transparent resize-none ${disabled ? 'bg-gray-50 text-gray-500' : 'bg-white'
+        }`}
     />
   )
 
@@ -424,7 +427,7 @@ export default function UserProfile() {
                   />
                 </div>
               </div>
-              
+
               <div className="border-t border-gray-200 pt-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Residential Address</h3>
                 <div className="grid grid-cols-1 gap-4">
@@ -516,7 +519,7 @@ export default function UserProfile() {
                       <h3 className="font-medium text-gray-900">Password</h3>
                       <p className="text-sm text-gray-500">Last changed 3 months ago</p>
                     </div>
-                    <Button 
+                    <Button
                       variant="outline"
                       onClick={() => setShowChangePassword(true)}
                       className="hover:bg-[#23479A]/5 hover:border-[#23479A]"
@@ -525,7 +528,7 @@ export default function UserProfile() {
                       Change Password
                     </Button>
                   </div>
-                  
+
                   <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                     <div>
                       <h3 className="font-medium text-gray-900">Two-Factor Authentication</h3>
@@ -594,7 +597,7 @@ export default function UserProfile() {
                     onCheckedChange={(checked) => handleNotificationChange('email', checked)}
                   />
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-medium text-gray-900">SMS Notifications</h3>
@@ -606,7 +609,7 @@ export default function UserProfile() {
                     onCheckedChange={(checked) => handleNotificationChange('sms', checked)}
                   />
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-medium text-gray-900">Push Notifications</h3>
@@ -618,7 +621,7 @@ export default function UserProfile() {
                     onCheckedChange={(checked) => handleNotificationChange('push', checked)}
                   />
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="font-medium text-gray-900">Newsletter</h3>
@@ -631,7 +634,7 @@ export default function UserProfile() {
                   />
                 </div>
               </div>
-              
+
               <div className="border-t border-gray-200 pt-6">
                 <div className="flex justify-end">
                   <Button className="bg-[#23479A] hover:bg-[#23479A]/90">
@@ -727,11 +730,10 @@ export default function UserProfile() {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors duration-200 ${
-                      activeTab === tab.id
-                        ? 'border-[#23479A] text-[#23479A]'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
+                    className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors duration-200 ${activeTab === tab.id
+                      ? 'border-[#23479A] text-[#23479A]'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
                   >
                     <Icon className="h-4 w-4" />
                     {tab.label}
@@ -845,7 +847,7 @@ export default function UserProfile() {
                     {passwordErrors.new}
                   </p>
                 )}
-                
+
                 {/* Password Strength Indicator */}
                 {passwordData.newPassword && (
                   <div className="space-y-2">
@@ -856,20 +858,18 @@ export default function UserProfile() {
                           <div className="flex items-center gap-2">
                             <div className="flex-1 bg-gray-200 rounded-full h-2">
                               <div
-                                className={`h-2 rounded-full transition-all duration-300 ${
-                                  strength.level === 'weak' ? 'bg-red-500 w-1/3' :
+                                className={`h-2 rounded-full transition-all duration-300 ${strength.level === 'weak' ? 'bg-red-500 w-1/3' :
                                   strength.level === 'medium' ? 'bg-yellow-500 w-2/3' :
-                                  'bg-green-500 w-full'
-                                }`}
+                                    'bg-green-500 w-full'
+                                  }`}
                               />
                             </div>
-                            <span className={`text-xs font-medium ${
-                              strength.level === 'weak' ? 'text-red-600' :
+                            <span className={`text-xs font-medium ${strength.level === 'weak' ? 'text-red-600' :
                               strength.level === 'medium' ? 'text-yellow-600' :
-                              'text-green-600'
-                            }`}>
+                                'text-green-600'
+                              }`}>
                               {strength.level === 'weak' ? 'Weak' :
-                               strength.level === 'medium' ? 'Medium' : 'Strong'}
+                                strength.level === 'medium' ? 'Medium' : 'Strong'}
                             </span>
                           </div>
                           <div className="grid grid-cols-2 gap-2 text-xs">
@@ -933,12 +933,11 @@ export default function UserProfile() {
                     {passwordErrors.confirm}
                   </p>
                 )}
-                
+
                 {/* Password Match Indicator */}
                 {passwordData.confirmPassword && passwordData.newPassword && (
-                  <div className={`text-sm flex items-center gap-1 ${
-                    passwordData.newPassword === passwordData.confirmPassword ? 'text-green-600' : 'text-red-600'
-                  }`}>
+                  <div className={`text-sm flex items-center gap-1 ${passwordData.newPassword === passwordData.confirmPassword ? 'text-green-600' : 'text-red-600'
+                    }`}>
                     {passwordData.newPassword === passwordData.confirmPassword ? (
                       <>
                         <CheckCircle2 className="h-3 w-3" />

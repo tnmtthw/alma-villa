@@ -22,20 +22,22 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { 
-  FileText, 
-  History, 
-  LayoutDashboard, 
-  LogOut, 
-  Menu, 
-  Newspaper, 
-  Settings, 
+import {
+  FileText,
+  History,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  Newspaper,
+  Settings,
   User2,
   HelpCircle,
   Moon,
   ChevronDown,
 } from "lucide-react"
 import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
+import useSWR from 'swr'
 
 interface NavigationItem {
   icon: React.ElementType
@@ -71,9 +73,17 @@ const navigationItems: NavigationItem[] = [
   },
 ]
 
+const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) => fetch(...args).then((res) => res.json());
+
 export function MainNav() {
-  const userName = "Juan Dela Cruz"
-  const userEmail = "juan.delacruz@email.com"
+  const { data: session } = useSession()
+
+  const { data } = useSWR(`/api/user?id=${session?.user.id}`, fetcher)
+
+  const fullName = data?.firstName + data?.middleName + data?.lastName;
+
+  const userName = fullName;
+  const userEmail = data?.email;
   const [mounted, setMounted] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(false)
 
@@ -98,8 +108,8 @@ export function MainNav() {
               <span className="sr-only">Toggle menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent 
-            side="left" 
+          <SheetContent
+            side="left"
             className="w-[280px] p-0 bg-white border-r border-gray-200 shadow-lg"
           >
             <SheetHeader className="p-6 md:p-8 border-b border-gray-200 bg-white">
@@ -155,15 +165,15 @@ export function MainNav() {
           {mounted && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   className="h-10 rounded-xl px-3 hover:bg-gray-50 transition-colors duration-200"
                 >
                   <div className="flex items-center space-x-2">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src="/placeholder-avatar.jpg" alt={userName} />
                       <AvatarFallback className="bg-[#23479A] text-white text-xs font-medium">
-                        {userName.split(' ').map(n => n[0]).join('')}
+                        {userName.split(' ').map((n: any[]) => n[0]).join('')}
                       </AvatarFallback>
                     </Avatar>
                     <div className="hidden sm:block">
@@ -175,9 +185,9 @@ export function MainNav() {
                   </div>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent 
-                className="w-64 bg-white border border-gray-200 shadow-lg rounded-xl p-0 mt-2" 
-                align="end" 
+              <DropdownMenuContent
+                className="w-64 bg-white border border-gray-200 shadow-lg rounded-xl p-0 mt-2"
+                align="end"
                 forceMount
               >
                 {/* User Info Section */}
@@ -186,7 +196,7 @@ export function MainNav() {
                     <Avatar className="h-10 w-10">
                       <AvatarImage src="/placeholder-avatar.jpg" alt={userName} />
                       <AvatarFallback className="bg-[#23479A] text-white text-sm font-medium">
-                        {userName.split(' ').map(n => n[0]).join('')}
+                        {userName.split(' ').map((n: any[]) => n[0]).join('')}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
@@ -209,7 +219,7 @@ export function MainNav() {
                       <span className="text-sm font-medium text-gray-700">Profile Settings</span>
                     </Link>
                   </DropdownMenuItem>
-                  
+
                   <DropdownMenuItem asChild className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors">
                     <Link href="/help" className="flex items-center w-full">
                       <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 mr-3">
@@ -218,7 +228,7 @@ export function MainNav() {
                       <span className="text-sm font-medium text-gray-700">Help Center</span>
                     </Link>
                   </DropdownMenuItem>
-                  
+
                   <DropdownMenuItem onClick={toggleDarkMode} className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors">
                     <div className="flex items-center w-full">
                       <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 mr-3">
@@ -229,7 +239,7 @@ export function MainNav() {
                       </span>
                     </div>
                   </DropdownMenuItem>
-                  
+
                   <DropdownMenuItem asChild className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors">
                     <Link href="/upgrade" className="flex items-center w-full">
                       <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 mr-3">
