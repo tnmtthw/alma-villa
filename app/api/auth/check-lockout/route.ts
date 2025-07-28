@@ -30,6 +30,7 @@ export async function POST(req: Request) {
         timeLeft,
         attemptsLeft: 0,
         loginAttempts: user.loginAttempts || 0,
+        role: user.role,
         error: 'Account temporarily locked due to too many failed attempts'
       }, { status: 423 });
     }
@@ -51,7 +52,8 @@ export async function POST(req: Request) {
           isLocked: false,
           timeLeft: 0,
           attemptsLeft: LOGIN_SECURITY.MAX_ATTEMPTS,
-          loginAttempts: 0
+          loginAttempts: 0,
+          role: user.role
         }, { status: 200 });
       }
 
@@ -63,7 +65,8 @@ export async function POST(req: Request) {
       isLocked: false,
       timeLeft: 0,
       attemptsLeft,
-      loginAttempts: currentAttempts
+      loginAttempts: currentAttempts,
+      role: user.role
     }, { status: 200 });
 
   } catch (error) {

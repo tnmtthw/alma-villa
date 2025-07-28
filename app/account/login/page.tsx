@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useState, useEffect } from "react"
-import { Eye, EyeOff, User, Lock, Clock, Shield, AlertTriangle } from "lucide-react"
+import { Eye, EyeOff, User, Lock, Clock, Shield, AlertTriangle, Mail, CheckCircle, XCircle } from "lucide-react"
 import Image from "next/image"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -20,6 +20,7 @@ export default function LoginPage() {
   const [cooldownTime, setCooldownTime] = useState(0)
   const [attemptsLeft, setAttemptsLeft] = useState(3)
   const [isCheckingStatus, setIsCheckingStatus] = useState(false)
+  const [accountStatus, setAccountStatus] = useState<"checking" | "registered" | "unregistered" | "unverified" | null>(null)
   const router = useRouter()
 
   // Reset state when email changes significantly
@@ -28,13 +29,16 @@ export default function LoginPage() {
     setCooldownTime(0)
     setErrorMessage("")
     setAttemptsLeft(3)
+    setAccountStatus(null)
   }
 
-  // Real-time lockout status checker
-  const checkLockoutStatus = async (userEmail = email) => {
+  // Check if account exists and its verification status
+  const checkAccountStatus = async (userEmail = email) => {
     if (!userEmail || userEmail.length < 3) return
     
     setIsCheckingStatus(true)
+    setAccountStatus("checking")
+    
     try {
       const response = await fetch("/api/auth/check-lockout", {
         method: "POST",
@@ -44,33 +48,49 @@ export default function LoginPage() {
 
       const result = await response.json()
 
-      if (response.status === 423 || result.isLocked) {
+      if (response.status === 404) {
+        // Account doesn't exist
+        setAccountStatus("unregistered")
+        setErrorMessage("")
+      } else if (response.status === 423 || result.isLocked) {
         // User is locked
         setIsLocked(true)
         setCooldownTime(result.timeLeft || 0)
         setAttemptsLeft(0)
         setErrorMessage(result.error || "Account temporarily locked")
+        setAccountStatus("registered")
       } else if (response.ok) {
         // User is not locked
         setIsLocked(false)
         setCooldownTime(0)
         setAttemptsLeft(result.attemptsLeft || 3)
-        if (result.loginAttempts > 0) {
+        setAccountStatus("registered")
+        
+        // Check if account is unverified
+        if (result.role === "Unverified") {
+          setAccountStatus("unverified")
+          setErrorMessage("Your account is not verified. Please check your email to verify your account.")
+        } else if (result.loginAttempts > 0) {
           setErrorMessage(`${result.loginAttempts} previous failed attempts. ${result.attemptsLeft} attempts remaining.`)
+        } else {
+          setErrorMessage("")
         }
       }
     } catch (error) {
-      console.error("Error checking lockout status:", error)
+      console.error("Error checking account status:", error)
+      setAccountStatus(null)
     } finally {
       setIsCheckingStatus(false)
     }
   }
 
-  // Check lockout status when email changes
+  // Check account status when email changes
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (email && email.includes('@')) {
-        checkLockoutStatus(email)
+        checkAccountStatus(email)
+      } else {
+        resetLoginState()
       }
     }, 500) // Debounce for 500ms
 
@@ -88,7 +108,7 @@ export default function LoginPage() {
             setAttemptsLeft(3)
             setErrorMessage("")
             // Recheck status after lockout expires
-            setTimeout(() => checkLockoutStatus(), 100)
+            setTimeout(() => checkAccountStatus(), 100)
             return 0
           }
           return prev - 1
@@ -106,6 +126,13 @@ export default function LoginPage() {
     // Check if account is locked before attempting
     if (isLocked && cooldownTime > 0) {
       setErrorMessage(`Account is locked. Try again in ${cooldownTime} seconds.`)
+      setIsLoading(false)
+      return
+    }
+
+    // Check if account exists before attempting login
+    if (accountStatus === "unregistered") {
+      setErrorMessage("No account found with this email address. Please sign up first.")
       setIsLoading(false)
       return
     }
@@ -141,12 +168,13 @@ export default function LoginPage() {
           if (remainingAttempts === 0) {
             setErrorMessage("Too many failed attempts. Account will be locked.")
             // Recheck status immediately for potential lockout
-            setTimeout(() => checkLockoutStatus(), 200)
+            setTimeout(() => checkAccountStatus(), 200)
           } else {
             setErrorMessage(`${message}. ${remainingAttempts} attempt${remainingAttempts === 1 ? '' : 's'} remaining.`)
           }
           
         } else if (response.error === "Unverified") {
+          setAccountStatus("unverified")
           setErrorMessage("Your account is not verified. Please check your email to verify your account.")
         } else if (response.error === "CredentialsSignin") {
           setErrorMessage("Invalid email or password. Please try again.")
@@ -155,7 +183,7 @@ export default function LoginPage() {
         }
         
         // After any failed attempt, recheck status for real-time updates
-        setTimeout(() => checkLockoutStatus(), 300)
+        setTimeout(() => checkAccountStatus(), 300)
         
       } else if (response?.ok) {
         // Reset all states on successful login
@@ -163,6 +191,7 @@ export default function LoginPage() {
         setIsLocked(false)
         setCooldownTime(0)
         setErrorMessage("")
+        setAccountStatus(null)
         
         // Small delay for better UX
         setTimeout(() => {
@@ -244,12 +273,47 @@ export default function LoginPage() {
             <p className="text-gray-600">Sign in to your Alma Villa account</p>
           </div>
 
-          {/* Real-time Status Indicator */}
-          {isCheckingStatus && (
+          {/* Account Status Indicator */}
+          {accountStatus === "checking" && (
             <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-[2px] text-blue-600 text-sm">
               <div className="flex items-center gap-2">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
                 <span>Checking account status...</span>
+              </div>
+            </div>
+          )}
+
+          {accountStatus === "unregistered" && (
+            <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-[2px] text-orange-600 text-sm">
+              <div className="flex items-center gap-2">
+                <XCircle className="h-4 w-4" />
+                <span>No account found with this email address.</span>
+              </div>
+              <div className="mt-2 text-xs">
+                <a href="/account/signup" className="text-orange-700 hover:text-orange-800 underline">
+                  Create an account here
+                </a>
+              </div>
+            </div>
+          )}
+
+          {accountStatus === "unverified" && (
+            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-[2px] text-yellow-600 text-sm">
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4" />
+                <span>Your account is not verified.</span>
+              </div>
+              <div className="mt-2 text-xs">
+                Please check your email for verification instructions.
+              </div>
+            </div>
+          )}
+
+          {accountStatus === "registered" && !isLocked && !errorMessage && (
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-[2px] text-green-600 text-sm">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                <span>Account found and ready to sign in.</span>
               </div>
             </div>
           )}
@@ -379,10 +443,12 @@ export default function LoginPage() {
             <Button
               type="submit"
               className="w-full bg-[#23479A] hover:bg-[#23479A]/90 text-white py-2 px-4 rounded-[2px] disabled:opacity-50"
-              disabled={isLoading || isLocked}
+              disabled={isLoading || isLocked || accountStatus === "unregistered"}
             >
               {isLocked && cooldownTime > 0 
                 ? `🔒 Locked (${cooldownTime}s)` 
+                : accountStatus === "unregistered"
+                ? "Account Not Found"
                 : isLoading 
                   ? "Signing in..." 
                   : "Sign in"
