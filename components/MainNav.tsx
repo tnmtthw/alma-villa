@@ -218,9 +218,7 @@ export function MainNav() {
                       <p className="text-sm font-medium text-gray-900 truncate">{userName}</p>
                       <p className="text-xs text-gray-500 truncate">{userEmail}</p>
                     </div>
-                    <Badge variant="secondary" className="bg-[#23479A] text-white text-xs px-2 py-1 rounded-full">
-                      PRO
-                    </Badge>
+                   
                   </div>
                 </div>
 
