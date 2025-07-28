@@ -80,10 +80,13 @@ export function MainNav() {
 
   const { data } = useSWR(`/api/user?id=${session?.user.id}`, fetcher)
 
-  const fullName = data?.firstName + data?.middleName + data?.lastName;
+  // Safely construct full name with null checks
+  const fullName = [data?.firstName, data?.middleName, data?.lastName]
+    .filter(Boolean) // Remove null/undefined values
+    .join(' ') || session?.user?.name || 'User'; // Fallback to session name or 'User'
 
   const userName = fullName;
-  const userEmail = data?.email;
+  const userEmail = data?.email || session?.user?.email;
   const [mounted, setMounted] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(false)
 
@@ -95,6 +98,18 @@ export function MainNav() {
     setIsDarkMode(!isDarkMode)
     // Here you would implement actual dark mode functionality
     // document.documentElement.classList.toggle('dark')
+  }
+
+  // Helper function to safely get initials
+  const getInitials = (name: string) => {
+    if (!name || typeof name !== 'string') return 'U';
+    return name.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'U';
+  }
+
+  // Helper function to safely get first name
+  const getFirstName = (name: string) => {
+    if (!name || typeof name !== 'string') return 'User';
+    return name.split(' ')[0] || 'User';
   }
 
   return (
@@ -173,12 +188,12 @@ export function MainNav() {
                     <Avatar className="h-8 w-8">
                       <AvatarImage src="/placeholder-avatar.jpg" alt={userName} />
                       <AvatarFallback className="bg-[#23479A] text-white text-xs font-medium">
-                        {userName.split(' ').map((n: any[]) => n[0]).join('')}
+                        {getInitials(userName)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="hidden sm:block">
                       <span className="text-sm font-medium text-gray-700">
-                        {userName.split(' ')[0]}
+                        {getFirstName(userName)}
                       </span>
                     </div>
                     <ChevronDown className="h-4 w-4 text-gray-500" />
@@ -196,7 +211,7 @@ export function MainNav() {
                     <Avatar className="h-10 w-10">
                       <AvatarImage src="/placeholder-avatar.jpg" alt={userName} />
                       <AvatarFallback className="bg-[#23479A] text-white text-sm font-medium">
-                        {userName.split(' ').map((n: any[]) => n[0]).join('')}
+                        {getInitials(userName)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
