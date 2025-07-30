@@ -46,6 +46,7 @@ interface UserData {
   suffix?: string;
   email: string;
   mobileNumber?: string;
+  phone?: string; // Added for compatibility
   birthDate: string;
   age: string;
   gender: string;
@@ -60,16 +61,33 @@ interface UserData {
   province: string;
   zipCode: string;
   residencyLength: string;
+  address?: string; // Added for compatibility
+  street?: string; // Added for street address
 }
 
 export default function UserProfile() {
   const searchParams = useSearchParams()
   const [isEditing, setIsEditing] = useState(false)
   const [activeTab, setActiveTab] = useState("personal")
-  const { data: session } = useSession()
   const [isClient, setIsClient] = useState(false)
+  const { data: session } = useSession()
 
   const { data: apiData } = useSWR(`/api/user?id=${session?.user.id}`, fetcher)
+
+  // Use the same logic as MainNav for consistent data display
+  const getUserFullName = () => {
+    if (!apiData) return session?.user?.name || "User";
+    
+    const fullName = [apiData?.firstName, apiData?.middleName, apiData?.lastName]
+      .filter(Boolean) // Remove null/undefined values
+      .join(' ');
+    
+    return fullName || session?.user?.name || "User";
+  }
+
+  const getUserEmail = () => {
+    return apiData?.email || session?.user?.email || "No email provided";
+  }
 
   // Set isClient to true after component mounts
   useEffect(() => {
@@ -102,11 +120,11 @@ export default function UserProfile() {
   })
   const [isChangingPassword, setIsChangingPassword] = useState(false)
 
-  // Initialize form data with data from localStorage first, then API data
+  // Initialize form data with existing API data first, then registration data
   const [formData, setFormData] = useState<Partial<UserData>>({})
 
   useEffect(() => {
-    if (isClient) {
+    if (isClient && apiData) {
       // First, try to get data from localStorage (registration data)
       const savedRegistrationData = localStorage.getItem('residentInfoData')
       let registrationData = null
@@ -119,28 +137,37 @@ export default function UserProfile() {
         }
       }
 
-      // Merge API data with registration data, prioritizing registration data
+      // Prioritize API data for name and email, fallback to registration data for other fields
       const combinedData = {
-        firstName: registrationData?.firstName || apiData?.firstName || "",
-        lastName: registrationData?.lastName || apiData?.lastName || "",
-        middleName: registrationData?.middleName || apiData?.middleName || "",
-        suffix: registrationData?.suffix || apiData?.suffix || "",
-        email: registrationData?.email || apiData?.email || "",
-        mobileNumber: registrationData?.mobileNumber || apiData?.mobileNumber || "",
-        birthDate: registrationData?.birthDate || apiData?.birthDate || "",
-        age: registrationData?.age || apiData?.age || "",
-        gender: registrationData?.gender || apiData?.gender || "",
-        civilStatus: registrationData?.civilStatus || apiData?.civilStatus || "",
-        nationality: registrationData?.nationality || apiData?.nationality || "",
-        religion: registrationData?.religion || apiData?.religion || "",
-        emergencyContact: registrationData?.emergencyContact || apiData?.emergencyContact || "",
-        emergencyNumber: registrationData?.emergencyNumber || apiData?.emergencyNumber || "",
-        purok: registrationData?.purok || apiData?.purok || "", // Sitio
-        barangay: registrationData?.barangay || apiData?.barangay || "Alma Villa",
-        city: registrationData?.city || apiData?.city || "Gloria",
-        province: registrationData?.province || apiData?.province || "Oriental Mindoro",
-        zipCode: registrationData?.zipCode || apiData?.zipCode || "5209",
-        residencyLength: registrationData?.residencyLength || apiData?.residencyLength || ""
+        // Use API data first for name and email to match MainNav
+        firstName: apiData?.firstName || registrationData?.firstName || "",
+        lastName: apiData?.lastName || registrationData?.lastName || "",
+        middleName: apiData?.middleName || registrationData?.middleName || "",
+        suffix: apiData?.suffix || registrationData?.suffix || "",
+        email: apiData?.email || registrationData?.email || "",
+        
+        // Enhanced with registration-specific fields (fallback to registration data)
+        mobileNumber: apiData?.mobileNumber || registrationData?.mobileNumber || "",
+        birthDate: apiData?.birthDate || registrationData?.birthDate || "",
+        age: apiData?.age || registrationData?.age || "",
+        gender: apiData?.gender || registrationData?.gender || "",
+        civilStatus: apiData?.civilStatus || registrationData?.civilStatus || "",
+        nationality: apiData?.nationality || registrationData?.nationality || "",
+        religion: apiData?.religion || registrationData?.religion || "",
+        emergencyContact: apiData?.emergencyContact || registrationData?.emergencyContact || "",
+        emergencyNumber: apiData?.emergencyNumber || registrationData?.emergencyNumber || "",
+        
+        // Address fields - enhanced from registration
+        purok: apiData?.purok || registrationData?.purok || "", // Sitio
+        barangay: apiData?.barangay || registrationData?.barangay || "Alma Villa",
+        city: apiData?.city || registrationData?.city || "Gloria",
+        province: apiData?.province || registrationData?.province || "Oriental Mindoro",
+        zipCode: apiData?.zipCode || registrationData?.zipCode || "5209",
+        residencyLength: apiData?.residencyLength || registrationData?.residencyLength || "",
+        
+        // Keep existing fields for compatibility
+        phone: apiData?.mobileNumber || apiData?.phone || registrationData?.mobileNumber || "",
+        address: apiData?.street || apiData?.address || registrationData?.street || "",
       }
 
       setFormData(combinedData)
@@ -191,11 +218,14 @@ export default function UserProfile() {
         [field]: value,
         age: age
       }))
-    } else if (field === 'mobileNumber' || field === 'emergencyNumber') {
+    } else if (field === 'mobileNumber' || field === 'emergencyNumber' || field === 'phone') {
       const formatted = formatMobileNumber(value)
       setFormData(prev => ({
         ...prev,
-        [field]: formatted
+        [field]: formatted,
+        // Keep phone and mobileNumber in sync
+        ...(field === 'phone' && { mobileNumber: formatted }),
+        ...(field === 'mobileNumber' && { phone: formatted }),
       }))
     } else {
       setFormData(prev => ({
@@ -507,7 +537,7 @@ export default function UserProfile() {
                   <Label htmlFor="mobileNumber">Mobile Number</Label>
                   <Input
                     id="mobileNumber"
-                    value={formData.mobileNumber || ""}
+                    value={formData.mobileNumber || formData.phone || ""}
                     onChange={(e) => handleInputChange('mobileNumber', e.target.value)}
                     disabled={!isEditing}
                     className={!isEditing ? "bg-gray-50" : ""}
@@ -553,7 +583,7 @@ export default function UserProfile() {
                     <Label htmlFor="purok">Sitio</Label>
                     <Input
                       id="purok"
-                      value={formData.purok || ""}
+                      value={formData.purok || formData.address || ""}
                       onChange={(e) => handleInputChange('purok', e.target.value)}
                       disabled={!isEditing}
                       className={!isEditing ? "bg-gray-50" : ""}
@@ -630,36 +660,26 @@ export default function UserProfile() {
                   Password & Security
                 </CardTitle>
                 <CardDescription>
-                  Manage your account security and authentication settings
+                  Manage your account security settings
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                    <div>
-                      <h3 className="font-medium text-gray-900">Password</h3>
-                      <p className="text-sm text-gray-500">Last changed 3 months ago</p>
-                    </div>
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowChangePassword(true)}
-                      className="hover:bg-[#23479A]/5 hover:border-[#23479A]"
-                    >
-                      <Key className="h-4 w-4 mr-2" />
-                      Change Password
-                    </Button>
+                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                  <div>
+                    <h3 className="font-medium text-gray-900">Password</h3>
+                    <p className="text-sm text-gray-500">Reset your account password</p>
                   </div>
-
-                  <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                    <div>
-                      <h3 className="font-medium text-gray-900">Two-Factor Authentication</h3>
-                      <p className="text-sm text-gray-500">Add an extra layer of security</p>
-                    </div>
-                    <Button variant="outline">
-                      <Shield className="h-4 w-4 mr-2" />
-                      Enable 2FA
-                    </Button>
-                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      // Handle password reset logic here
+                      alert("Password reset functionality will be implemented here")
+                    }}
+                    className="hover:bg-[#23479A]/5 hover:border-[#23479A]"
+                  >
+                    <Key className="h-4 w-4 mr-2" />
+                    Reset Password
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -711,7 +731,7 @@ export default function UserProfile() {
                   <Avatar className="h-24 w-24">
                     <AvatarImage src="/placeholder-avatar.jpg" />
                     <AvatarFallback className="bg-[#23479A] text-white text-xl">
-                      {(formData.firstName || "U")[0]}{(formData.lastName || "U")[0]}
+                      {getUserFullName().split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'U'}
                     </AvatarFallback>
                   </Avatar>
                   <Button
@@ -728,9 +748,9 @@ export default function UserProfile() {
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
                       <h1 className="text-2xl font-bold text-gray-900">
-                        {formData.firstName || "User"} {formData.middleName ? `${formData.middleName} ` : ""}{formData.lastName || ""} {formData.suffix || ""}
+                        {getUserFullName()}
                       </h1>
-                      <p className="text-gray-600 mt-1">{formData.email || "No email provided"}</p>
+                      <p className="text-gray-600 mt-1">{getUserEmail()}</p>
                       <div className="flex items-center gap-2 mt-2">
                         <Badge variant="outline" className="text-green-700 border-green-200 bg-green-50">
                           <CheckCircle2 className="h-3 w-3 mr-1" />
@@ -795,246 +815,6 @@ export default function UserProfile() {
           {renderTabContent()}
         </div>
       </div>
-
-      {/* Change Password Modal */}
-      {showChangePassword && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <div className="flex items-center gap-3">
-                <div className="bg-[#23479A]/10 p-2 rounded-lg">
-                  <Lock className="h-5 w-5 text-[#23479A]" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900">Change Password</h2>
-                  <p className="text-sm text-gray-500">Update your account password</p>
-                </div>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setShowChangePassword(false)
-                  setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
-                  setPasswordErrors({ current: "", new: "", confirm: "" })
-                }}
-                className="h-8 w-8 p-0 hover:bg-gray-100"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {/* Modal Body */}
-            <form onSubmit={handleChangePassword} className="p-6 space-y-6">
-              {/* Current Password */}
-              <div className="space-y-2">
-                <Label htmlFor="currentPassword">Current Password</Label>
-                <div className="relative">
-                  <Input
-                    id="currentPassword"
-                    type={showPasswords.current ? "text" : "password"}
-                    value={passwordData.currentPassword}
-                    onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
-                    placeholder="Enter your current password"
-                    className={`pr-10 ${passwordErrors.current ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : 'focus:border-[#23479A] focus:ring-[#23479A]/20'}`}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-gray-100"
-                    onClick={() => setShowPasswords(prev => ({ ...prev, current: !prev.current }))}
-                  >
-                    {showPasswords.current ? (
-                      <EyeOff className="h-4 w-4 text-gray-400" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-gray-400" />
-                    )}
-                  </Button>
-                </div>
-                {passwordErrors.current && (
-                  <p className="text-sm text-red-600 flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
-                    {passwordErrors.current}
-                  </p>
-                )}
-              </div>
-
-              {/* New Password */}
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
-                <div className="relative">
-                  <Input
-                    id="newPassword"
-                    type={showPasswords.new ? "text" : "password"}
-                    value={passwordData.newPassword}
-                    onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
-                    placeholder="Enter your new password"
-                    className={`pr-10 ${passwordErrors.new ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : 'focus:border-[#23479A] focus:ring-[#23479A]/20'}`}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-gray-100"
-                    onClick={() => setShowPasswords(prev => ({ ...prev, new: !prev.new }))}
-                  >
-                    {showPasswords.new ? (
-                      <EyeOff className="h-4 w-4 text-gray-400" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-gray-400" />
-                    )}
-                  </Button>
-                </div>
-                {passwordErrors.new && (
-                  <p className="text-sm text-red-600 flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
-                    {passwordErrors.new}
-                  </p>
-                )}
-
-                {/* Password Strength Indicator */}
-                {passwordData.newPassword && (
-                  <div className="space-y-2">
-                    {(() => {
-                      const strength = getPasswordStrength(passwordData.newPassword)
-                      return (
-                        <>
-                          <div className="flex items-center gap-2">
-                            <div className="flex-1 bg-gray-200 rounded-full h-2">
-                              <div
-                                className={`h-2 rounded-full transition-all duration-300 ${strength.level === 'weak' ? 'bg-red-500 w-1/3' :
-                                  strength.level === 'medium' ? 'bg-yellow-500 w-2/3' :
-                                    'bg-green-500 w-full'
-                                  }`}
-                              />
-                            </div>
-                            <span className={`text-xs font-medium ${strength.level === 'weak' ? 'text-red-600' :
-                              strength.level === 'medium' ? 'text-yellow-600' :
-                                'text-green-600'
-                              }`}>
-                              {strength.level === 'weak' ? 'Weak' :
-                                strength.level === 'medium' ? 'Medium' : 'Strong'}
-                            </span>
-                          </div>
-                          <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div className={`flex items-center gap-1 ${strength.checks.length ? 'text-green-600' : 'text-gray-400'}`}>
-                              <Check className="h-3 w-3" />
-                              8+ characters
-                            </div>
-                            <div className={`flex items-center gap-1 ${strength.checks.uppercase ? 'text-green-600' : 'text-gray-400'}`}>
-                              <Check className="h-3 w-3" />
-                              Uppercase letter
-                            </div>
-                            <div className={`flex items-center gap-1 ${strength.checks.lowercase ? 'text-green-600' : 'text-gray-400'}`}>
-                              <Check className="h-3 w-3" />
-                              Lowercase letter
-                            </div>
-                            <div className={`flex items-center gap-1 ${strength.checks.number ? 'text-green-600' : 'text-gray-400'}`}>
-                              <Check className="h-3 w-3" />
-                              Number
-                            </div>
-                            <div className={`flex items-center gap-1 ${strength.checks.special ? 'text-green-600' : 'text-gray-400'}`}>
-                              <Check className="h-3 w-3" />
-                              Special character
-                            </div>
-                          </div>
-                        </>
-                      )
-                    })()}
-                  </div>
-                )}
-              </div>
-
-              {/* Confirm Password */}
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                <div className="relative">
-                  <Input
-                    id="confirmPassword"
-                    type={showPasswords.confirm ? "text" : "password"}
-                    value={passwordData.confirmPassword}
-                    onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
-                    placeholder="Confirm your new password"
-                    className={`pr-10 ${passwordErrors.confirm ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : 'focus:border-[#23479A] focus:ring-[#23479A]/20'}`}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-gray-100"
-                    onClick={() => setShowPasswords(prev => ({ ...prev, confirm: !prev.confirm }))}
-                  >
-                    {showPasswords.confirm ? (
-                      <EyeOff className="h-4 w-4 text-gray-400" />
-                    ) : (
-                      <Eye className="h-4 w-4 text-gray-400" />
-                    )}
-                  </Button>
-                </div>
-                {passwordErrors.confirm && (
-                  <p className="text-sm text-red-600 flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
-                    {passwordErrors.confirm}
-                  </p>
-                )}
-
-                {/* Password Match Indicator */}
-                {passwordData.confirmPassword && passwordData.newPassword && (
-                  <div className={`text-sm flex items-center gap-1 ${passwordData.newPassword === passwordData.confirmPassword ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                    {passwordData.newPassword === passwordData.confirmPassword ? (
-                      <>
-                        <CheckCircle2 className="h-3 w-3" />
-                        Passwords match
-                      </>
-                    ) : (
-                      <>
-                        <AlertCircle className="h-3 w-3" />
-                        Passwords do not match
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Modal Footer */}
-              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setShowChangePassword(false)
-                    setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
-                    setPasswordErrors({ current: "", new: "", confirm: "" })
-                  }}
-                  disabled={isChangingPassword}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  className="bg-[#23479A] hover:bg-[#23479A]/90"
-                  disabled={isChangingPassword || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
-                >
-                  {isChangingPassword ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
-                      Changing Password...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4 mr-2" />
-                      Change Password
-                    </>
-                  )}
-                </Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
