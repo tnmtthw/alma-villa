@@ -234,15 +234,15 @@ export function MainNav() {
                   </DropdownMenuItem>
 
                   <DropdownMenuItem asChild className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors">
-                    <Link href="/help" className="flex items-center w-full">
+                    {/* <Link href="/help" className="flex items-center w-full">
                       <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 mr-3">
                         <HelpCircle className="h-4 w-4 text-gray-600" />
                       </div>
                       <span className="text-sm font-medium text-gray-700">Help Center</span>
-                    </Link>
+                    </Link> */}
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem onClick={toggleDarkMode} className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors">
+                  {/* <DropdownMenuItem onClick={toggleDarkMode} className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors">
                     <div className="flex items-center w-full">
                       <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 mr-3">
                         <Moon className="h-4 w-4 text-gray-600" />
@@ -251,15 +251,15 @@ export function MainNav() {
                         {isDarkMode ? 'Light Mode' : 'Dark Mode'}
                       </span>
                     </div>
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
 
                   <DropdownMenuItem asChild className="px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors">
-                    <Link href="/upgrade" className="flex items-center w-full">
+                    {/* <Link href="/upgrade" className="flex items-center w-full">
                       <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 mr-3">
                         <Settings className="h-4 w-4 text-gray-600" />
                       </div>
                       <span className="text-sm font-medium text-gray-700">Upgrade Plan</span>
-                    </Link>
+                    </Link> */}
                   </DropdownMenuItem>
                 </div>
 

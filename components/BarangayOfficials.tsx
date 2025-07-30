@@ -3,44 +3,44 @@ import ScrollToTop from "./ScrollToTop"
 
 const BarangayOfficials = () => {
   const barangayCaptain = {
-    name: "Hon. Maria Esperanza Santos",
+    name: "Hon. Marife M. Sol",
     position: "Barangay Captain",
     image: "/assets/img/officials/captain.png"
   }
 
   const kagawads = [
     {
-      name: "Hon. Juan Carlos Cruz",
+      name: "Hon. Ricky S. Soverano",
       position: "Kagawad 1",
       image: "/assets/img/officials/kagawad.png"
     },
     {
-      name: "Hon. Ana Maria Reyes",
+      name: "Hon. Julito J. Mamitag",
       position: "Kagawad 2", 
       image: "/assets/img/officials/kagawad.png"
     },
     {
-      name: "Hon. Roberto Dela Cruz",
+      name: "Hon. Agustin J. Malacas",
       position: "Kagawad 3",
       image: "/assets/img/officials/kagawad.png"
     },
     {
-      name: "Hon. Carmen Villanueva",
+      name: "Hon. John Mark C. Manrique",
       position: "Kagawad 4",
       image: "/assets/img/officials/kagawad.png"
     },
     {
-      name: "Hon. Miguel Antonio Torres",
+      name: "Hon. Wody J. Fronda",
       position: "Kagawad 5",
       image: "/assets/img/officials/kagawad.png"
     },
     {
-      name: "Hon. Elena Grace Mendoza",
+      name: "Hon. Miguela M. Motol",
       position: "Kagawad 6",
       image: "/assets/img/officials/kagawad.png"
     },
     {
-      name: "Hon. Fernando Jose Garcia",
+      name: "Hon. Jocelyn P. Supleo",
       position: "Kagawad 7",
       image: "/assets/img/officials/kagawad.png"
     }

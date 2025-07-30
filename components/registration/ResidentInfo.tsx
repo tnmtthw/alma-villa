@@ -11,6 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { AlertTriangle } from "lucide-react"
 
 interface ResidentInfoProps {
   onNextAction: () => void
@@ -94,6 +96,7 @@ const sampleData: FormData = {
 export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
   const [formData, setFormData] = useState<FormData>(initialFormData)
   const [isClient, setIsClient] = useState(false)
+  const [isMinor, setIsMinor] = useState(false)
 
   // Set isClient to true after component mounts (client-side only)
   useEffect(() => {
@@ -115,6 +118,12 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
           street: parsedData.street || "N/A"
         }
         setFormData(updatedData)
+        
+        // Check if the loaded data shows a minor
+        if (updatedData.birthDate) {
+          const age = calculateAge(updatedData.birthDate)
+          setIsMinor(parseInt(age) < 18)
+        }
       } catch (error) {
         console.error('Error parsing saved resident data:', error)
       }
@@ -186,6 +195,11 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
     
     if (id === 'birthDate') {
       const age = calculateAge(value)
+      const calculatedAge = parseInt(age)
+      
+      // Check if the person is a minor (under 18)
+      setIsMinor(calculatedAge < 18 && calculatedAge > 0)
+      
       setFormData(prev => ({
         ...prev,
         [id]: value,
@@ -247,11 +261,17 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
       (formData.houseNumber === "N/A" || formData.houseNumber !== "") &&
       (formData.street === "N/A" || formData.street !== "")
 
-    return userFieldsValid && autoFieldsPresent
+    // Don't allow proceed if user is a minor
+    return userFieldsValid && autoFieldsPresent && !isMinor
   }
 
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Double-check if user is minor before proceeding
+    if (isMinor) {
+      return // Prevent form submission
+    }
     
     // Ensure all required backend fields are properly set before proceeding
     const completeFormData = {
@@ -278,6 +298,9 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
 
   const fillWithSampleData = () => {
     setFormData(sampleData)
+    // Check if sample data shows a minor
+    const age = parseInt(sampleData.age)
+    setIsMinor(age < 18)
   }
 
   return (
@@ -294,6 +317,19 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
           Fill with Sample Data
         </Button>
       </div>
+
+      {/* Minor Age Warning */}
+      {isMinor && (
+        <div className="mb-6">
+          <Alert className="border-red-200 bg-red-50">
+            <AlertTriangle className="h-4 w-4 text-red-600" />
+            <AlertDescription className="text-red-800">
+              <strong>You are not of legal age.</strong> Registration is only available for individuals who are 18 years old or above. 
+              Please contact the barangay office directly for assistance if you need services as a minor.
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
 
       <form className="space-y-6">
         <div className="grid grid-cols-12 gap-6">
@@ -353,19 +389,24 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                   <Input
                     id="birthDate"
                     type="date"
-                    className="mt-1"
+                    className={`mt-1 ${isMinor ? 'border-red-300 focus:border-red-500' : ''}`}
                     required
                     value={formData.birthDate}
                     onChange={handleInputChange}
                     max="2025-12-31"
                   />
+                  {isMinor && formData.birthDate && (
+                    <p className="text-xs text-red-600 mt-1">
+                      Age must be 18 or above to register
+                    </p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="age">Age</Label>
                   <Input
                     id="age"
                     type="number"
-                    className="mt-1 bg-gray-100"
+                    className={`mt-1 bg-gray-100 ${isMinor ? 'border-red-300' : ''}`}
                     required
                     value={formData.age}
                     readOnly
@@ -582,7 +623,12 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
             type="submit"
             onClick={handleNext}
             disabled={!isFormValid()}
-            className="bg-[#23479A] hover:bg-[#23479A]/90 text-white rounded-[2px] px-8 disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`rounded-[2px] px-8 ${
+              isMinor 
+                ? "bg-gray-400 hover:bg-gray-400 cursor-not-allowed" 
+                : "bg-[#23479A] hover:bg-[#23479A]/90"
+            } text-white disabled:opacity-50 disabled:cursor-not-allowed`}
+            title={isMinor ? "You must be 18 or older to proceed" : ""}
           >
             Next Step
           </Button>

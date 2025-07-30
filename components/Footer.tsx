@@ -29,8 +29,8 @@ const Footer = () => {
       links: [
         { label: "Barangay Alma Villa", href: "#" },
         { label: "Gloria, Oriental Mindoro", href: "#" },
-        { label: "almavilla.gloria@gmail.com", href: "mailto:almavilla.gloria@gmail.com" },
-        { label: "Contact: Coming Soon", href: "#" },
+        { label: "almavillagloria@gmail.com", href: "mailto:almavilla.gloria@gmail.com" },
+        { label: "Contact : + 63 9355 0384 27", href: "+ 63 9355 0384 27" },
       ],
     },
   ]
@@ -68,7 +68,7 @@ const Footer = () => {
                 className="object-contain brightness-0 invert"
               />
               <div>
-                <span className="text-xl font-bold text-white">Alma Villa</span>
+                <span className="text-xl font-bold text-white">Alma Villa Gloria</span>
                 <p className="text-sm text-white/70">Barangay Portal</p>
               </div>
             </Link>

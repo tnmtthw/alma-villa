@@ -9,15 +9,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
   User2,
   Mail,
   Phone,
-  MapPin,
-  Calendar,
-  Shield,
-  Bell,
-  Eye,
-  EyeOff,
   Lock,
   Camera,
   Edit3,
@@ -25,28 +26,60 @@ import {
   X,
   CheckCircle2,
   AlertCircle,
-  Settings,
   ChevronDown,
   Key,
-  Check
+  Check,
+  Shield,
+  Eye,
+  EyeOff
 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import useSWR from 'swr'
 
 const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) => fetch(...args).then((res) => res.json());
 
+interface UserData {
+  id: string;
+  firstName: string;
+  lastName: string;
+  middleName?: string;
+  suffix?: string;
+  email: string;
+  mobileNumber?: string;
+  birthDate: string;
+  age: string;
+  gender: string;
+  civilStatus: string;
+  nationality: string;
+  religion: string;
+  emergencyContact: string;
+  emergencyNumber: string;
+  purok: string; // Sitio
+  barangay: string;
+  city: string;
+  province: string;
+  zipCode: string;
+  residencyLength: string;
+}
+
 export default function UserProfile() {
   const searchParams = useSearchParams()
   const [isEditing, setIsEditing] = useState(false)
   const [activeTab, setActiveTab] = useState("personal")
   const { data: session } = useSession()
+  const [isClient, setIsClient] = useState(false)
 
-  const { data } = useSWR(`/api/user?id=${session?.user.id}`, fetcher)
+  const { data: apiData } = useSWR(`/api/user?id=${session?.user.id}`, fetcher)
+
+  // Set isClient to true after component mounts
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   // Set active tab based on URL parameter
   useEffect(() => {
     const tabParam = searchParams.get("tab")
-    if (tabParam && ["personal", "contact", "security", "settings"].includes(tabParam)) {
+    if (tabParam && ["personal", "contact", "security"].includes(tabParam)) {
       setActiveTab(tabParam)
     }
   }, [searchParams])
@@ -68,42 +101,108 @@ export default function UserProfile() {
     confirm: ""
   })
   const [isChangingPassword, setIsChangingPassword] = useState(false)
-  const [notifications, setNotifications] = useState({
-    email: true,
-    sms: false,
-    push: true,
-    newsletter: true
-  })
 
-  const [formData, setFormData] = useState({
-    firstName: data?.firstName,
-    lastName: data?.lastName,
-    email: data?.email,
-    phone: data?.mobileNumber,
-    address: data?.street,
-    barangay: data?.barangay,
-    city: data?.city,
-    province: data?.province,
-    zipCode: data?.zipCode,
-    birthDate: data?.birthDate,
-    gender: data?.Male,
-    civilStatus: data?.civilStatus,
-    occupation: "Software Developer",
-    bio: "Resident of Barangay Alma Villa, actively participating in community events and local governance initiatives."
-  })
+  // Initialize form data with data from localStorage first, then API data
+  const [formData, setFormData] = useState<Partial<UserData>>({})
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }))
+  useEffect(() => {
+    if (isClient) {
+      // First, try to get data from localStorage (registration data)
+      const savedRegistrationData = localStorage.getItem('residentInfoData')
+      let registrationData = null
+      
+      if (savedRegistrationData) {
+        try {
+          registrationData = JSON.parse(savedRegistrationData)
+        } catch (error) {
+          console.error('Error parsing registration data:', error)
+        }
+      }
+
+      // Merge API data with registration data, prioritizing registration data
+      const combinedData = {
+        firstName: registrationData?.firstName || apiData?.firstName || "",
+        lastName: registrationData?.lastName || apiData?.lastName || "",
+        middleName: registrationData?.middleName || apiData?.middleName || "",
+        suffix: registrationData?.suffix || apiData?.suffix || "",
+        email: registrationData?.email || apiData?.email || "",
+        mobileNumber: registrationData?.mobileNumber || apiData?.mobileNumber || "",
+        birthDate: registrationData?.birthDate || apiData?.birthDate || "",
+        age: registrationData?.age || apiData?.age || "",
+        gender: registrationData?.gender || apiData?.gender || "",
+        civilStatus: registrationData?.civilStatus || apiData?.civilStatus || "",
+        nationality: registrationData?.nationality || apiData?.nationality || "",
+        religion: registrationData?.religion || apiData?.religion || "",
+        emergencyContact: registrationData?.emergencyContact || apiData?.emergencyContact || "",
+        emergencyNumber: registrationData?.emergencyNumber || apiData?.emergencyNumber || "",
+        purok: registrationData?.purok || apiData?.purok || "", // Sitio
+        barangay: registrationData?.barangay || apiData?.barangay || "Alma Villa",
+        city: registrationData?.city || apiData?.city || "Gloria",
+        province: registrationData?.province || apiData?.province || "Oriental Mindoro",
+        zipCode: registrationData?.zipCode || apiData?.zipCode || "5209",
+        residencyLength: registrationData?.residencyLength || apiData?.residencyLength || ""
+      }
+
+      setFormData(combinedData)
+    }
+  }, [isClient, apiData])
+
+  // Calculate age automatically when birthDate changes
+  const calculateAge = (birthDate: string): string => {
+    if (!birthDate) return ""
+    
+    const today = new Date()
+    const birth = new Date(birthDate)
+    let age = today.getFullYear() - birth.getFullYear()
+    const monthDiff = today.getMonth() - birth.getMonth()
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--
+    }
+    
+    return age.toString()
   }
 
-  const handleNotificationChange = (field: string, value: boolean) => {
-    setNotifications(prev => ({
-      ...prev,
-      [field]: value
-    }))
+  // Format mobile number with +63 and numbers only
+  const formatMobileNumber = (value: string): string => {
+    const digits = value.replace(/\D/g, '')
+    
+    if (digits.startsWith('63')) {
+      const withoutCountryCode = digits.slice(2)
+      const limited = withoutCountryCode.slice(0, 10)
+      return `+63${limited}`
+    }
+    
+    if (digits.startsWith('0')) {
+      const withoutZero = digits.slice(1)
+      const limited = withoutZero.slice(0, 10)
+      return `+63${limited}`
+    }
+    
+    const limited = digits.slice(0, 10)
+    return limited ? `+63${limited}` : ""
+  }
+
+  const handleInputChange = (field: string, value: string) => {
+    if (field === 'birthDate') {
+      const age = calculateAge(value)
+      setFormData(prev => ({
+        ...prev,
+        [field]: value,
+        age: age
+      }))
+    } else if (field === 'mobileNumber' || field === 'emergencyNumber') {
+      const formatted = formatMobileNumber(value)
+      setFormData(prev => ({
+        ...prev,
+        [field]: formatted
+      }))
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [field]: value
+      }))
+    }
   }
 
   const handlePasswordChange = (field: string, value: string) => {
@@ -112,7 +211,6 @@ export default function UserProfile() {
       [field]: value
     }))
 
-    // Clear errors when user starts typing
     setPasswordErrors(prev => ({
       ...prev,
       [field]: ""
@@ -180,25 +278,12 @@ export default function UserProfile() {
     setIsChangingPassword(true)
 
     try {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000))
 
-      // Here you would call your password change API
-      // const response = await fetch('/api/auth/change-password', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({
-      //     currentPassword: passwordData.currentPassword,
-      //     newPassword: passwordData.newPassword
-      //   })
-      // })
-
-      // Reset form and close modal on success
       setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
       setPasswordErrors({ current: "", new: "", confirm: "" })
       setShowChangePassword(false)
 
-      // Show success message (you could use a toast notification)
       alert("Password changed successfully!")
 
     } catch (error) {
@@ -211,76 +296,27 @@ export default function UserProfile() {
     }
   }
 
+  const handleSaveProfile = () => {
+    // Save the updated profile data
+    console.log('Saving profile data:', formData)
+    
+    // Here you would typically make an API call to save the data
+    // Example: await updateUserProfile(formData)
+    
+    // Update localStorage with the new data
+    if (isClient) {
+      localStorage.setItem('residentInfoData', JSON.stringify(formData))
+    }
+    
+    setIsEditing(false)
+    alert("Profile updated successfully!")
+  }
+
   const tabs = [
     { id: "personal", label: "Personal Info", icon: User2 },
     { id: "contact", label: "Contact & Address", icon: Mail },
-    { id: "security", label: "Security", icon: Lock },
-    { id: "settings", label: "Preferences", icon: Settings }
+    { id: "security", label: "Security", icon: Lock }
   ]
-
-  // Custom Switch Component
-  const CustomSwitch = ({ checked, onCheckedChange, id }: { checked: boolean; onCheckedChange: (checked: boolean) => void; id: string }) => (
-    <label htmlFor={id} className="relative inline-flex items-center cursor-pointer">
-      <input
-        type="checkbox"
-        id={id}
-        className="sr-only"
-        checked={checked}
-        onChange={(e) => onCheckedChange(e.target.checked)}
-      />
-      <div className={`relative w-11 h-6 rounded-full transition-colors duration-200 ease-in-out ${checked ? 'bg-[#23479A]' : 'bg-gray-200'
-        }`}>
-        <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-200 ease-in-out ${checked ? 'translate-x-5' : 'translate-x-0'
-          }`} />
-      </div>
-    </label>
-  )
-
-  // Custom Select Component
-  const CustomSelect = ({ value, onChange, options, disabled, placeholder }: {
-    value: string;
-    onChange: (value: string) => void;
-    options: { value: string; label: string }[];
-    disabled: boolean;
-    placeholder?: string;
-  }) => (
-    <div className="relative">
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
-        className={`w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#23479A] focus:border-transparent appearance-none ${disabled ? 'bg-gray-50 text-gray-500' : 'bg-white'
-          }`}
-      >
-        {placeholder && <option value="">{placeholder}</option>}
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-    </div>
-  )
-
-  // Custom Textarea Component
-  const CustomTextarea = ({ value, onChange, disabled, placeholder, rows = 3 }: {
-    value: string;
-    onChange: (value: string) => void;
-    disabled: boolean;
-    placeholder?: string;
-    rows?: number;
-  }) => (
-    <textarea
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      disabled={disabled}
-      placeholder={placeholder}
-      rows={rows}
-      className={`w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#23479A] focus:border-transparent resize-none ${disabled ? 'bg-gray-50 text-gray-500' : 'bg-white'
-        }`}
-    />
-  )
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -302,7 +338,7 @@ export default function UserProfile() {
                   <Label htmlFor="firstName">First Name</Label>
                   <Input
                     id="firstName"
-                    value={formData.firstName}
+                    value={formData.firstName || ""}
                     onChange={(e) => handleInputChange('firstName', e.target.value)}
                     disabled={!isEditing}
                     className={!isEditing ? "bg-gray-50" : ""}
@@ -312,8 +348,28 @@ export default function UserProfile() {
                   <Label htmlFor="lastName">Last Name</Label>
                   <Input
                     id="lastName"
-                    value={formData.lastName}
+                    value={formData.lastName || ""}
                     onChange={(e) => handleInputChange('lastName', e.target.value)}
+                    disabled={!isEditing}
+                    className={!isEditing ? "bg-gray-50" : ""}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="middleName">Middle Name</Label>
+                  <Input
+                    id="middleName"
+                    value={formData.middleName || ""}
+                    onChange={(e) => handleInputChange('middleName', e.target.value)}
+                    disabled={!isEditing}
+                    className={!isEditing ? "bg-gray-50" : ""}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="suffix">Suffix</Label>
+                  <Input
+                    id="suffix"
+                    value={formData.suffix || ""}
+                    onChange={(e) => handleInputChange('suffix', e.target.value)}
                     disabled={!isEditing}
                     className={!isEditing ? "bg-gray-50" : ""}
                   />
@@ -323,65 +379,96 @@ export default function UserProfile() {
                   <Input
                     id="birthDate"
                     type="date"
-                    value={formData.birthDate}
+                    value={formData.birthDate || ""}
                     onChange={(e) => handleInputChange('birthDate', e.target.value)}
                     disabled={!isEditing}
                     className={!isEditing ? "bg-gray-50" : ""}
+                    max="2025-12-31"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="age">Age</Label>
+                  <Input
+                    id="age"
+                    type="number"
+                    value={formData.age || ""}
+                    disabled={true}
+                    className="bg-gray-50"
+                    placeholder="Calculated from birth date"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="gender">Gender</Label>
-                  <CustomSelect
-                    value={formData.gender}
-                    onChange={(value) => handleInputChange('gender', value)}
+                  <Select
+                    value={formData.gender || ""}
+                    onValueChange={(value) => handleInputChange('gender', value)}
                     disabled={!isEditing}
-                    options={[
-                      { value: "Male", label: "Male" },
-                      { value: "Female", label: "Female" },
-                      { value: "Other", label: "Other" }
-                    ]}
-                    placeholder="Select gender"
-                  />
+                  >
+                    <SelectTrigger className={!isEditing ? "bg-gray-50" : ""}>
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="male">Male</SelectItem>
+                      <SelectItem value="female">Female</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="civilStatus">Civil Status</Label>
-                  <CustomSelect
-                    value={formData.civilStatus}
-                    onChange={(value) => handleInputChange('civilStatus', value)}
+                  <Select
+                    value={formData.civilStatus || ""}
+                    onValueChange={(value) => handleInputChange('civilStatus', value)}
                     disabled={!isEditing}
-                    options={[
-                      { value: "Single", label: "Single" },
-                      { value: "Married", label: "Married" },
-                      { value: "Widowed", label: "Widowed" },
-                      { value: "Separated", label: "Separated" }
-                    ]}
-                    placeholder="Select status"
+                  >
+                    <SelectTrigger className={!isEditing ? "bg-gray-50" : ""}>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="single">Single</SelectItem>
+                      <SelectItem value="married">Married</SelectItem>
+                      <SelectItem value="widowed">Widowed</SelectItem>
+                      <SelectItem value="separated">Separated</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="nationality">Nationality</Label>
+                  <Input
+                    id="nationality"
+                    value={formData.nationality || ""}
+                    onChange={(e) => handleInputChange('nationality', e.target.value)}
+                    disabled={!isEditing}
+                    className={!isEditing ? "bg-gray-50" : ""}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="occupation">Occupation</Label>
+                  <Label htmlFor="religion">Religion</Label>
                   <Input
-                    id="occupation"
-                    value={formData.occupation}
-                    onChange={(e) => handleInputChange('occupation', e.target.value)}
+                    id="religion"
+                    value={formData.religion || ""}
+                    onChange={(e) => handleInputChange('religion', e.target.value)}
+                    disabled={!isEditing}
+                    className={!isEditing ? "bg-gray-50" : ""}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="residencyLength">Length of Residency (years)</Label>
+                  <Input
+                    id="residencyLength"
+                    type="number"
+                    value={formData.residencyLength || ""}
+                    onChange={(e) => handleInputChange('residencyLength', e.target.value)}
                     disabled={!isEditing}
                     className={!isEditing ? "bg-gray-50" : ""}
                   />
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="bio">Bio</Label>
-                <CustomTextarea
-                  value={formData.bio}
-                  onChange={(value) => handleInputChange('bio', value)}
-                  disabled={!isEditing}
-                  placeholder="Tell us about yourself..."
-                  rows={3}
-                />
-              </div>
               {isEditing && (
                 <div className="flex justify-end">
-                  <Button className="bg-[#23479A] hover:bg-[#23479A]/90">
+                  <Button 
+                    onClick={handleSaveProfile}
+                    className="bg-[#23479A] hover:bg-[#23479A]/90"
+                  >
                     <Save className="h-4 w-4 mr-2" />
                     Save Changes
                   </Button>
@@ -410,21 +497,52 @@ export default function UserProfile() {
                   <Input
                     id="email"
                     type="email"
-                    value={formData.email}
+                    value={formData.email || ""}
                     onChange={(e) => handleInputChange('email', e.target.value)}
                     disabled={!isEditing}
                     className={!isEditing ? "bg-gray-50" : ""}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
+                  <Label htmlFor="mobileNumber">Mobile Number</Label>
                   <Input
-                    id="phone"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    id="mobileNumber"
+                    value={formData.mobileNumber || ""}
+                    onChange={(e) => handleInputChange('mobileNumber', e.target.value)}
                     disabled={!isEditing}
                     className={!isEditing ? "bg-gray-50" : ""}
+                    placeholder="+639123456789"
+                    maxLength={13}
                   />
+                  <p className="text-xs text-gray-500">Format: +63 followed by 10 digits</p>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-200 pt-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Emergency Contact</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="emergencyContact">Emergency Contact Person</Label>
+                    <Input
+                      id="emergencyContact"
+                      value={formData.emergencyContact || ""}
+                      onChange={(e) => handleInputChange('emergencyContact', e.target.value)}
+                      disabled={!isEditing}
+                      className={!isEditing ? "bg-gray-50" : ""}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="emergencyNumber">Emergency Contact Number</Label>
+                    <Input
+                      id="emergencyNumber"
+                      value={formData.emergencyNumber || ""}
+                      onChange={(e) => handleInputChange('emergencyNumber', e.target.value)}
+                      disabled={!isEditing}
+                      className={!isEditing ? "bg-gray-50" : ""}
+                      placeholder="+639123456789"
+                      maxLength={13}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -432,11 +550,11 @@ export default function UserProfile() {
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Residential Address</h3>
                 <div className="grid grid-cols-1 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="address">Street Address</Label>
+                    <Label htmlFor="purok">Sitio</Label>
                     <Input
-                      id="address"
-                      value={formData.address}
-                      onChange={(e) => handleInputChange('address', e.target.value)}
+                      id="purok"
+                      value={formData.purok || ""}
+                      onChange={(e) => handleInputChange('purok', e.target.value)}
                       disabled={!isEditing}
                       className={!isEditing ? "bg-gray-50" : ""}
                     />
@@ -446,31 +564,31 @@ export default function UserProfile() {
                       <Label htmlFor="barangay">Barangay</Label>
                       <Input
                         id="barangay"
-                        value={formData.barangay}
-                        onChange={(e) => handleInputChange('barangay', e.target.value)}
-                        disabled={!isEditing}
-                        className={!isEditing ? "bg-gray-50" : ""}
+                        value={formData.barangay || "Alma Villa"}
+                        disabled={true}
+                        className="bg-gray-100"
                       />
+                      <p className="text-xs text-gray-500">Default barangay name</p>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="city">City/Municipality</Label>
+                      <Label htmlFor="city">Municipality</Label>
                       <Input
                         id="city"
-                        value={formData.city}
-                        onChange={(e) => handleInputChange('city', e.target.value)}
-                        disabled={!isEditing}
-                        className={!isEditing ? "bg-gray-50" : ""}
+                        value={formData.city || "Gloria"}
+                        disabled={true}
+                        className="bg-gray-100"
                       />
+                      <p className="text-xs text-gray-500">Default municipality name</p>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="province">Province</Label>
                       <Input
                         id="province"
-                        value={formData.province}
-                        onChange={(e) => handleInputChange('province', e.target.value)}
-                        disabled={!isEditing}
-                        className={!isEditing ? "bg-gray-50" : ""}
+                        value={formData.province || "Oriental Mindoro"}
+                        disabled={true}
+                        className="bg-gray-100"
                       />
+                      <p className="text-xs text-gray-500">Default province name</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -478,18 +596,21 @@ export default function UserProfile() {
                       <Label htmlFor="zipCode">ZIP Code</Label>
                       <Input
                         id="zipCode"
-                        value={formData.zipCode}
-                        onChange={(e) => handleInputChange('zipCode', e.target.value)}
-                        disabled={!isEditing}
-                        className={!isEditing ? "bg-gray-50" : ""}
+                        value={formData.zipCode || "5209"}
+                        disabled={true}
+                        className="bg-gray-100"
                       />
+                      <p className="text-xs text-gray-500">Default ZIP code</p>
                     </div>
                   </div>
                 </div>
               </div>
               {isEditing && (
                 <div className="flex justify-end">
-                  <Button className="bg-[#23479A] hover:bg-[#23479A]/90">
+                  <Button 
+                    onClick={handleSaveProfile}
+                    className="bg-[#23479A] hover:bg-[#23479A]/90"
+                  >
                     <Save className="h-4 w-4 mr-2" />
                     Save Changes
                   </Button>
@@ -572,81 +693,6 @@ export default function UserProfile() {
           </div>
         )
 
-      case "settings":
-        return (
-          <Card className="bg-white border-0 shadow-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="h-5 w-5 text-[#23479A]" />
-                Notification Preferences
-              </CardTitle>
-              <CardDescription>
-                Choose how you want to receive notifications and updates
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium text-gray-900">Email Notifications</h3>
-                    <p className="text-sm text-gray-500">Receive updates via email</p>
-                  </div>
-                  <CustomSwitch
-                    id="email-notif"
-                    checked={notifications.email}
-                    onCheckedChange={(checked) => handleNotificationChange('email', checked)}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium text-gray-900">SMS Notifications</h3>
-                    <p className="text-sm text-gray-500">Receive urgent updates via SMS</p>
-                  </div>
-                  <CustomSwitch
-                    id="sms-notif"
-                    checked={notifications.sms}
-                    onCheckedChange={(checked) => handleNotificationChange('sms', checked)}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium text-gray-900">Push Notifications</h3>
-                    <p className="text-sm text-gray-500">Receive notifications in your browser</p>
-                  </div>
-                  <CustomSwitch
-                    id="push-notif"
-                    checked={notifications.push}
-                    onCheckedChange={(checked) => handleNotificationChange('push', checked)}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium text-gray-900">Newsletter</h3>
-                    <p className="text-sm text-gray-500">Receive monthly community updates</p>
-                  </div>
-                  <CustomSwitch
-                    id="newsletter-notif"
-                    checked={notifications.newsletter}
-                    onCheckedChange={(checked) => handleNotificationChange('newsletter', checked)}
-                  />
-                </div>
-              </div>
-
-              <div className="border-t border-gray-200 pt-6">
-                <div className="flex justify-end">
-                  <Button className="bg-[#23479A] hover:bg-[#23479A]/90">
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Preferences
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )
-
       default:
         return null
     }
@@ -665,7 +711,7 @@ export default function UserProfile() {
                   <Avatar className="h-24 w-24">
                     <AvatarImage src="/placeholder-avatar.jpg" />
                     <AvatarFallback className="bg-[#23479A] text-white text-xl">
-                      {formData.firstName[0]}{formData.lastName[0]}
+                      {(formData.firstName || "U")[0]}{(formData.lastName || "U")[0]}
                     </AvatarFallback>
                   </Avatar>
                   <Button
@@ -682,9 +728,9 @@ export default function UserProfile() {
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
                       <h1 className="text-2xl font-bold text-gray-900">
-                        {formData.firstName} {formData.lastName}
+                        {formData.firstName || "User"} {formData.middleName ? `${formData.middleName} ` : ""}{formData.lastName || ""} {formData.suffix || ""}
                       </h1>
-                      <p className="text-gray-600 mt-1">{formData.email}</p>
+                      <p className="text-gray-600 mt-1">{formData.email || "No email provided"}</p>
                       <div className="flex items-center gap-2 mt-2">
                         <Badge variant="outline" className="text-green-700 border-green-200 bg-green-50">
                           <CheckCircle2 className="h-3 w-3 mr-1" />
@@ -720,7 +766,7 @@ export default function UserProfile() {
           </Card>
         </div>
 
-        {/* Custom Tab Navigation */}
+        {/* Tab Navigation */}
         <div className="mb-6">
           <div className="border-b border-gray-200">
             <nav className="flex space-x-8 overflow-x-auto">

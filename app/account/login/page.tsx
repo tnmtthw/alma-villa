@@ -257,10 +257,10 @@ export default function LoginPage() {
 
       {/* Login Content */}
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
-        <div className="w-full max-w-md bg-white rounded-lg shadow-xl p-8">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="flex justify-center mb-4">
+        <div className="w-full max-w-md relative">
+          {/* Floating Logo */}
+          <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 z-20">
+            <div className="bg-white rounded-full w-24 h-24 flex items-center justify-center shadow-lg border-4 border-white">
               <Image
                 src="/assets/img/Logo.png"
                 alt="Alma Villa Logo"
@@ -269,199 +269,208 @@ export default function LoginPage() {
                 className="object-contain"
               />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back</h1>
-            <p className="text-gray-600">Sign in to your Alma Villa account</p>
+            <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
+              <div className="w-4 h-4 bg-white transform rotate-45 border-r border-b border-gray-200"></div>
+            </div>
           </div>
 
-          {/* Account Status Indicator */}
-          {accountStatus === "checking" && (
-            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-[2px] text-blue-600 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                <span>Checking account status...</span>
-              </div>
+          {/* Main Login Card */}
+          <div className="bg-white rounded-lg shadow-xl p-8 relative pt-12">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back</h1>
+              <p className="text-gray-600">Sign in to your Alma Villa account</p>
             </div>
-          )}
 
-          {accountStatus === "unregistered" && (
-            <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-[2px] text-orange-600 text-sm">
-              <div className="flex items-center gap-2">
-                <XCircle className="h-4 w-4" />
-                <span>No account found with this email address.</span>
+            {/* Account Status Indicator */}
+            {accountStatus === "unregistered" && (
+              <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-[2px] text-orange-600 text-sm">
+                <div className="flex items-center gap-2">
+                  <XCircle className="h-4 w-4" />
+                  <span>No account found with this email address.</span>
+                </div>
+                <div className="mt-2 text-xs">
+                  <a href="/account/signup" className="text-orange-700 hover:text-orange-800 underline">
+                    Create an account here
+                  </a>
+                </div>
               </div>
-              <div className="mt-2 text-xs">
-                <a href="/account/signup" className="text-orange-700 hover:text-orange-800 underline">
-                  Create an account here
+            )}
+
+            {accountStatus === "unverified" && (
+              <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-[2px] text-yellow-600 text-sm">
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  <span>Your account is not verified.</span>
+                </div>
+                <div className="mt-2 text-xs">
+                  Please check your email for verification instructions.
+                </div>
+              </div>
+            )}
+
+            {accountStatus === "registered" && !isLocked && !errorMessage && !isCheckingStatus && (
+              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-[2px] text-green-600 text-sm">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4" />
+                  <span>Account found and ready to sign in.</span>
+                </div>
+              </div>
+            )}
+
+            {/* Error Messages */}
+            {errorMessage && (
+              <div className={`mb-4 p-3 rounded-[2px] text-sm ${
+                isLocked
+                  ? "bg-red-50 border border-red-200 text-red-600"
+                  : attemptsLeft <= 1 && attemptsLeft > 0
+                  ? "bg-orange-50 border border-orange-200 text-orange-600" 
+                  : "bg-red-50 border border-red-200 text-red-600"
+              }`}>
+                <div className="flex items-center gap-2">
+                  {isLocked ? (
+                    <Lock className="h-4 w-4" />
+                  ) : attemptsLeft <= 1 ? (
+                    <AlertTriangle className="h-4 w-4" />
+                  ) : (
+                    <Shield className="h-4 w-4" />
+                  )}
+                  <span>{errorMessage}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Cooldown Timer */}
+            {isLocked && cooldownTime > 0 && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-[2px] text-red-600 text-sm">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  <span>
+                    🔒 Account locked. Try again in <strong className="font-mono">{cooldownTime}</strong> seconds.
+                  </span>
+                </div>
+                <div className="mt-2 w-full bg-red-100 rounded-full h-1.5">
+                  <div 
+                    className="bg-red-600 h-1.5 rounded-full transition-all duration-1000 ease-linear"
+                    style={{ width: `${(cooldownTime / 60) * 100}%` }}
+                  ></div>
+                </div>
+              </div>
+            )}
+
+            {/* Attempts Warning */}
+            {!isLocked && attemptsLeft < 3 && attemptsLeft > 0 && (
+              <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-[2px] text-yellow-600 text-sm">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span>
+                    <strong>Warning:</strong> {attemptsLeft} attempt{attemptsLeft === 1 ? '' : 's'} remaining before account lockout.
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Login Form */}
+            <form onSubmit={handleSignIn} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <User className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email address"
+                    className="w-full pl-10 pr-4 py-2 border rounded-[2px] focus:ring-2 focus:ring-[#23479A]/20 focus:border-[#23479A]"
+                    required
+                    disabled={isLoading}
+                  />
+                  {/* Email Status Indicator */}
+                  {isCheckingStatus && (
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-[#23479A]"></div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    className="w-full pl-10 pr-10 py-2 border rounded-[2px] focus:ring-2 focus:ring-[#23479A]/20 focus:border-[#23479A]"
+                    required
+                    disabled={isLoading || isLocked}
+                  />
+                  <Button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
+                    disabled={isLoading || isLocked}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <Checkbox
+                    id="remember"
+                    className="h-4 w-4 text-[#23479A] focus:ring-2 focus:ring-[#23479A]/20 border-gray-300 rounded-[2px]"
+                    disabled={isLoading || isLocked}
+                  />
+                  <Label htmlFor="remember" className="ml-2 block text-sm text-gray-700">
+                    Remember me
+                  </Label>
+                </div>
+                <a href="/account/forgot-password" className="text-sm text-[#23479A] hover:text-[#23479A]/80">
+                  Forgot password?
                 </a>
               </div>
-            </div>
-          )}
 
-          {accountStatus === "unverified" && (
-            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-[2px] text-yellow-600 text-sm">
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                <span>Your account is not verified.</span>
-              </div>
-              <div className="mt-2 text-xs">
-                Please check your email for verification instructions.
-              </div>
-            </div>
-          )}
+              <Button
+                type="submit"
+                className="w-full bg-[#23479A] hover:bg-[#23479A]/90 text-white py-2 px-4 rounded-[2px] disabled:opacity-50 relative"
+                disabled={isLoading || isLocked || accountStatus === "unregistered" || isCheckingStatus}
+              >
+                {isLocked && cooldownTime > 0 
+                  ? `🔒 Locked (${cooldownTime}s)` 
+                  : accountStatus === "unregistered"
+                  ? "Account Not Found"
+                  : isLoading 
+                    ? "Signing in..." 
+                    : isCheckingStatus
+                    ? "Checking account..."
+                    : "Sign in"
+                }
+              </Button>
 
-          {accountStatus === "registered" && !isLocked && !errorMessage && (
-            <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-[2px] text-green-600 text-sm">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>Account found and ready to sign in.</span>
-              </div>
-            </div>
-          )}
-
-          {/* Error Messages */}
-          {errorMessage && (
-            <div className={`mb-4 p-3 rounded-[2px] text-sm ${
-              isLocked
-                ? "bg-red-50 border border-red-200 text-red-600"
-                : attemptsLeft <= 1 && attemptsLeft > 0
-                ? "bg-orange-50 border border-orange-200 text-orange-600" 
-                : "bg-red-50 border border-red-200 text-red-600"
-            }`}>
-              <div className="flex items-center gap-2">
-                {isLocked ? (
-                  <Lock className="h-4 w-4" />
-                ) : attemptsLeft <= 1 ? (
-                  <AlertTriangle className="h-4 w-4" />
-                ) : (
-                  <Shield className="h-4 w-4" />
-                )}
-                <span>{errorMessage}</span>
-              </div>
-            </div>
-          )}
-
-          {/* Cooldown Timer */}
-          {isLocked && cooldownTime > 0 && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-[2px] text-red-600 text-sm">
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                <span>
-                  🔒 Account locked. Try again in <strong className="font-mono">{cooldownTime}</strong> seconds.
-                </span>
-              </div>
-              <div className="mt-2 w-full bg-red-100 rounded-full h-1.5">
-                <div 
-                  className="bg-red-600 h-1.5 rounded-full transition-all duration-1000 ease-linear"
-                  style={{ width: `${(cooldownTime / 60) * 100}%` }}
-                ></div>
-              </div>
-            </div>
-          )}
-
-          {/* Attempts Warning */}
-          {!isLocked && attemptsLeft < 3 && attemptsLeft > 0 && (
-            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-[2px] text-yellow-600 text-sm">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4" />
-                <span>
-                  <strong>Warning:</strong> {attemptsLeft} attempt{attemptsLeft === 1 ? '' : 's'} remaining before account lockout.
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* Login Form */}
-          <form onSubmit={handleSignIn} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-gray-400" />
-                </div>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email address"
-                  className="w-full pl-10 pr-4 py-2 border rounded-[2px] focus:ring-2 focus:ring-[#23479A]/20 focus:border-[#23479A]"
-                  required
-                  disabled={isLoading}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  className="w-full pl-10 pr-10 py-2 border rounded-[2px] focus:ring-2 focus:ring-[#23479A]/20 focus:border-[#23479A]"
-                  required
-                  disabled={isLoading || isLocked}
-                />
-                <Button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
-                  disabled={isLoading || isLocked}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <Checkbox
-                  id="remember"
-                  className="h-4 w-4 text-[#23479A] focus:ring-2 focus:ring-[#23479A]/20 border-gray-300 rounded-[2px]"
-                  disabled={isLoading || isLocked}
-                />
-                <Label htmlFor="remember" className="ml-2 block text-sm text-gray-700">
-                  Remember me
-                </Label>
-              </div>
-              <a href="/account/forgot-password" className="text-sm text-[#23479A] hover:text-[#23479A]/80">
-                Forgot password?
-              </a>
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full bg-[#23479A] hover:bg-[#23479A]/90 text-white py-2 px-4 rounded-[2px] disabled:opacity-50"
-              disabled={isLoading || isLocked || accountStatus === "unregistered"}
-            >
-              {isLocked && cooldownTime > 0 
-                ? `🔒 Locked (${cooldownTime}s)` 
-                : accountStatus === "unregistered"
-                ? "Account Not Found"
-                : isLoading 
-                  ? "Signing in..." 
-                  : "Sign in"
-              }
-            </Button>
-
-            <p className="text-center text-sm text-gray-600">
-              Don't have an account?{" "}
-              <a href="/account/signup" className="text-[#23479A] hover:text-[#23479A]/80 font-medium">
-                Sign up
-              </a>
-            </p>
-          </form>
+              <p className="text-center text-sm text-gray-600">
+                Don't have an account?{" "}
+                <a href="/account/signup" className="text-[#23479A] hover:text-[#23479A]/80 font-medium">
+                  Sign up
+                </a>
+              </p>
+            </form>
+          </div>
         </div>
       </div>
     </div>
