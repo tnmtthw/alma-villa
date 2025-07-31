@@ -73,7 +73,7 @@ export const { handlers, signIn, signOut, auth, update } = NextAuth({
   },
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 30 * 60, // 30 minutes in seconds
   },
   callbacks: {
     async jwt({ token, user, trigger, session }) {
