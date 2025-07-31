@@ -39,7 +39,7 @@ import {
   BadgeCheck
 } from "lucide-react"
 import { useSession } from "next-auth/react"
-import useSWR from 'swr'
+import useSWR, { mutate } from 'swr'
 
 const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) => fetch(...args).then((res) => res.json());
 
@@ -110,21 +110,19 @@ export default function UserProfile() {
   // Password Modal States
   const [showPasswordModal, setShowPasswordModal] = useState(false)
   const [showPasswords, setShowPasswords] = useState({
-    current: false,
     new: false,
     confirm: false
   })
   const [passwordData, setPasswordData] = useState({
-    currentPassword: "",
     newPassword: "",
     confirmPassword: ""
   })
   const [passwordErrors, setPasswordErrors] = useState({
-    current: "",
     new: "",
     confirm: ""
   })
   const [isChangingPassword, setIsChangingPassword] = useState(false)
+  const [isSavingProfile, setIsSavingProfile] = useState(false)
 
   // Initialize form data with existing API data first, then registration data
   const [formData, setFormData] = useState<Partial<UserData>>({})
@@ -254,7 +252,7 @@ export default function UserProfile() {
     }))
   }
 
-  const togglePasswordVisibility = (field: 'current' | 'new' | 'confirm') => {
+  const togglePasswordVisibility = (field: 'new' | 'confirm') => {
     setShowPasswords(prev => ({
       ...prev,
       [field]: !prev[field]
@@ -281,13 +279,8 @@ export default function UserProfile() {
   }
 
   const validatePasswords = () => {
-    const errors = { current: "", new: "", confirm: "" }
+    const errors = { new: "", confirm: "" }
     let isValid = true
-
-    if (!passwordData.currentPassword) {
-      errors.current = "Current password is required"
-      isValid = false
-    }
 
     if (!passwordData.newPassword) {
       errors.new = "New password is required"
@@ -305,11 +298,6 @@ export default function UserProfile() {
       isValid = false
     }
 
-    if (passwordData.currentPassword === passwordData.newPassword) {
-      errors.new = "New password must be different from current password"
-      isValid = false
-    }
-
     setPasswordErrors(errors)
     return isValid
   }
@@ -319,24 +307,43 @@ export default function UserProfile() {
 
     if (!validatePasswords()) return
 
+    if (!session?.user?.id) {
+      alert("User session not found. Please log in again.")
+      return
+    }
+
     setIsChangingPassword(true)
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Call the API to change password
+      const response = await fetch(`/api/user/profile?id=${session.user.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          password: passwordData.newPassword
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(`Failed to change password: ${response.status} - ${errorData.error || 'Unknown error'}`)
+      }
 
       // Reset form and close modal
-      setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
-      setPasswordErrors({ current: "", new: "", confirm: "" })
-      setShowPasswords({ current: false, new: false, confirm: false })
+      setPasswordData({ newPassword: "", confirmPassword: "" })
+      setPasswordErrors({ new: "", confirm: "" })
+      setShowPasswords({ new: false, confirm: false })
       setShowPasswordModal(false)
 
       alert("Password changed successfully!")
 
     } catch (error) {
+      console.error('Error changing password:', error)
       setPasswordErrors(prev => ({
         ...prev,
-        current: "Failed to change password. Please try again."
+        new: "Failed to change password. Please try again."
       }))
     } finally {
       setIsChangingPassword(false)
@@ -346,25 +353,89 @@ export default function UserProfile() {
   const openPasswordModal = () => {
     setShowPasswordModal(true)
     // Reset form when opening
-    setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" })
-    setPasswordErrors({ current: "", new: "", confirm: "" })
-    setShowPasswords({ current: false, new: false, confirm: false })
+    setPasswordData({ newPassword: "", confirmPassword: "" })
+    setPasswordErrors({ new: "", confirm: "" })
+    setShowPasswords({ new: false, confirm: false })
   }
 
-  const handleSaveProfile = () => {
-    // Save the updated profile data
-    console.log('Saving profile data:', formData)
-
-    // Here you would typically make an API call to save the data
-    // Example: await updateUserProfile(formData)
-
-    // Update localStorage with the new data
-    if (isClient) {
-      localStorage.setItem('residentInfoData', JSON.stringify(formData))
+  const handleSaveProfile = async () => {
+    if (!session?.user?.id) {
+      alert("User session not found. Please log in again.")
+      return
     }
 
-    setIsEditing(false)
-    alert("Profile updated successfully!")
+    setIsSavingProfile(true)
+
+    try {
+      // Prepare the data for API update
+      const updateData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        middleName: formData.middleName,
+        suffix: formData.suffix,
+        email: formData.email,
+        mobileNumber: formData.mobileNumber,
+        birthDate: formData.birthDate,
+        age: formData.age,
+        gender: formData.gender,
+        civilStatus: formData.civilStatus,
+        nationality: formData.nationality,
+        religion: formData.religion,
+        emergencyContact: formData.emergencyContact,
+        emergencyNumber: formData.emergencyNumber,
+        purok: formData.purok,
+        barangay: formData.barangay,
+        city: formData.city,
+        province: formData.province,
+        zipCode: formData.zipCode,
+        residencyLength: formData.residencyLength,
+        street: formData.street || formData.address
+      }
+
+      // Remove undefined values and sanitize data
+      const cleanData = Object.fromEntries(
+        Object.entries(updateData)
+          .filter(([_, value]) => value !== undefined && value !== null)
+          .map(([key, value]) => [
+            key,
+            typeof value === 'string' ?
+              value.trim().replace(/[\x00-\x1F\x7F-\x9F]/g, '') : // Remove control characters
+              value
+          ])
+      )
+
+      console.log('Sending data to API:', cleanData)
+
+      const response = await fetch(`/api/user/profile?id=${session.user.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(cleanData),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(`Failed to update profile: ${response.status} - ${errorData.error || 'Unknown error'}`)
+      }
+
+      // Update localStorage with the new data
+      if (isClient) {
+        localStorage.setItem('residentInfoData', JSON.stringify(formData))
+      }
+
+      setIsEditing(false)
+      alert("Profile updated successfully!")
+
+      // Refresh the data by revalidating SWR
+      await mutate(`/api/user?id=${session.user.id}`)
+
+    } catch (error) {
+      console.error('Error updating profile:', error)
+      alert("Failed to update profile. Please try again.")
+    } finally {
+      setIsSavingProfile(false)
+    }
   }
 
   const tabs = [
@@ -524,10 +595,20 @@ export default function UserProfile() {
                 <div className="flex justify-end">
                   <Button
                     onClick={handleSaveProfile}
+                    disabled={isSavingProfile}
                     className="bg-[#23479A] hover:bg-[#23479A]/90 w-full sm:w-auto"
                   >
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Changes
+                    {isSavingProfile ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4 mr-2" />
+                        Save Changes
+                      </>
+                    )}
                   </Button>
                 </div>
               )}
@@ -666,10 +747,20 @@ export default function UserProfile() {
                 <div className="flex justify-end">
                   <Button
                     onClick={handleSaveProfile}
+                    disabled={isSavingProfile}
                     className="bg-[#23479A] hover:bg-[#23479A]/90 w-full sm:w-auto"
                   >
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Changes
+                    {isSavingProfile ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4 mr-2" />
+                        Save Changes
+                      </>
+                    )}
                   </Button>
                 </div>
               )}
@@ -751,20 +842,20 @@ export default function UserProfile() {
               <CardContent className="p-4 sm:p-6 md:p-8">
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6">
                   {/* Avatar Section */}
-              
 
-<div className="relative flex-shrink-0">
-  <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
-    <AvatarImage src="/placeholder-avatar.jpg" />
-    <AvatarFallback className="bg-[#23479A] text-white text-lg sm:text-xl">
-      {getUserFullName().split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'U'}
-    </AvatarFallback>
-  </Avatar>
 
-  <div className="absolute -bottom-1 -right-1 h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white border-0 border-gray-200 shadow-sm flex items-center justify-center">
-    <BadgeCheck className="h-6 w-6 text-green-500 sm:h-8 sm:w-8" />
-  </div>
-</div>
+                  <div className="relative flex-shrink-0">
+                    <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
+                      <AvatarImage src="/placeholder-avatar.jpg" />
+                      <AvatarFallback className="bg-[#23479A] text-white text-lg sm:text-xl">
+                        {getUserFullName().split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+
+                    <div className="absolute -bottom-1 -right-1 h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white border-0 border-gray-200 shadow-sm flex items-center justify-center">
+                      <BadgeCheck className="h-6 w-6 text-green-500 sm:h-8 sm:w-8" />
+                    </div>
+                  </div>
 
 
                   {/* User Info */}
@@ -823,8 +914,8 @@ export default function UserProfile() {
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
                       className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors duration-200 ${activeTab === tab.id
-                          ? 'border-[#23479A] text-[#23479A]'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        ? 'border-[#23479A] text-[#23479A]'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                         }`}
                     >
                       <Icon className="h-4 w-4" />
@@ -853,42 +944,11 @@ export default function UserProfile() {
               Change Password
             </DialogTitle>
             <DialogDescription className="text-gray-600">
-              Enter your current password and choose a new secure password.
+              Choose a new secure password for your account.
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleChangePassword} className="space-y-4 mt-4 bg-white">
-            {/* Current Password */}
-            <div className="space-y-2">
-              <Label htmlFor="currentPassword" className="text-gray-700">Current Password</Label>
-              <div className="relative">
-                <Input
-                  id="currentPassword"
-                  type={showPasswords.current ? "text" : "password"}
-                  value={passwordData.currentPassword}
-                  onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
-                  className={`bg-white border-gray-300 ${passwordErrors.current ? "border-red-300 focus:border-red-500" : "focus:border-[#23479A]"}`}
-                  placeholder="Enter your current password"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-gray-50"
-                  onClick={() => togglePasswordVisibility('current')}
-                >
-                  {showPasswords.current ? (
-                    <EyeOff className="h-4 w-4 text-gray-400" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-gray-400" />
-                  )}
-                </Button>
-              </div>
-              {passwordErrors.current && (
-                <p className="text-sm text-red-600">{passwordErrors.current}</p>
-              )}
-            </div>
-
             {/* New Password */}
             <div className="space-y-2">
               <Label htmlFor="newPassword" className="text-gray-700">New Password</Label>
@@ -925,7 +985,7 @@ export default function UserProfile() {
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-500">Password strength:</span>
                     <span className={`text-xs font-medium ${passwordStrength.level === 'weak' ? 'text-red-500' :
-                        passwordStrength.level === 'medium' ? 'text-yellow-500' : 'text-green-500'
+                      passwordStrength.level === 'medium' ? 'text-yellow-500' : 'text-green-500'
                       }`}>
                       {passwordStrength.level.charAt(0).toUpperCase() + passwordStrength.level.slice(1)}
                     </span>
@@ -933,7 +993,7 @@ export default function UserProfile() {
                   <Progress
                     value={(passwordStrength.score / 5) * 100}
                     className={`h-2 bg-gray-200 ${passwordStrength.level === 'weak' ? '[&>div]:bg-red-500' :
-                        passwordStrength.level === 'medium' ? '[&>div]:bg-yellow-500' : '[&>div]:bg-green-500'
+                      passwordStrength.level === 'medium' ? '[&>div]:bg-yellow-500' : '[&>div]:bg-green-500'
                       }`}
                   />
                   <div className="grid grid-cols-1 gap-1 text-xs">
