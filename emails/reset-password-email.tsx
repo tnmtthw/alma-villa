@@ -36,7 +36,7 @@ export const ResetPasswordEmail = ({
               <tr>
                 <td style={logoContainer}>
                   <Img
-                    src="https://i.ibb.co/cKwSMjNP/Logo.png"
+                    src="https://wq8gj23taekk62rr.public.blob.vercel-storage.com/AlmaVilla/Logo.png"
                     width="60"
                     height="60"
                     alt="Alma Villa Logo"

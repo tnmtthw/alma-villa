@@ -34,7 +34,7 @@ export const ImprovedVerificationEmail = ({
                             <tr>
                                 <td style={logoContainer}>
                                     <Img
-                                        src="https://i.ibb.co/cKwSMjNP/Logo.png"
+                                        src="https://wq8gj23taekk62rr.public.blob.vercel-storage.com/AlmaVilla/Logo.png"
                                         width="60"
                                         height="60"
                                         alt="Alma Villa Logo"
@@ -60,7 +60,7 @@ export const ImprovedVerificationEmail = ({
 
                         {/* Main Content */}
                         <Heading style={title}>Registration Received</Heading>
-                        
+
                         <Text style={description}>
                             Your registration has been received and is pending admin approval.
                         </Text>
@@ -96,7 +96,7 @@ export const ImprovedVerificationEmail = ({
                     {/* Footer */}
                     <Section style={footer}>
                         <Text style={footerText}>
-                            Barangay Alma Villa, Gloria, Oriental Mindoro<br/>
+                            Barangay Alma Villa, Gloria, Oriental Mindoro<br />
                             Office Hours: Mon-Fri 8AM-5PM, Sat 8AM-12PM
                         </Text>
                     </Section>
