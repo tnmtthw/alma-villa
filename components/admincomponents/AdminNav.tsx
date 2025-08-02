@@ -25,6 +25,8 @@ import {
   ChevronRight,
 } from "lucide-react"
 import { signOut } from "next-auth/react"
+import { useSession } from "next-auth/react"
+import useSWR, { mutate } from 'swr'
 
 const navigationItems = [
   {
@@ -77,6 +79,8 @@ const navigationItems = [
   },
 ]
 
+const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) => fetch(...args).then((res) => res.json());
+
 export function AdminNav({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
@@ -85,11 +89,15 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
 
+  const { data: session } = useSession()
+
+  const { data } = useSWR(`/api/user?id=${session?.user.id}`, fetcher)
+
   const profileDropdownRef = useRef<HTMLDivElement>(null)
 
-  const adminName = "Juan Dela Cruz"
+  const adminName = data?.firstName + " " + data?.lastName
   const adminRole = "Barangay Administrator"
-  const adminEmail = "admin@almavilla.gov.ph"
+  const adminEmail = data?.email
 
   useEffect(() => {
     setIsMounted(true)
