@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { FileText, History, MessageSquare, Bell, Plus, ChevronRight, TrendingUp, Clock, CheckCircle, ArrowUpRight, Activity, Calendar, Users, Star } from "lucide-react"
@@ -5,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import DocumentStatusTracker from "@/components/DocumentStatusTracker"
 import ScrollToTop from "@/components/ScrollToTop"
+import { useSession } from "next-auth/react"
+import useSWR from 'swr'
 
 const stats = [
   {
@@ -145,8 +149,14 @@ const upcomingEvents = [
   },
 ]
 
+const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) => fetch(...args).then((res) => res.json());
+
 export default function DashboardPage() {
-  const userName = "Juan" // This should come from your auth state
+  const { data: session } = useSession()
+
+  const { data } = useSWR(`/api/user?id=${session?.user.id}`, fetcher)
+
+  const userName = data?.firstName
 
   return (
     <main>
