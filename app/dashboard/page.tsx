@@ -263,9 +263,9 @@ export default function DashboardPage() {
           </div>
 
           {/* Document Status Tracker - NEW COMPONENT */}
-          <div className="mb-6 sm:mb-8">
+          {/* <div className="mb-6 sm:mb-8">
             <DocumentStatusTracker />
-          </div>
+          </div> */}
 
           {/* Mobile-Optimized Content Grid */}
           <div className="grid lg:grid-cols-3 gap-6 sm:gap-8 mb-6 sm:mb-8">
