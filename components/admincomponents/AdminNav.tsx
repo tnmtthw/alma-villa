@@ -9,16 +9,13 @@ import {
   FileText,
   Users,
   Settings,
-  Bell,
   LogOut,
   Menu,
   X,
   Search,
   ChevronDown,
   Home,
-  BarChart3,
   Calendar,
-  Mail,
   HelpCircle,
   User,
   ChevronLeft,
@@ -48,28 +45,10 @@ const navigationItems = [
     badge: null,
   },
   {
-    icon: BarChart3,
-    label: "Analytics",
-    href: "/admin/analytics",
-    badge: null,
-  },
-  {
     icon: Calendar,
     label: "Events",
     href: "/admin/events",
     badge: 3,
-  },
-  {
-    icon: Mail,
-    label: "Messages",
-    href: "/admin/messages",
-    badge: 5,
-  },
-  {
-    icon: Bell,
-    label: "Notifications",
-    href: "/admin/notifications",
-    badge: 8,
   },
   {
     icon: Settings,
@@ -306,13 +285,7 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
                   <Search className="h-4 w-4" />
                 </button>
 
-                {/* Notifications */}
-                <button className="relative flex items-center justify-center h-8 w-8 md:h-10 md:w-10 rounded-lg hover:bg-gray-100 transition-colors">
-                  <Bell className="h-4 w-4 md:h-5 md:w-5" />
-                  <span className="absolute -top-1 -right-1 h-4 w-4 md:h-5 md:w-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center border-2 border-white shadow-sm font-medium">
-                    3
-                  </span>
-                </button>
+
 
                 {/* Help */}
                 <button className="hidden sm:flex items-center justify-center h-8 w-8 md:h-10 md:w-10 rounded-lg hover:bg-gray-100 transition-colors">
