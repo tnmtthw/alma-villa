@@ -56,7 +56,29 @@ model User {
   lastFailedLogin   DateTime?
   lockedUntil       DateTime?
 
-  resetToken  String?      @unique
+  resetToken        String?      @unique
 
   createdAt         DateTime     @default(now())
+
+  document          Document[]
+}
+
+model Document {
+  id                String       @id @default(uuid()) @db.Uuid
+  userId            String       @db.Uuid
+  fullName          String?
+  suffix            String?
+  birthDate         String?
+  age               String?
+  civilStatus       String?
+  houseNumber       String?
+  street            String?
+  purok             String?
+  residencyLength   String?
+  purpose           String?
+  additionalInfo    String?
+  type              String?
+  status            String       @default("Pending")
+  createdAt         DateTime     @default(now())
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

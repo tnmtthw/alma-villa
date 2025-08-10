@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { ArrowLeft, Upload, X, CheckCircle, Clock, Mail, DollarSign, Eye } from "lucide-react"
+import { Upload, X, ArrowLeft, Eye, CheckCircle, Clock, Mail, DollarSign } from "lucide-react"
+import { useToast } from "@/components/ui/toast"
+import { useSession } from "next-auth/react"
 
 interface BarangayClearanceFormProps {
   onBackAction: () => void
@@ -18,20 +19,20 @@ interface DocumentFile extends File {
 }
 
 interface FormData {
-  // Personal Information (matching the document)
+  // Personal Information
   fullName: string
-  age: string
+  suffix: string
   birthDate: string
-  birthPlace: string
   civilStatus: string
-  citizenship: string
-  
-  // Address Information (simplified to match document)
-  residenceAddress: string
-  
-  // Purpose and Legal Requirements
+
+  // Address Information
+  houseNumber: string
+  street: string
+  purok: string
+  residencyLength: string
+
+  // Purpose
   purpose: string
-  urgency: string
   additionalInfo: string
   
   // Contact Information (for processing)
@@ -40,35 +41,37 @@ interface FormData {
 }
 
 const sampleData: FormData = {
-  fullName: "Juan Santos Dela Cruz",
-  age: "33",
-  birthDate: "January 15, 1990",
-  birthPlace: "Gloria, Oriental Mindoro",
-  civilStatus: "Single",
-  citizenship: "Filipino",
-  residenceAddress: "123 Maharlika Street, Purok 1, Alma Villa, Gloria, Oriental Mindoro",
+  fullName: "Juan Dela Cruz",
+  suffix: "Jr.",
+  birthDate: "1990-01-15",
+  civilStatus: "single",
+  houseNumber: "123",
+  street: "Maharlika Street",
+  purok: "Purok 1",
+  residencyLength: "5",
   purpose: "employment",
-  urgency: "normal",
   additionalInfo: "Required for submission to HR department by end of month",
-  contactNumber: "09123456789",
-  emailAddress: "juan.delacruz@email.com"
+  contactNumber: "",
+  emailAddress: ""
 }
 
 export default function BarangayClearanceForm({ onBackAction }: BarangayClearanceFormProps) {
+  const { addToast } = useToast()
   const [formData, setFormData] = useState<FormData>({
     fullName: "",
-    age: "",
+    suffix: "",
     birthDate: "",
-    birthPlace: "",
     civilStatus: "",
-    citizenship: "Filipino", // Default as per document
-    residenceAddress: "",
+    houseNumber: "",
+    street: "",
+    purok: "",
+    residencyLength: "",
     purpose: "",
-    urgency: "",
     additionalInfo: "",
     contactNumber: "",
     emailAddress: ""
   })
+  const { data: session } = useSession()
 
   const [supportingDocs, setSupportingDocs] = useState<DocumentFile[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -122,6 +125,11 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
     setSelectedImagePreview(null)
   }
 
+  const handleCloseModal = () => {
+    setShowSuccessModal(false)
+    onBackAction()
+  }
+
   const getFileIcon = (file: DocumentFile) => {
     if (file.type.startsWith('image/')) {
       return file.preview ? (
@@ -149,29 +157,112 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
     setFormData(sampleData)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    // Check if at least one supporting document is uploaded
-    if (supportingDocs.length === 0) {
-      alert("Please upload at least one supporting document before submitting.")
-      return
+  // Auto-calculate age when birth date changes
+  const calculateAge = (birthDate: string) => {
+    const today = new Date()
+    const birth = new Date(birthDate)
+    let age = today.getFullYear() - birth.getFullYear()
+    const monthDiff = today.getMonth() - birth.getMonth()
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--
     }
-    
-    setIsSubmitting(true)
-    
-    // Simulate form submission
-    setTimeout(() => {
-      console.log("Barangay Clearance Form submitted:", formData)
-      setIsSubmitting(false)
-      setShowSuccessModal(true)
-    }, 2000)
+    return age.toString()
   }
 
-  const handleCloseModal = () => {
-    setShowSuccessModal(false)
-    // Navigate to request page
-    window.location.href = "/dashboard/request"
+  const handleBirthDateChange = (value: string) => {
+    handleInputChange('birthDate', value)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    setIsSubmitting(true)
+
+    try {
+      // Validate required fields
+      const requiredFields = ['fullName', 'birthDate', 'civilStatus', 'houseNumber', 'street', 'purok', 'residencyLength', 'purpose']
+      const missingFields = requiredFields.filter(field => !formData[field as keyof FormData])
+
+      if (missingFields.length > 0) {
+        addToast({
+          title: "Validation Error",
+          description: `Please fill in all required fields: ${missingFields.join(', ')}`,
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Calculate age from birth date
+      const calculatedAge = formData.birthDate ? calculateAge(formData.birthDate) : ""
+
+      // Prepare the data according to the Document model
+      const documentData = {
+        userId: session?.user.id,
+        contact: session?.user.mobileNumber,
+        fullName: formData.fullName,
+        suffix: formData.suffix,
+        birthDate: formData.birthDate,
+        age: calculatedAge,
+        civilStatus: formData.civilStatus,
+        houseNumber: formData.houseNumber,
+        street: formData.street,
+        purok: formData.purok,
+        residencyLength: formData.residencyLength,
+        purpose: formData.purpose,
+        additionalInfo: formData.additionalInfo,
+        type: "Barangay Clearance"
+      }
+
+      const response = await fetch('/api/document', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(documentData),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to submit document')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        addToast({
+          title: "Success!",
+          description: "Barangay clearance application submitted successfully!",
+          variant: "default",
+        })
+
+        // Reset form
+        setFormData({
+          fullName: "",
+          suffix: "",
+          birthDate: "",
+          civilStatus: "",
+          houseNumber: "",
+          street: "",
+          purok: "",
+          residencyLength: "",
+          purpose: "",
+          additionalInfo: "",
+          contactNumber: "",
+          emailAddress: ""
+        })
+        setSupportingDocs([])
+      } else {
+        throw new Error(result.error || 'Submission failed')
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error)
+      addToast({
+        title: "Error",
+        description: "Failed to submit application. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -204,156 +295,124 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
         {/* Personal Information Section */}
         <div className="space-y-6">
           <h2 className="text-xl font-semibold text-gray-900 border-b pb-2">Personal Information</h2>
-          
-          <div className="grid grid-cols-1 gap-6">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <Label htmlFor="fullName">Full Name *</Label>
+              <Label htmlFor="fullName">Full Name</Label>
               <Input
                 id="fullName"
-                placeholder="Enter your complete name (First Middle Last)"
+                placeholder="Enter full name"
                 className="mt-1"
                 required
                 value={formData.fullName}
                 onChange={(e) => handleInputChange('fullName', e.target.value)}
               />
-              <p className="text-xs text-gray-500 mt-1">As it appears on your birth certificate or valid ID</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label htmlFor="age">Age *</Label>
-                <Input
-                  id="age"
-                  type="number"
-                  placeholder="Enter your age"
-                  className="mt-1"
-                  required
-                  min="1"
-                  max="120"
-                  value={formData.age}
-                  onChange={(e) => handleInputChange('age', e.target.value)}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="birthDate">Date of Birth *</Label>
-                <Input
-                  id="birthDate"
-                  placeholder="e.g., January 15, 1990"
-                  className="mt-1"
-                  required
-                  value={formData.birthDate}
-                  onChange={(e) => handleInputChange('birthDate', e.target.value)}
-                />
-                <p className="text-xs text-gray-500 mt-1">Format: Month Day, Year</p>
-              </div>
             </div>
 
             <div>
-              <Label htmlFor="birthPlace">Birth Place *</Label>
+              <Label htmlFor="suffix">Suffix</Label>
               <Input
-                id="birthPlace"
-                placeholder="Enter your place of birth (City/Municipality, Province)"
+                id="suffix"
+                placeholder="Jr., Sr., III, etc."
                 className="mt-1"
-                required
-                value={formData.birthPlace}
-                onChange={(e) => handleInputChange('birthPlace', e.target.value)}
+                value={formData.suffix}
+                onChange={(e) => handleInputChange('suffix', e.target.value)}
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label htmlFor="civilStatus">Civil Status *</Label>
-                <Select
-                  value={formData.civilStatus}
-                  onValueChange={(value) => handleInputChange('civilStatus', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select civil status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Single">Single</SelectItem>
-                    <SelectItem value="Married">Married</SelectItem>
-                    <SelectItem value="Widowed">Widowed</SelectItem>
-                    <SelectItem value="Separated">Separated</SelectItem>
-                    <SelectItem value="Divorced">Divorced</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div>
+              <Label htmlFor="birthDate">Date of Birth</Label>
+              <Input
+                id="birthDate"
+                type="date"
+                className="mt-1"
+                required
+                value={formData.birthDate}
+                onChange={(e) => handleBirthDateChange(e.target.value)}
+              />
+            </div>
 
-              <div>
-                <Label htmlFor="citizenship">Citizenship *</Label>
-                <Input
-                  id="citizenship"
-                  placeholder="Enter citizenship"
-                  className="mt-1"
-                  required
-                  value={formData.citizenship}
-                  onChange={(e) => handleInputChange('citizenship', e.target.value)}
-                />
-                <p className="text-xs text-gray-500 mt-1">Usually "Filipino" for Philippine citizens</p>
-              </div>
+            <div>
+              <Label htmlFor="civilStatus">Civil Status</Label>
+              <Select
+                value={formData.civilStatus}
+                onValueChange={(value) => handleInputChange('civilStatus', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="single">Single</SelectItem>
+                  <SelectItem value="married">Married</SelectItem>
+                  <SelectItem value="widowed">Widowed</SelectItem>
+                  <SelectItem value="separated">Separated</SelectItem>
+                  <SelectItem value="divorced">Divorced</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
 
         {/* Address Information */}
         <div className="space-y-6">
-          <h2 className="text-xl font-semibold text-gray-900 border-b pb-2">Residence Information</h2>
-          
-          <div>
-            <Label htmlFor="residenceAddress">Complete Residence Address *</Label>
-            <Textarea
-              id="residenceAddress"
-              placeholder="Enter your complete address including house number, street, purok/zone, barangay, city/municipality, province"
-              className="mt-1"
-              required
-              rows={3}
-              value={formData.residenceAddress}
-              onChange={(e) => handleInputChange('residenceAddress', e.target.value)}
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Example: 123 Maharlika Street, Purok 1, Alma Villa, Gloria, Oriental Mindoro
-            </p>
-          </div>
-        </div>
+          <h2 className="text-xl font-semibold text-gray-900 border-b pb-2">Address Information</h2>
 
-        {/* Contact Information */}
-        <div className="space-y-6">
-          <h2 className="text-xl font-semibold text-gray-900 border-b pb-2">Contact Information</h2>
-          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <Label htmlFor="contactNumber">Contact Number</Label>
+              <Label htmlFor="houseNumber">House/Unit Number</Label>
               <Input
-                id="contactNumber"
-                placeholder="09XXXXXXXXX"
+                id="houseNumber"
+                placeholder="Enter house number"
                 className="mt-1"
-                value={formData.contactNumber}
-                onChange={(e) => handleInputChange('contactNumber', e.target.value)}
+                required
+                value={formData.houseNumber}
+                onChange={(e) => handleInputChange('houseNumber', e.target.value)}
               />
-              <p className="text-xs text-gray-500 mt-1">For updates on your application</p>
             </div>
 
             <div>
-              <Label htmlFor="emailAddress">Email Address</Label>
+              <Label htmlFor="street">Street Name</Label>
               <Input
-                id="emailAddress"
-                type="email"
-                placeholder="your@email.com"
+                id="street"
+                placeholder="Enter street name"
                 className="mt-1"
-                value={formData.emailAddress}
-                onChange={(e) => handleInputChange('emailAddress', e.target.value)}
+                required
+                value={formData.street}
+                onChange={(e) => handleInputChange('street', e.target.value)}
               />
-              <p className="text-xs text-gray-500 mt-1">For electronic notifications</p>
+            </div>
+
+            <div>
+              <Label htmlFor="purok">Purok/Zone</Label>
+              <Input
+                id="purok"
+                placeholder="Enter purok/zone"
+                className="mt-1"
+                required
+                value={formData.purok}
+                onChange={(e) => handleInputChange('purok', e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="residencyLength">Length of Residency (years)</Label>
+              <Input
+                id="residencyLength"
+                type="number"
+                placeholder="Years"
+                className="mt-1"
+                required
+                value={formData.residencyLength}
+                onChange={(e) => handleInputChange('residencyLength', e.target.value)}
+              />
             </div>
           </div>
         </div>
 
         {/* Purpose and Legal Requirements */}
         <div className="space-y-6">
-          <h2 className="text-xl font-semibold text-gray-900 border-b pb-2">Purpose and Legal Requirements</h2>
-          
+          <h2 className="text-xl font-semibold text-gray-900 border-b pb-2">Purpose</h2>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <Label htmlFor="purpose">Purpose of Clearance *</Label>
@@ -365,37 +424,17 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
                   <SelectValue placeholder="Select purpose" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="employment">Employment/Job Application</SelectItem>
-                  <SelectItem value="scholarship">Scholarship Application</SelectItem>
-                  <SelectItem value="visa">Visa Application/Travel</SelectItem>
-                  <SelectItem value="bank">Bank Account Opening</SelectItem>
-                  <SelectItem value="loan">Loan Application</SelectItem>
-                  <SelectItem value="legal">Legal Proceedings</SelectItem>
-                  <SelectItem value="business">Business Registration</SelectItem>
-                  <SelectItem value="school">School Enrollment</SelectItem>
-                  <SelectItem value="insurance">Insurance Claims</SelectItem>
-                  <SelectItem value="government">Government Requirements</SelectItem>
-                  <SelectItem value="police">Police Clearance Application</SelectItem>
-                  <SelectItem value="nbi">NBI Clearance Application</SelectItem>
-                  <SelectItem value="passport">Passport Application</SelectItem>
-                  <SelectItem value="other">Other Legal Purposes</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="urgency">Processing Time *</Label>
-              <Select
-                value={formData.urgency}
-                onValueChange={(value) => handleInputChange('urgency', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select processing time" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="normal">Regular (2-3 working days)</SelectItem>
-                  <SelectItem value="urgent">Rush (1 working day)</SelectItem>
-                  <SelectItem value="same-day">Same Day (Additional fee applies)</SelectItem>
+                  <SelectItem value="Employment/Job Application">Employment/Job Application</SelectItem>
+                  <SelectItem value="Scholarship Application">Scholarship Application</SelectItem>
+                  <SelectItem value="Visa Application/Travel">Visa Application/Travel</SelectItem>
+                  <SelectItem value="Bank Account Opening">Bank Account Opening</SelectItem>
+                  <SelectItem value="Loan Application">Loan Application</SelectItem>
+                  <SelectItem value="Legal Proceedings">Legal Proceedings</SelectItem>
+                  <SelectItem value="Business Registration">Business Registration</SelectItem>
+                  <SelectItem value="School Enrollment">School Enrollment</SelectItem>
+                  <SelectItem value="Insurance Claims">Insurance Claims</SelectItem>
+                  <SelectItem value="Government Requirements">Government Requirements</SelectItem>
+                  <SelectItem value="Other Purpose">Other Purpose</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -417,42 +456,19 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
         {/* Supporting Documents */}
         <div className="space-y-6">
           <h2 className="text-xl font-semibold text-gray-900 border-b pb-2">Supporting Documents</h2>
-          
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-            <h3 className="font-medium text-blue-900 mb-2">Required Documents:</h3>
-            <ul className="text-sm text-blue-800 space-y-1">
-              <li>• Valid Government-issued ID (front and back)</li>
-              <li>• Proof of Residency (Utility bill, lease contract, etc.)</li>
-              <li>• Birth Certificate (if required for specific purpose)</li>
-              <li>• Marriage Certificate (if married and relevant to purpose)</li>
-            </ul>
-          </div>
-          
-          <div>
-            <Label>Upload At Least One of the Supporting Documents *</Label>
-            <div className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
-              <div className="space-y-2 text-center">
-                <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                <div className="text-sm text-gray-600">
-                  <label
-                    htmlFor="supportingDocs"
-                    className="relative cursor-pointer rounded-md font-medium text-[#23479A] hover:text-[#23479A]/80"
-                  >
-                    <span>Upload at least one required document</span>
-                    <input
-                      id="supportingDocs"
-                      type="file"
-                      multiple
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      className="sr-only"
-                      onChange={handleFileUpload}
-                    />
-                  </label>
-                  <p className="pl-1">or drag and drop</p>
-                </div>
-                <p className="text-xs text-gray-500">PDF, PNG, JPG up to 5MB each</p>
-              </div>
-            </div>
+
+                     <div>
+             <Label>Upload Supporting Documents (Temporarily Disabled)</Label>
+             <div className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg bg-gray-50 opacity-50">
+               <div className="space-y-2 text-center">
+                 <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                 <div className="text-sm text-gray-600">
+                   <span className="text-gray-500">File upload temporarily disabled</span>
+                   <p className="pl-1 text-gray-400">This feature will be available soon</p>
+                 </div>
+                 <p className="text-xs text-gray-400">PDF, PNG, JPG up to 5MB each</p>
+               </div>
+             </div>
 
             {supportingDocs.length > 0 && (
               <div className="mt-4 space-y-3">

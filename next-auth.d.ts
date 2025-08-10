@@ -10,7 +10,7 @@ declare module "next-auth" {
     image?: string | null;
     address?: string | null;
     bio?: string | null;
-    phone?: string | null;
+    mobileNumber?: string | null;
   }
 
   interface Session {

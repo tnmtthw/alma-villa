@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useMemo } from "react"
+import useSWR from "swr"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import {
@@ -10,18 +11,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { 
-  FileText, 
-  Clock, 
-  Eye, 
-  CheckCircle, 
-  XCircle, 
+import {
+  FileText,
+  Clock,
+  Eye,
+  CheckCircle,
+  XCircle,
   AlertTriangle,
   Download,
   RefreshCw,
   CreditCard,
   ArrowUpDown,
-  Plus
+  Plus,
+  Loader2
 } from "lucide-react"
 
 // Import our reusable components
@@ -32,88 +34,69 @@ import RequestDetailsModal from "./requests/RequestDetailsModal"
 import StatusUpdateModal from "./requests/StatusUpdateModal"
 import PaymentReviewModal from "./requests/PaymentReviewModal"
 
-// Import types
 import { DocumentRequest, RequestStats } from "./requests/types"
 
-// Mock data - Replace with actual API calls
-const mockRequests: DocumentRequest[] = [
-  {
-    id: "REQ-2024-001",
-    userId: "user123",
-    userFullName: "Juan Dela Cruz",
-    userEmail: "juan.delacruz@email.com",
-    userPhone: "+63 912 345 6789",
-    documentType: "Barangay Clearance",
-    purpose: "Employment requirement",
-    status: "payment_pending",
-    requestDate: "2024-01-15T08:30:00Z",
-    estimatedCompletion: "2024-01-20T17:00:00Z",
-    lastUpdated: "2024-01-16T14:20:00Z",
-    fee: "₱50.00",
-    paymentReference: "GCash-123456789",
-    paymentProof: "/uploads/payment_proof_001.jpg",
-    urgentRequest: false,
-    formData: {
-      fullName: "Juan Dela Cruz",
-      address: "123 Main St, Barangay Alma Villa",
-      dateOfBirth: "1990-05-15",
-      civilStatus: "Single"
-    },
-    attachments: ["/uploads/valid_id_001.jpg"]
-  },
-  {
-    id: "REQ-2024-002",
-    userId: "user456",
-    userFullName: "Maria Santos",
-    userEmail: "maria.santos@email.com",
-    userPhone: "+63 917 654 3210",
-    documentType: "Certificate of Residency",
-    purpose: "School enrollment",
-    status: "under_review",
-    requestDate: "2024-01-16T10:15:00Z",
-    estimatedCompletion: "2024-01-18T17:00:00Z",
-    lastUpdated: "2024-01-16T15:30:00Z",
-    fee: "₱30.00",
-    urgentRequest: true,
-    formData: {
-      fullName: "Maria Santos",
-      address: "456 Secondary St, Barangay Alma Villa",
-      yearsOfResidency: "5 years"
-    },
-    attachments: ["/uploads/utility_bill_002.jpg", "/uploads/valid_id_002.jpg"]
-  },
-  {
-    id: "REQ-2024-003",
-    userId: "user789",
-    userFullName: "Roberto Garcia",
-    userEmail: "roberto.garcia@email.com",
-    userPhone: "+63 920 111 2222",
-    documentType: "Business Permit",
-    purpose: "Business registration",
-    status: "ready_for_claim",
-    requestDate: "2024-01-10T14:45:00Z",
-    estimatedCompletion: "2024-01-17T17:00:00Z",
-    lastUpdated: "2024-01-17T09:00:00Z",
-    fee: "₱200.00",
-    paymentReference: "Bank Transfer-987654321",
-    urgentRequest: false,
-    formData: {
-      businessName: "Garcia Sari-Sari Store",
-      businessType: "Retail",
-      businessAddress: "789 Commerce Ave, Barangay Alma Villa"
-    },
-    attachments: ["/uploads/business_plan_003.pdf", "/uploads/location_map_003.jpg"]
+const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) => fetch(...args).then((res) => res.json());
+
+const useDocumentRequests = () => {
+  const { data, error, isLoading, mutate } = useSWR('/api/document', fetcher)
+
+  return {
+    documents: data?.success ? data.documents : [],
+    pagination: data?.pagination || { total: 0, limit: 50, offset: 0, hasMore: false },
+    error,
+    isLoading,
+    mutate
   }
-]
+}
+
+// Transform API document data to DocumentRequest format
+const transformDocumentToRequest = (document: any): DocumentRequest => {
+  // Get user information from the joined user data
+  const userEmail = document.user?.email || "user@example.com"
+  const userPhone = document.user?.mobileNumber || ""
+  const userFullName = document.user?.firstName && document.user?.lastName
+    ? `${document.user.firstName} ${document.user.lastName}`.trim()
+    : document.fullName || "Unknown User"
+
+  return {
+    id: document.id,
+    userId: document.userId || "unknown",
+    userFullName: userFullName,
+    userEmail: userEmail,
+    userPhone: userPhone,
+    documentType: document.type || "Unknown Document",
+    purpose: document.purpose || "Not specified",
+    status: document.status || "pending", // Use status from document model
+    requestDate: document.createdAt || new Date().toISOString(),
+    estimatedCompletion: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days from now
+    lastUpdated: document.createdAt || new Date().toISOString(),
+    fee: "₱50.00", // Default fee
+    urgentRequest: false, // Default to false
+    formData: {
+      fullName: document.fullName,
+      suffix: document.suffix,
+      birthDate: document.birthDate,
+      age: document.age,
+      civilStatus: document.civilStatus,
+      houseNumber: document.houseNumber,
+      street: document.street,
+      purok: document.purok,
+      residencyLength: document.residencyLength,
+      purpose: document.purpose,
+      additionalInfo: document.additionalInfo
+    },
+    attachments: [] // No attachments in current document model
+  }
+}
 
 export default function RequestsManagement() {
-  const [requests, setRequests] = useState<DocumentRequest[]>(mockRequests)
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [documentTypeFilter, setDocumentTypeFilter] = useState("all")
   const [urgentFilter, setUrgentFilter] = useState("all")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
-  
+
   // Modal states
   const [selectedRequest, setSelectedRequest] = useState<DocumentRequest | null>(null)
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
@@ -125,17 +108,25 @@ export default function RequestsManagement() {
     rejectionReason: ""
   })
 
+  // Fetch documents using custom hook
+  const { documents, pagination, error, isLoading, mutate } = useDocumentRequests()
+
+  // Transform documents to requests format
+  const requests: DocumentRequest[] = useMemo(() => {
+    return documents.map(transformDocumentToRequest)
+  }, [documents])
+
   // Calculate statistics
   const stats: RequestStats = useMemo(() => {
     return {
       total: requests.length,
-      pending: requests.filter(r => r.status === "pending").length,
-      underReview: requests.filter(r => r.status === "under_review").length,
-      processing: requests.filter(r => r.status === "processing").length,
-      paymentPending: requests.filter(r => r.status === "payment_pending").length,
-      readyForClaim: requests.filter(r => r.status === "ready_for_claim").length,
-      completed: requests.filter(r => r.status === "completed").length,
-      rejected: requests.filter(r => r.status === "rejected").length,
+      pending: requests.filter(r => r.status?.toLowerCase() === "pending").length,
+      underReview: requests.filter(r => r.status?.toLowerCase() === "under_review").length,
+      processing: requests.filter(r => r.status?.toLowerCase() === "processing").length,
+      paymentPending: requests.filter(r => r.status?.toLowerCase() === "payment_pending").length,
+      readyForClaim: requests.filter(r => r.status?.toLowerCase() === "ready_for_claim").length,
+      completed: requests.filter(r => r.status?.toLowerCase() === "completed").length,
+      rejected: requests.filter(r => r.status?.toLowerCase() === "rejected").length,
       urgent: requests.filter(r => r.urgentRequest).length
     }
   }, [requests])
@@ -143,15 +134,15 @@ export default function RequestsManagement() {
   // Filter and sort requests
   const filteredRequests = useMemo(() => {
     let filtered = requests.filter(request => {
-      const matchesSearch = 
+      const matchesSearch =
         request.userFullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         request.userEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
         request.documentType.toLowerCase().includes(searchTerm.toLowerCase()) ||
         request.id.toLowerCase().includes(searchTerm.toLowerCase())
 
-      const matchesStatus = statusFilter === "all" || request.status === statusFilter
+      const matchesStatus = statusFilter === "all" || request.status?.toLowerCase() === statusFilter.toLowerCase()
       const matchesDocumentType = documentTypeFilter === "all" || request.documentType === documentTypeFilter
-      const matchesUrgent = urgentFilter === "all" || 
+      const matchesUrgent = urgentFilter === "all" ||
         (urgentFilter === "urgent" && request.urgentRequest) ||
         (urgentFilter === "normal" && !request.urgentRequest)
 
@@ -170,7 +161,10 @@ export default function RequestsManagement() {
 
   // Status configuration
   const getStatusConfig = (status: DocumentRequest["status"]) => {
-    const configs = {
+    // Normalize status to lowercase for consistent matching
+    const normalizedStatus = status?.toLowerCase()
+
+    const configs: Record<string, { label: string; color: string; icon: any }> = {
       pending: { label: "Pending", color: "bg-orange-100 text-orange-800", icon: Clock },
       under_review: { label: "Under Review", color: "bg-blue-100 text-blue-800", icon: Eye },
       processing: { label: "Processing", color: "bg-purple-100 text-purple-800", icon: RefreshCw },
@@ -179,7 +173,9 @@ export default function RequestsManagement() {
       completed: { label: "Completed", color: "bg-gray-100 text-gray-800", icon: CheckCircle },
       rejected: { label: "Rejected", color: "bg-red-100 text-red-800", icon: XCircle }
     }
-    return configs[status]
+
+    // Return the config for the normalized status, or default to pending if not found
+    return configs[normalizedStatus] || configs.pending
   }
 
   // Format date
@@ -214,39 +210,100 @@ export default function RequestsManagement() {
     setIsPaymentReviewModalOpen(true)
   }
 
-  const handleStatusUpdateSubmit = () => {
+  const handleStatusUpdateSubmit = async () => {
     if (!selectedRequest) return
 
-    setRequests(prev => prev.map(req => 
-      req.id === selectedRequest.id 
-        ? {
-            ...req,
-            status: updateStatusData.newStatus as DocumentRequest["status"],
-            adminNotes: updateStatusData.adminNotes,
-            rejectionReason: updateStatusData.rejectionReason,
-            lastUpdated: new Date().toISOString()
-          }
-        : req
-    ))
+    try {
+      const response = await fetch(`/api/document/set-status?id=${selectedRequest.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: updateStatusData.newStatus,
+          adminNotes: updateStatusData.adminNotes,
+          rejectionReason: updateStatusData.rejectionReason
+        }),
+      })
 
-    setIsStatusUpdateModalOpen(false)
-    setSelectedRequest(null)
+      if (!response.ok) {
+        throw new Error('Failed to update status')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Trigger a revalidation of the SWR data
+        await mutate()
+        setIsStatusUpdateModalOpen(false)
+        setSelectedRequest(null)
+      } else {
+        throw new Error(result.error || 'Status update failed')
+      }
+    } catch (error) {
+      console.error('Error updating status:', error)
+      // You might want to show a toast notification here
+    }
   }
 
-  const handleApprovePayment = (request: DocumentRequest) => {
-    setRequests(prev => prev.map(req => 
-      req.id === request.id 
-        ? { ...req, status: "processing", lastUpdated: new Date().toISOString() }
-        : req
-    ))
+  const handleApprovePayment = async (request: DocumentRequest) => {
+    try {
+      const response = await fetch(`/api/document/set-status?id=${request.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: "processing"
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to approve payment')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Trigger a revalidation of the SWR data
+        await mutate()
+      } else {
+        throw new Error(result.error || 'Payment approval failed')
+      }
+    } catch (error) {
+      console.error('Error approving payment:', error)
+      // You might want to show a toast notification here
+    }
   }
 
-  const handleRejectPayment = (request: DocumentRequest) => {
-    setRequests(prev => prev.map(req => 
-      req.id === request.id 
-        ? { ...req, status: "payment_pending", lastUpdated: new Date().toISOString() }
-        : req
-    ))
+  const handleRejectPayment = async (request: DocumentRequest) => {
+    try {
+      const response = await fetch(`/api/document/set-status?id=${request.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: "payment_pending"
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to reject payment')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Trigger a revalidation of the SWR data
+        await mutate()
+      } else {
+        throw new Error(result.error || 'Payment rejection failed')
+      }
+    } catch (error) {
+      console.error('Error rejecting payment:', error)
+      // You might want to show a toast notification here
+    }
   }
 
   // Statistics cards configuration
@@ -261,15 +318,64 @@ export default function RequestsManagement() {
     { title: "Urgent", value: stats.urgent, icon: AlertTriangle, color: "text-red-600" },
   ]
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="flex items-center gap-2">
+            <Loader2 className="h-6 w-6 animate-spin" />
+            <span className="text-lg">Loading document requests...</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Error loading requests</h3>
+            <p className="text-gray-600 mb-4">Failed to load document requests. Please try again.</p>
+            <Button onClick={() => mutate()} className="bg-[#23479A] hover:bg-[#23479A]/90">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Retry
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Document Requests</h1>
-          <p className="text-gray-600 mt-1 text-sm md:text-base">Manage and process document requests from residents</p>
+          <p className="text-gray-600 mt-1 text-sm md:text-base">
+            Manage and process document requests from residents
+            {pagination.total > 0 && (
+              <span className="ml-2 text-sm text-gray-500">
+                ({pagination.total} total documents)
+              </span>
+            )}
+          </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <Button
+            variant="outline"
+            className="flex items-center justify-center gap-2 w-full sm:w-auto"
+            onClick={() => mutate()}
+            disabled={isLoading}
+          >
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">Refresh</span>
+          </Button>
           <Button variant="outline" className="flex items-center justify-center gap-2 w-full sm:w-auto">
             <Download className="h-4 w-4" />
             <span className="hidden sm:inline">Export</span>
@@ -311,10 +417,13 @@ export default function RequestsManagement() {
       <Card>
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <CardTitle className="text-lg md:text-xl">Document Requests ({filteredRequests.length})</CardTitle>
+            <CardTitle className="text-lg md:text-xl">
+              Document Requests ({filteredRequests.length})
+              {isLoading && <Loader2 className="h-4 w-4 animate-spin ml-2" />}
+            </CardTitle>
             <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
                 className="flex items-center gap-1 w-full sm:w-auto"

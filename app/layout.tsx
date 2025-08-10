@@ -3,6 +3,7 @@ import { SessionProvider } from "next-auth/react";
 import { auth } from "@/auth";
 import { Inter } from "next/font/google"
 import { Metadata } from "next"
+import { ToastProvider } from "@/components/ui/toast"
 import "./globals.css"
 
 const inter = Inter({
@@ -29,7 +30,9 @@ export default async function RootLayout({ children }: RootLayoutProps) {
     <html lang="en">
       <SessionProvider session={session}>
         <body className={`${inter.variable} font-sans antialiased`}>
-          <ConditionalLayout>{children}</ConditionalLayout>
+          <ToastProvider>
+            <ConditionalLayout>{children}</ConditionalLayout>
+          </ToastProvider>
         </body>
       </SessionProvider>
     </html>
