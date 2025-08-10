@@ -19,6 +19,8 @@ interface RequestsFiltersProps {
   setDocumentTypeFilter: (value: string) => void
   urgentFilter: string
   setUrgentFilter: (value: string) => void
+  userIdFilter: string
+  setUserIdFilter: (value: string) => void
 }
 
 export default function RequestsFilters({
@@ -30,20 +32,32 @@ export default function RequestsFilters({
   setDocumentTypeFilter,
   urgentFilter,
   setUrgentFilter,
+  userIdFilter,
+  setUserIdFilter,
 }: RequestsFiltersProps) {
   return (
     <Card>
       <CardContent className="p-4 md:p-6">
         <div className="flex flex-col space-y-4">
-          {/* Search */}
-          <div className="w-full relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Search by name, email, document type, or request ID..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 w-full"
-            />
+          {/* Search and User ID Filter */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="w-full relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search by name, email, document type, or request ID..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 w-full"
+              />
+            </div>
+            <div className="w-full">
+              <Input
+                placeholder="Filter by User ID..."
+                value={userIdFilter}
+                onChange={(e) => setUserIdFilter(e.target.value)}
+                className="w-full"
+              />
+            </div>
           </div>
 
           {/* Filters */}

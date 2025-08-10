@@ -5,8 +5,8 @@ import { PDFDocument } from 'pdf-lib';
 
 const Page = () => {
     const formData = {
-        Fullname: "Fortune Tamares",
-        Age: "25",
+        fullname: "Fortune Tamares",
+        age: "25",
         "Date of Birth": "2000-01-01",
         "Birth Place": "Gloria, Oriental Mindoro",
         "Civil Status": "Single",
