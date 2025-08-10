@@ -55,7 +55,7 @@ const useDocumentRequests = () => {
 // Custom hook for user-specific document requests
 const useUserDocumentRequests = (userId: string | null) => {
   const { data, error, isLoading, mutate } = useSWR(
-    userId ? `/api/user/docs?userId=${userId}` : null, 
+    userId ? `/api/user/docs?userId=${userId}` : null,
     fetcher
   )
 
@@ -131,12 +131,13 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
     rejectionReason: ""
   })
 
+  const effectiveUserId = userId || userIdFilter || null
+
   // Fetch documents using custom hook - choose between all documents or user-specific
   const { documents: allDocuments, pagination: allPagination, error: allError, isLoading: allIsLoading, mutate: allMutate } = useDocumentRequests()
   const { documents: userDocuments, pagination: userPagination, error: userError, isLoading: userIsLoading, mutate: userMutate } = useUserDocumentRequests(effectiveUserId)
 
   // Use user-specific data if userId prop is provided or userIdFilter is set, otherwise use all documents
-  const effectiveUserId = userId || userIdFilter || null
   const documents = effectiveUserId ? userDocuments : allDocuments
   const pagination = effectiveUserId ? userPagination : allPagination
   const error = effectiveUserId ? userError : allError
@@ -387,27 +388,27 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
     <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-                 <div>
-           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-             {effectiveUserId ? "User Document Requests" : "Document Requests"}
-           </h1>
-           <p className="text-gray-600 mt-1 text-sm md:text-base">
-             {effectiveUserId 
-               ? "View and manage document requests for this specific user"
-               : "Manage and process document requests from residents"
-             }
-             {effectiveUserId && (
-               <span className="ml-2 text-sm text-blue-600 font-medium">
-                 (User ID: {effectiveUserId})
-               </span>
-             )}
-             {pagination.total > 0 && (
-               <span className="ml-2 text-sm text-gray-500">
-                 ({pagination.total} total documents)
-               </span>
-             )}
-           </p>
-         </div>
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+            {effectiveUserId ? "User Document Requests" : "Document Requests"}
+          </h1>
+          <p className="text-gray-600 mt-1 text-sm md:text-base">
+            {effectiveUserId
+              ? "View and manage document requests for this specific user"
+              : "Manage and process document requests from residents"
+            }
+            {effectiveUserId && (
+              <span className="ml-2 text-sm text-blue-600 font-medium">
+                (User ID: {effectiveUserId})
+              </span>
+            )}
+            {pagination.total > 0 && (
+              <span className="ml-2 text-sm text-gray-500">
+                ({pagination.total} total documents)
+              </span>
+            )}
+          </p>
+        </div>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Button
             variant="outline"
