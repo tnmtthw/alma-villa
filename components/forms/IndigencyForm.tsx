@@ -15,45 +15,10 @@ interface IndigencyFormProps {
   onBackAction: () => void
 }
 
-interface FamilyMember {
-  name: string
-  age: string
-  relationship: string
-  occupation: string
-  monthlyIncome: string
-}
-
 interface FormData {
-  // Personal Information
+  // Personal Information - only what's needed for the PDF
   fullName: string
-  address: string
-  contactNumber: string
-  email: string
-  birthDate: string
   age: string
-  gender: string
-  civilStatus: string
-  
-  // Family Composition
-  familyMembers: FamilyMember[]
-  totalHouseholdMembers: string
-  totalMonthlyIncome: string
-  
-  // Housing Information
-  housingType: string
-  monthlyRent: string
-  utilities: string[]
-  
-  // Employment Information
-  employmentStatus: string
-  occupation: string
-  employer: string
-  monthlyIncome: string
-  
-  // Assistance Information
-  currentlyReceivingAssistance: boolean
-  assistanceReceived: string[]
-  reasonForIndigency: string
   
   // Purpose and supporting info
   purpose: string
@@ -63,41 +28,7 @@ interface FormData {
 
 const sampleData: FormData = {
   fullName: "Rosa Maria Garcia",
-  address: "234 Narra Street, Purok 1, Barangay Alma Villa",
-  contactNumber: "09176543210",
-  email: "rosa.garcia@email.com",
-  birthDate: "1975-05-10",
   age: "48",
-  gender: "female",
-  civilStatus: "widowed",
-  familyMembers: [
-    {
-      name: "Miguel Garcia",
-      age: "16",
-      relationship: "son",
-      occupation: "Student",
-      monthlyIncome: "0"
-    },
-    {
-      name: "Elena Garcia",
-      age: "14",
-      relationship: "daughter",
-      occupation: "Student",
-      monthlyIncome: "0"
-    }
-  ],
-  totalHouseholdMembers: "3",
-  totalMonthlyIncome: "3500",
-  housingType: "rented",
-  monthlyRent: "2000",
-  utilities: ["electricity", "water"],
-  employmentStatus: "part-time",
-  occupation: "Laundrywoman",
-  employer: "Various households",
-  monthlyIncome: "3500",
-  currentlyReceivingAssistance: true,
-  assistanceReceived: ["4Ps"],
-  reasonForIndigency: "Lost husband who was the main breadwinner. Currently struggling to support two children with irregular part-time work.",
   purpose: "To apply for medical assistance for my son's operation",
   urgentRequest: true,
   attachments: []
@@ -105,49 +36,34 @@ const sampleData: FormData = {
 
 // PDF Generation Function
 const generateIndigencyCertificatePDF = (data: FormData) => {
+  const currentDate = new Date()
+  const day = currentDate.getDate()
+  const month = currentDate.toLocaleString('default', { month: 'long' })
+  const year = currentDate.getFullYear()
+  
   const content = `
-REPUBLIC OF THE PHILIPPINES
-Province of Oriental Mindoro
-Municipality of Gloria
-BARANGAY ALMA VILLA
-
 CERTIFICATE OF INDIGENCY
 
-TO WHOM IT MAY CONCERN:
+To whom it may concern:
 
-This is to certify that ${data.fullName}, ${data.age} years old, ${data.civilStatus}, is a bonafide resident of ${data.address}, Barangay Alma Villa, Gloria, Oriental Mindoro.
+This is to certify that ${data.fullName}, legal age, resident of Alma Villa, Gloria Oriental Mindoro belongs to an indigent family.
 
-This is to certify further that the above-named person belongs to the indigent family in this barangay with the following family composition:
+This further certifies that their only source of income is through daily paid labor and their income is not enough to suffice their daily consumption. The Family doesn't have any real property for taxation purposes according to the Assessor and Treasury office of this Municipality.
 
-FAMILY COMPOSITION:
-${data.familyMembers.map((member, index) => 
-  `${index + 1}. ${member.name} - Age: ${member.age} - Relationship: ${member.relationship} - Occupation: ${member.occupation} - Monthly Income: ₱${member.monthlyIncome || '0'}`
-).join('\n')}
+This Certificate of Indigency is being issued upon the request for whatever legal purposes it may serve.
 
-Total Household Members: ${data.totalHouseholdMembers}
-Total Monthly Household Income: ₱${data.totalMonthlyIncome}
+Any instance extended to him/her is highly appreciated.
 
-HOUSING INFORMATION:
-Housing Type: ${data.housingType}
-${data.monthlyRent ? `Monthly Rent: ₱${data.monthlyRent}` : ''}
+ISSUED this ${day} day of ${month}, ${year} at the office of the Barangay Chairperson
 
-EMPLOYMENT INFORMATION:
-Employment Status: ${data.employmentStatus}
-Occupation: ${data.occupation}
-Monthly Income: ₱${data.monthlyIncome}
+Certified by:
 
-${data.reasonForIndigency ? `Reason for Indigency: ${data.reasonForIndigency}` : ''}
-
-This certification is issued upon the request of the interested party for ${data.purpose}.
-
-Given this ${new Date().getDate()}th day of ${new Date().toLocaleString('default', { month: 'long' })}, ${new Date().getFullYear()}.
-
-                                    _____________________
-                                    BARANGAY CAPTAIN
-                                    Barangay Alma Villa
+_____________________
+BARANGAY CAPTAIN
 
 Document Fee: FREE
 Processing Time: 2-3 days
+Purpose: ${data.purpose}
 ${data.urgentRequest ? 'URGENT REQUEST - Priority processing requested' : ''}
 
 Submitted: ${new Date().toLocaleString()}
@@ -168,26 +84,7 @@ Submitted: ${new Date().toLocaleString()}
 export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormProps) {
   const [formData, setFormData] = useState<FormData>({
     fullName: "",
-    address: "",
-    contactNumber: "",
-    email: "",
-    birthDate: "",
     age: "",
-    gender: "",
-    civilStatus: "",
-    familyMembers: [{ name: "", age: "", relationship: "", occupation: "", monthlyIncome: "" }],
-    totalHouseholdMembers: "",
-    totalMonthlyIncome: "",
-    housingType: "",
-    monthlyRent: "",
-    utilities: [],
-    employmentStatus: "",
-    occupation: "",
-    employer: "",
-    monthlyIncome: "",
-    currentlyReceivingAssistance: false,
-    assistanceReceived: [],
-    reasonForIndigency: "",
     purpose: "",
     urgentRequest: false,
     attachments: []
@@ -195,66 +92,8 @@ export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormP
   
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const assistanceOptions = [
-    "4Ps (Pantawid Pamilyang Pilipino Program)",
-    "Social Pension for Indigent Senior Citizens",
-    "DSWD Assistance",
-    "PCSO Medical Assistance",
-    "DOH Medical Assistance",
-    "Educational Assistance",
-    "Livelihood Programs"
-  ]
-
-  const utilityOptions = [
-    "electricity",
-    "water",
-    "internet",
-    "cable"
-  ]
-
   const handleInputChange = (field: keyof FormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }))
-  }
-
-  const handleFamilyMemberChange = (index: number, field: keyof FamilyMember, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      familyMembers: prev.familyMembers.map((member, i) => 
-        i === index ? { ...member, [field]: value } : member
-      )
-    }))
-  }
-
-  const addFamilyMember = () => {
-    setFormData(prev => ({
-      ...prev,
-      familyMembers: [...prev.familyMembers, { name: "", age: "", relationship: "", occupation: "", monthlyIncome: "" }]
-    }))
-  }
-
-  const removeFamilyMember = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      familyMembers: prev.familyMembers.filter((_, i) => i !== index)
-    }))
-  }
-
-  const handleAssistanceChange = (assistance: string, checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      assistanceReceived: checked 
-        ? [...prev.assistanceReceived, assistance]
-        : prev.assistanceReceived.filter(a => a !== assistance)
-    }))
-  }
-
-  const handleUtilityChange = (utility: string, checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      utilities: checked 
-        ? [...prev.utilities, utility]
-        : prev.utilities.filter(u => u !== utility)
-    }))
   }
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -316,7 +155,7 @@ export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormP
           </Button>
         </div>
         <p className="text-sm text-gray-600 mt-2">
-          Please provide accurate information about your family's financial situation.
+          Please provide your basic information for the Certificate of Indigency request.
         </p>
       </CardHeader>
 
@@ -338,52 +177,6 @@ export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormP
                 />
               </div>
               <div>
-                <Label htmlFor="contactNumber">Contact Number *</Label>
-                <Input
-                  id="contactNumber"
-                  value={formData.contactNumber}
-                  onChange={(e) => handleInputChange("contactNumber", e.target.value)}
-                  required
-                  placeholder="09XXXXXXXXX"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="email">Email Address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
-                  placeholder="your.email@example.com"
-                />
-              </div>
-              <div>
-                <Label htmlFor="address">Complete Address *</Label>
-                <Input
-                  id="address"
-                  value={formData.address}
-                  onChange={(e) => handleInputChange("address", e.target.value)}
-                  required
-                  placeholder="House No., Street, Purok, Barangay"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <Label htmlFor="birthDate">Date of Birth *</Label>
-                <Input
-                  id="birthDate"
-                  type="date"
-                  value={formData.birthDate}
-                  onChange={(e) => handleInputChange("birthDate", e.target.value)}
-                  required
-                />
-              </div>
-              <div>
                 <Label htmlFor="age">Age *</Label>
                 <Input
                   id="age"
@@ -394,310 +187,13 @@ export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormP
                   placeholder="Age"
                 />
               </div>
-              <div>
-                <Label>Gender *</Label>
-                <Select
-                  value={formData.gender}
-                  onValueChange={(value) => handleInputChange("gender", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select gender" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="male">Male</SelectItem>
-                    <SelectItem value="female">Female</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Civil Status *</Label>
-                <Select
-                  value={formData.civilStatus}
-                  onValueChange={(value) => handleInputChange("civilStatus", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="single">Single</SelectItem>
-                    <SelectItem value="married">Married</SelectItem>
-                    <SelectItem value="widowed">Widowed</SelectItem>
-                    <SelectItem value="separated">Separated</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
           </div>
 
-          {/* Family Composition Section */}
+          {/* Purpose Section */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium border-b pb-2">Family Composition</h3>
-              <Button
-                type="button"
-                onClick={addFamilyMember}
-                variant="outline"
-                className="text-sm border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10"
-              >
-                Add Family Member
-              </Button>
-            </div>
+            <h3 className="text-lg font-medium border-b pb-2">Certificate Purpose</h3>
             
-            {formData.familyMembers.map((member, index) => (
-              <div key={index} className="border border-gray-200 rounded-lg p-4 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-medium">Family Member #{index + 1}</h4>
-                  {formData.familyMembers.length > 1 && (
-                    <Button
-                      type="button"
-                      onClick={() => removeFamilyMember(index)}
-                      variant="outline"
-                      className="text-sm text-red-600 border-red-300 hover:bg-red-50"
-                    >
-                      Remove
-                    </Button>
-                  )}
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                  <div>
-                    <Label>Full Name *</Label>
-                    <Input
-                      value={member.name}
-                      onChange={(e) => handleFamilyMemberChange(index, 'name', e.target.value)}
-                      required
-                      placeholder="Full name"
-                    />
-                  </div>
-                  <div>
-                    <Label>Age *</Label>
-                    <Input
-                      type="number"
-                      value={member.age}
-                      onChange={(e) => handleFamilyMemberChange(index, 'age', e.target.value)}
-                      required
-                      placeholder="Age"
-                    />
-                  </div>
-                  <div>
-                    <Label>Relationship *</Label>
-                    <Input
-                      value={member.relationship}
-                      onChange={(e) => handleFamilyMemberChange(index, 'relationship', e.target.value)}
-                      required
-                      placeholder="e.g., Son, Daughter, Spouse"
-                    />
-                  </div>
-                  <div>
-                    <Label>Occupation *</Label>
-                    <Input
-                      value={member.occupation}
-                      onChange={(e) => handleFamilyMemberChange(index, 'occupation', e.target.value)}
-                      required
-                      placeholder="Occupation or Student"
-                    />
-                  </div>
-                  <div>
-                    <Label>Monthly Income</Label>
-                    <Input
-                      type="number"
-                      value={member.monthlyIncome}
-                      onChange={(e) => handleFamilyMemberChange(index, 'monthlyIncome', e.target.value)}
-                      placeholder="₱0.00"
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="totalHouseholdMembers">Total Household Members *</Label>
-                <Input
-                  id="totalHouseholdMembers"
-                  type="number"
-                  value={formData.totalHouseholdMembers}
-                  onChange={(e) => handleInputChange("totalHouseholdMembers", e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="totalMonthlyIncome">Total Monthly Household Income *</Label>
-                <Input
-                  id="totalMonthlyIncome"
-                  type="number"
-                  value={formData.totalMonthlyIncome}
-                  onChange={(e) => handleInputChange("totalMonthlyIncome", e.target.value)}
-                  required
-                  placeholder="₱0.00"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Housing Information Section */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium border-b pb-2">Housing Information</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>Housing Type *</Label>
-                <Select
-                  value={formData.housingType}
-                  onValueChange={(value) => handleInputChange("housingType", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select housing type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="owned">Owned</SelectItem>
-                    <SelectItem value="rented">Rented</SelectItem>
-                    <SelectItem value="shared">Shared with relatives</SelectItem>
-                    <SelectItem value="informal">Informal settler</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="monthlyRent">Monthly Rent (if applicable)</Label>
-                <Input
-                  id="monthlyRent"
-                  type="number"
-                  value={formData.monthlyRent}
-                  onChange={(e) => handleInputChange("monthlyRent", e.target.value)}
-                  placeholder="₱0.00"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label>Available Utilities (Check all that apply)</Label>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2">
-                {utilityOptions.map((utility) => (
-                  <div key={utility} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={utility}
-                      checked={formData.utilities.includes(utility)}
-                      onCheckedChange={(checked) => handleUtilityChange(utility, checked as boolean)}
-                    />
-                    <Label htmlFor={utility} className="text-sm capitalize">
-                      {utility}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Employment Information Section */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium border-b pb-2">Employment Information</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>Employment Status *</Label>
-                <Select
-                  value={formData.employmentStatus}
-                  onValueChange={(value) => handleInputChange("employmentStatus", value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select employment status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="unemployed">Unemployed</SelectItem>
-                    <SelectItem value="part-time">Part-time</SelectItem>
-                    <SelectItem value="full-time">Full-time</SelectItem>
-                    <SelectItem value="self-employed">Self-employed</SelectItem>
-                    <SelectItem value="disabled">Disabled/Unable to work</SelectItem>
-                    <SelectItem value="retired">Retired</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="occupation">Occupation</Label>
-                <Input
-                  id="occupation"
-                  value={formData.occupation}
-                  onChange={(e) => handleInputChange("occupation", e.target.value)}
-                  placeholder="Current occupation or job"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="employer">Employer/Company</Label>
-                <Input
-                  id="employer"
-                  value={formData.employer}
-                  onChange={(e) => handleInputChange("employer", e.target.value)}
-                  placeholder="Current employer or business"
-                />
-              </div>
-              <div>
-                <Label htmlFor="monthlyIncome">Your Monthly Income</Label>
-                <Input
-                  id="monthlyIncome"
-                  type="number"
-                  value={formData.monthlyIncome}
-                  onChange={(e) => handleInputChange("monthlyIncome", e.target.value)}
-                  placeholder="₱0.00"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Government Assistance Section */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium border-b pb-2">Government Assistance</h3>
-            
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="currentlyReceivingAssistance"
-                checked={formData.currentlyReceivingAssistance}
-                onCheckedChange={(checked: boolean) => handleInputChange("currentlyReceivingAssistance", checked)}
-              />
-              <Label htmlFor="currentlyReceivingAssistance">
-                Currently receiving government assistance or benefits
-              </Label>
-            </div>
-
-            {formData.currentlyReceivingAssistance && (
-              <div>
-                <Label>Select all assistance/benefits you are currently receiving:</Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
-                  {assistanceOptions.map((assistance) => (
-                    <div key={assistance} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={assistance}
-                        checked={formData.assistanceReceived.includes(assistance)}
-                        onCheckedChange={(checked) => handleAssistanceChange(assistance, checked as boolean)}
-                      />
-                      <Label htmlFor={assistance} className="text-sm">
-                        {assistance}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Reason for Indigency Section */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium border-b pb-2">Indigency Information</h3>
-            
-            <div>
-              <Label htmlFor="reasonForIndigency">Reason for Financial Hardship *</Label>
-              <Textarea
-                id="reasonForIndigency"
-                value={formData.reasonForIndigency}
-                onChange={(e) => handleInputChange("reasonForIndigency", e.target.value)}
-                required
-                placeholder="Please explain the circumstances that led to your current financial situation (e.g., loss of job, illness, death of breadwinner, etc.)"
-                rows={4}
-              />
-            </div>
-
             <div>
               <Label htmlFor="purpose">Purpose of This Certificate *</Label>
               <Textarea

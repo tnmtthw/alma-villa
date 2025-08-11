@@ -8,13 +8,12 @@ import { ArrowLeft } from "lucide-react"
 
 // Import all form components
 import BarangayClearanceForm from "@/components/forms/BarangayClearanceForm"
-// import BusinessPermitForm from "@/components/forms/BusinessPermitForm"
-import CedulaForm from "@/components/forms/CedulaForm"
-import JobSeekerForm from "@/components/forms/JobSeekerForm"
-import SoloParentForm from "@/components/forms/SoloParentForm"
+import BusinessPermitForm from "@/components/forms/BusinessPermitForm"
+
 import ResidencyForm from "@/components/forms/ResidencyForm"
 import IndigencyForm from "@/components/forms/IndigencyForm"
-import BlotterForm from "@/components/forms/BlotterForm"
+
+import GoodMoralForm from "@/components/forms/GoodMoralForm"
 
 // Document type configuration
 const documentTypes = {
@@ -39,40 +38,20 @@ const documentTypes = {
     processingTime: "2-3 days",
     component: IndigencyForm
   },
-//   "business-permit": {
-//     title: "Barangay Business Permit",
-//     description: "Permit to operate a business within the barangay",
-//     fee: "₱200", 
-//     processingTime: "3-5 days",
-//     component: BusinessPermitForm
-//   },
-  "cedula": {
-    title: "Community Tax Certificate (Cedula)",
-    description: "Official tax certificate for legal transactions",
-    fee: "₱30",
-    processingTime: "Same day", 
-    component: CedulaForm
+  "business-permit": {
+    title: "Barangay Business Permit",
+    description: "Permit to operate a business within the barangay",
+    fee: "₱200", 
+    processingTime: "3-5 days",
+    component: BusinessPermitForm
   },
-  "first-time-job-seeker": {
-    title: "First Time Job Seeker Certificate",
-    description: "Certificate for first-time job seekers to claim tax exemption",
-    fee: "Free",
-    processingTime: "1 day",
-    component: JobSeekerForm
-  },
-  "solo-parent": {
-    title: "Solo Parent Certificate", 
-    description: "Certificate for single parents to avail benefits and discounts",
-    fee: "Free",
-    processingTime: "2-3 days",
-    component: SoloParentForm
-  },
-  "complaint-blotter": {
-    title: "Complaint/Blotter Report",
-    description: "Official report for incidents and complaints",
-    fee: "Free",
-    processingTime: "Same day",
-    component: BlotterForm
+
+  "good-moral-character": {
+    title: "Certificate of Good Moral Character",
+    description: "Certificate verifying good moral character and integrity",
+    fee: "₱50",
+    processingTime: "1-2 days",
+    component: GoodMoralForm
   }
 } as const
 

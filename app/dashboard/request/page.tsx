@@ -10,7 +10,6 @@ import {
   FileText,
   Users,
   Home,
-  CreditCard,
   Building,
   Search,
   Clock,
@@ -66,55 +65,24 @@ export default function DocumentRequestPage() {
       processingTime: "3-5 days",
       requirements: ["Valid ID", "Business Registration", "Location Map"]
     },
+
     {
-      id: "cedula",
-      title: "Community Tax Certificate (Cedula)",
-      description: "Official tax certificate for legal transactions",
+      id: "good-moral-character",
+      title: "Certificate of Good Moral Character",
+      description: "Certificate verifying good moral character and integrity",
       category: "certificate",
-      icon: CreditCard,
-      fee: "₱30",
-      processingTime: "Same day",
-      requirements: ["Valid ID", "Income Declaration"],
-      popular: true
-    },
-    {
-      id: "first-time-job-seeker",
-      title: "First Time Job Seeker Certificate",
-      description: "Certificate for first-time job seekers to claim tax exemption",
-      category: "certificate",
-      icon: Users,
-      fee: "Free",
-      processingTime: "1 day",
-      requirements: ["Valid ID", "Birth Certificate", "Sworn Statement"]
-    },
-    {
-      id: "solo-parent",
-      title: "Solo Parent Certificate",
-      description: "Certificate for single parents to avail benefits and discounts",
-      category: "certificate",
-      icon: Users,
-      fee: "Free",
-      processingTime: "2-3 days",
-      requirements: ["Valid ID", "Birth Certificate of Child", "Supporting Documents"]
-    },
-    {
-      id: "complaint-blotter",
-      title: "Complaint/Blotter Report",
-      description: "Official report for incidents and complaints",
-      category: "report",
       icon: FileText,
-      fee: "Free",
-      processingTime: "Same day",
-      requirements: ["Valid ID", "Detailed Statement"],
-      popular: false
+      fee: "₱50",
+      processingTime: "1-2 days",
+      requirements: ["Valid ID", "Birth Certificate"],
+      popular: true
     }
   ]
 
   const categories = [
     { id: "all", label: "All Documents", count: documentTypes.length },
     { id: "certificate", label: "Certificates", count: documentTypes.filter(doc => doc.category === "certificate").length },
-    { id: "permit", label: "Permits", count: documentTypes.filter(doc => doc.category === "permit").length },
-    { id: "report", label: "Reports", count: documentTypes.filter(doc => doc.category === "report").length }
+    { id: "permit", label: "Permits", count: documentTypes.filter(doc => doc.category === "permit").length }
   ]
 
   const filteredDocuments = documentTypes.filter(doc => {

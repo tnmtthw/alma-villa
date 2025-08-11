@@ -12,68 +12,49 @@ import { Separator } from "@/components/ui/separator"
 import { ArrowLeft, Upload, X, FileText, Building, User } from "lucide-react"
 
 interface BusinessPermitFormProps {
-  onBack: () => void
+  onBackAction: () => void
+  onSubmit: (formData: any) => void
 }
 
 interface FormData {
-  // Business Information
+  // Business Information (as per PDF format)
   businessName: string
-  businessType: string
-  businessAddress: string
-  contactNumber: string
-  emailAddress: string
+  businessLocation: string
   
-  // Owner Information
-  ownerName: string
-  ownerAddress: string
-  ownerContactNumber: string
+  // Operator/Manager Information (as per PDF format)
+  operatorName: string
+  operatorAddress: string
   
-  // Business Details
-  businessActivity: string
-  numberOfEmployees: string
-  capitalInvestment: string
-  operatingHours: string
+  // Payment Information (for PDF)
+  amountPaid: string
+  orNumbers: string
   
-  // Purpose
-  purpose: string
+  // Supporting documents
+  attachments: File[]
 }
 
 const sampleData: FormData = {
   businessName: "Juan's Sari-Sari Store",
-  businessType: "retail",
-  businessAddress: "123 Maharlika Street, Purok 1, Alma Villa",
-  contactNumber: "09123456789",
-  emailAddress: "juan.store@email.com",
-  ownerName: "Juan Dela Cruz",
-  ownerAddress: "123 Maharlika Street, Purok 1, Alma Villa",
-  ownerContactNumber: "09123456789",
-  businessActivity: "General merchandise and food items retail",
-  numberOfEmployees: "2",
-  capitalInvestment: "50000",
-  operatingHours: "6:00 AM - 10:00 PM",
-  purpose: "Business permit renewal for continued operation"
+  businessLocation: "Purok 1",
+  operatorName: "Juan Dela Cruz",
+  operatorAddress: "123 Maharlika Street",
+  amountPaid: "200",
+  orNumbers: "12345678",
+  attachments: []
 }
 
-export default function BusinessPermitForm({ onBack }: BusinessPermitFormProps) {
+export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessPermitFormProps) {
   const [formData, setFormData] = useState<FormData>({
     businessName: "",
-    businessType: "",
-    businessAddress: "",
-    contactNumber: "",
-    emailAddress: "",
-    ownerName: "",
-    ownerAddress: "",
-    ownerContactNumber: "",
-    businessActivity: "",
-    numberOfEmployees: "",
-    capitalInvestment: "",
-    operatingHours: "",
-    purpose: ""
+    businessLocation: "",
+    operatorName: "",
+    operatorAddress: "",
+    amountPaid: "",
+    orNumbers: "",
+    attachments: []
   })
 
-  const [supportingDocs, setSupportingDocs] = useState<File[]>([])
-
-  const handleInputChange = (field: keyof FormData, value: string) => {
+  const handleInputChange = (field: keyof FormData, value: any) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -83,23 +64,115 @@ export default function BusinessPermitForm({ onBack }: BusinessPermitFormProps) 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (files) {
-      setSupportingDocs([...supportingDocs, ...Array.from(files)])
+      setFormData(prev => ({
+        ...prev,
+        attachments: [...prev.attachments, ...Array.from(files)]
+      }))
     }
   }
 
   const removeFile = (index: number) => {
-    setSupportingDocs(supportingDocs.filter((_, i) => i !== index))
+    setFormData(prev => ({
+      ...prev,
+      attachments: prev.attachments.filter((_, i) => i !== index)
+    }))
   }
 
   const fillWithSampleData = () => {
     setFormData(sampleData)
   }
 
+  // PDF Generation Function
+  const generateBusinessPermitPDF = (data: FormData) => {
+    const currentDate = new Date()
+    const day = currentDate.getDate()
+    const month = currentDate.toLocaleString('default', { month: 'long' })
+    const year = currentDate.getFullYear()
+    
+    const content = `
+BARANGAY BUSINESS PERMIT
+
+TO WHOM IT MAY CONCERN:
+
+This is to certify that the business or trade activity described below:
+
+( ${data.businessName} )
+
+BARANGAY ALMA VILLA
+
+Barangay Alma Villa, Gloria, Oriental Mindoro
+Location
+
+( ${data.operatorName} )
+
+Barangay Alma Villa, Gloria, Oriental Mindoro
+Address
+
+Being applied for the corresponding Mayor's Permit has been found to be:
+_______/Complying with the provisions of existing Barangay Ordinance,
+Rules and regulations being enforced in this Barangay.
+_______/ Partially complying with the provisions of existing Barangay
+Ordinances, rules and regulations being enforced in this Barangay
+In view of the foregoing, this Barangay thru the undersigned:
+
+_______/Interposes NO objection for the issuance of the corresponding
+Mayor's Permit being applied for.
+_______/Recommends only the issuance of a Temporary Mayor's Permit
+For not more than three (3) months and within that period the
+requirements under existing barangay ordinances, rules and
+regulations on that matter should be totally complied with, otherwise
+this barangay would take the necessary actions, with legal bounds, to
+stop its continued operation.
+
+Signed and issued this ${day} day of ${month} ${year} Alma Villa, Gloria Oriental Mindoro
+
+Amount paid: ${data.amountPaid}
+
+OR Numbers: ${data.orNumbers}
+
+Issued On: ${currentDate.toLocaleDateString()}
+Issued At: Barangay Alma Villa
+
+                    _____________________
+                    MARIFE M. SOL
+                    Punong Barangay
+
+Processing Fee: ₱200
+Processing Time: 3-5 days
+
+Submitted: ${new Date().toLocaleString()}
+    `
+    
+    // Create and download the file
+    const blob = new Blob([content], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `business-permit-${data.businessName.replace(/\s+/g, '-')}-${Date.now()}.txt`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle form submission
-    console.log("Business Permit Form submitted:", formData)
-    alert("Business permit application submitted successfully!")
+    
+    try {
+      // Generate PDF for admin
+      generateBusinessPermitPDF(formData)
+      
+      // Submit form data
+      onSubmit({
+        documentType: "business-permit",
+        formData,
+        submittedAt: new Date().toISOString()
+      })
+      
+    } catch (error) {
+      console.error("Error submitting form:", error)
+      alert("There was an error submitting your application. Please try again.")
+    }
   }
 
   return (
@@ -110,7 +183,7 @@ export default function BusinessPermitForm({ onBack }: BusinessPermitFormProps) 
           <div className="flex items-center gap-4">
             <Button
               type="button"
-              onClick={onBack}
+              onClick={onBackAction}
               variant="outline"
               size="sm"
             >
@@ -147,204 +220,113 @@ export default function BusinessPermitForm({ onBack }: BusinessPermitFormProps) 
       </Card>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Business Information */}
+        {/* Business Information (matching PDF format) */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Building className="h-5 w-5 text-[#23479A]" />
-              Business Information
+              Business or Trade Activity
             </CardTitle>
+            <CardDescription>
+              Business Name or Trade Activity (as it will appear on the permit)
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="businessName">Business Name *</Label>
-                <Input
-                  id="businessName"
-                  placeholder="Enter business name"
-                  required
-                  value={formData.businessName}
-                  onChange={(e) => handleInputChange('businessName', e.target.value)}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="businessName">Business Name or Trade Activity *</Label>
+              <Input
+                id="businessName"
+                placeholder="Enter business name or trade activity"
+                required
+                value={formData.businessName}
+                onChange={(e) => handleInputChange('businessName', e.target.value)}
+              />
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="businessType">Business Type *</Label>
-                <Select
-                  value={formData.businessType}
-                  onValueChange={(value) => handleInputChange('businessType', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select business type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="retail">Retail</SelectItem>
-                    <SelectItem value="wholesale">Wholesale</SelectItem>
-                    <SelectItem value="service">Service</SelectItem>
-                    <SelectItem value="manufacturing">Manufacturing</SelectItem>
-                    <SelectItem value="food">Food & Beverage</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="md:col-span-2 space-y-2">
-                <Label htmlFor="businessAddress">Business Address *</Label>
-                <Input
-                  id="businessAddress"
-                  placeholder="Enter complete business address"
-                  required
-                  value={formData.businessAddress}
-                  onChange={(e) => handleInputChange('businessAddress', e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="contactNumber">Contact Number *</Label>
-                <Input
-                  id="contactNumber"
-                  placeholder="Enter contact number"
-                  required
-                  value={formData.contactNumber}
-                  onChange={(e) => handleInputChange('contactNumber', e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="emailAddress">Email Address</Label>
-                <Input
-                  id="emailAddress"
-                  type="email"
-                  placeholder="Enter email address"
-                  value={formData.emailAddress}
-                  onChange={(e) => handleInputChange('emailAddress', e.target.value)}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="businessLocation">Location *</Label>
+              <Input
+                id="businessLocation"
+                placeholder="Street/Purok (location within Barangay Alma Villa)"
+                required
+                value={formData.businessLocation}
+                onChange={(e) => handleInputChange('businessLocation', e.target.value)}
+              />
+              <p className="text-xs text-gray-500">
+                Enter specific street or purok within Barangay Alma Villa, Gloria, Oriental Mindoro
+              </p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Owner Information */}
+        {/* Operator/Manager Information (matching PDF format) */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5 text-[#23479A]" />
-              Owner Information
+              Operator/Manager Information
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="ownerName">Owner Full Name *</Label>
-                <Input
-                  id="ownerName"
-                  placeholder="Enter owner's full name"
-                  required
-                  value={formData.ownerName}
-                  onChange={(e) => handleInputChange('ownerName', e.target.value)}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="operatorName">Operator/Manager Full Name *</Label>
+              <Input
+                id="operatorName"
+                placeholder="Enter operator or manager's full name"
+                required
+                value={formData.operatorName}
+                onChange={(e) => handleInputChange('operatorName', e.target.value)}
+              />
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="ownerContactNumber">Owner Contact Number *</Label>
-                <Input
-                  id="ownerContactNumber"
-                  placeholder="Enter owner's contact number"
-                  required
-                  value={formData.ownerContactNumber}
-                  onChange={(e) => handleInputChange('ownerContactNumber', e.target.value)}
-                />
-              </div>
-
-              <div className="md:col-span-2 space-y-2">
-                <Label htmlFor="ownerAddress">Owner Address *</Label>
-                <Input
-                  id="ownerAddress"
-                  placeholder="Enter owner's complete address"
-                  required
-                  value={formData.ownerAddress}
-                  onChange={(e) => handleInputChange('ownerAddress', e.target.value)}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="operatorAddress">Address *</Label>
+              <Input
+                id="operatorAddress"
+                placeholder="Street/Purok (address within Barangay Alma Villa)"
+                required
+                value={formData.operatorAddress}
+                onChange={(e) => handleInputChange('operatorAddress', e.target.value)}
+              />
+              <p className="text-xs text-gray-500">
+                Enter specific address within Barangay Alma Villa, Gloria, Oriental Mindoro
+              </p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Business Details */}
+        {/* Payment Information */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-[#23479A]" />
-              Business Details
+              Payment Information
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="businessActivity">Business Activity Description *</Label>
-              <Textarea
-                id="businessActivity"
-                placeholder="Describe the nature of your business activities"
-                className="min-h-[100px]"
-                required
-                value={formData.businessActivity}
-                onChange={(e) => handleInputChange('businessActivity', e.target.value)}
-              />
-            </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="numberOfEmployees">Number of Employees *</Label>
+                <Label htmlFor="amountPaid">Amount Paid (PHP) *</Label>
                 <Input
-                  id="numberOfEmployees"
+                  id="amountPaid"
                   type="number"
-                  placeholder="Enter number of employees"
+                  placeholder="Enter amount paid"
                   required
-                  value={formData.numberOfEmployees}
-                  onChange={(e) => handleInputChange('numberOfEmployees', e.target.value)}
+                  value={formData.amountPaid}
+                  onChange={(e) => handleInputChange('amountPaid', e.target.value)}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="capitalInvestment">Capital Investment (PHP) *</Label>
+                <Label htmlFor="orNumbers">OR Numbers *</Label>
                 <Input
-                  id="capitalInvestment"
-                  type="number"
-                  placeholder="Enter capital investment amount"
+                  id="orNumbers"
+                  placeholder="Enter Official Receipt numbers"
                   required
-                  value={formData.capitalInvestment}
-                  onChange={(e) => handleInputChange('capitalInvestment', e.target.value)}
+                  value={formData.orNumbers}
+                  onChange={(e) => handleInputChange('orNumbers', e.target.value)}
                 />
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="operatingHours">Operating Hours *</Label>
-              <Input
-                id="operatingHours"
-                placeholder="e.g., 8:00 AM - 6:00 PM, Monday to Saturday"
-                required
-                value={formData.operatingHours}
-                onChange={(e) => handleInputChange('operatingHours', e.target.value)}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Purpose */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Purpose of Application</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <Label htmlFor="purpose">Purpose *</Label>
-              <Textarea
-                id="purpose"
-                placeholder="State the purpose for this business permit application"
-                required
-                value={formData.purpose}
-                onChange={(e) => handleInputChange('purpose', e.target.value)}
-              />
             </div>
           </CardContent>
         </Card>
@@ -384,11 +366,11 @@ export default function BusinessPermitForm({ onBack }: BusinessPermitFormProps) 
                 </div>
               </div>
 
-              {supportingDocs.length > 0 && (
+              {formData.attachments.length > 0 && (
                 <div className="space-y-2">
                   <Label>Uploaded Files:</Label>
                   <div className="space-y-2">
-                    {supportingDocs.map((file, index) => (
+                    {formData.attachments.map((file, index) => (
                       <div
                         key={index}
                         className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border"
@@ -427,7 +409,7 @@ export default function BusinessPermitForm({ onBack }: BusinessPermitFormProps) 
               <div className="flex gap-3">
                 <Button
                   type="button"
-                  onClick={onBack}
+                  onClick={onBackAction}
                   variant="outline"
                 >
                   Cancel
