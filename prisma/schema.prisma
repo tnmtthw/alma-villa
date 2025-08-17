@@ -71,8 +71,6 @@ model Document {
   birthDate         String?
   age               String?
   civilStatus       String?
-  houseNumber       String?
-  street            String?
   purok             String?
   residencyLength   String?
   purpose           String?

@@ -26,15 +26,13 @@ interface FormData {
   civilStatus: string
 
   // Address Information
-  houseNumber: string
-  street: string
   purok: string
   residencyLength: string
 
   // Purpose
   purpose: string
   additionalInfo: string
-  
+
   // Contact Information (for processing)
   contactNumber: string
   emailAddress: string
@@ -45,9 +43,7 @@ const sampleData: FormData = {
   suffix: "Jr.",
   birthDate: "1990-01-15",
   civilStatus: "single",
-  houseNumber: "123",
-  street: "Maharlika Street",
-  purok: "Purok 1",
+  purok: "Sitio 1",
   residencyLength: "5",
   purpose: "employment",
   additionalInfo: "Required for submission to HR department by end of month",
@@ -62,8 +58,6 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
     suffix: "",
     birthDate: "",
     civilStatus: "",
-    houseNumber: "",
-    street: "",
     purok: "",
     residencyLength: "",
     purpose: "",
@@ -90,7 +84,7 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
     if (files) {
       const newFiles = Array.from(files).map(file => {
         const documentFile = file as DocumentFile
-        
+
         // Create preview for image files
         if (file.type.startsWith('image/')) {
           const reader = new FileReader()
@@ -100,10 +94,10 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
           }
           reader.readAsDataURL(file)
         }
-        
+
         return documentFile
       })
-      
+
       setSupportingDocs(prev => [...prev, ...newFiles])
     }
   }
@@ -133,9 +127,9 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
   const getFileIcon = (file: DocumentFile) => {
     if (file.type.startsWith('image/')) {
       return file.preview ? (
-        <img 
-          src={file.preview} 
-          alt="Preview" 
+        <img
+          src={file.preview}
+          alt="Preview"
           className="w-12 h-12 object-cover rounded border cursor-pointer hover:opacity-75"
           onClick={() => openImagePreview(file.preview!)}
         />
@@ -175,7 +169,7 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     setIsSubmitting(true)
 
     try {
@@ -204,8 +198,6 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
         birthDate: formData.birthDate,
         age: calculatedAge,
         civilStatus: formData.civilStatus,
-        houseNumber: formData.houseNumber,
-        street: formData.street,
         purok: formData.purok,
         residencyLength: formData.residencyLength,
         purpose: formData.purpose,
@@ -240,8 +232,6 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
           suffix: "",
           birthDate: "",
           civilStatus: "",
-          houseNumber: "",
-          street: "",
           purok: "",
           residencyLength: "",
           purpose: "",
@@ -358,7 +348,7 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
           <h2 className="text-xl font-semibold text-gray-900 border-b pb-2">Address Information</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
+            {/* <div>
               <Label htmlFor="houseNumber">House/Unit Number</Label>
               <Input
                 id="houseNumber"
@@ -380,13 +370,13 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
                 value={formData.street}
                 onChange={(e) => handleInputChange('street', e.target.value)}
               />
-            </div>
+            </div> */}
 
             <div>
-              <Label htmlFor="purok">Purok/Zone</Label>
+              <Label htmlFor="purok">Sitio</Label>
               <Input
                 id="purok"
-                placeholder="Enter purok/zone"
+                placeholder="Sitio"
                 className="mt-1"
                 required
                 value={formData.purok}
@@ -457,18 +447,18 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
         <div className="space-y-6">
           <h2 className="text-xl font-semibold text-gray-900 border-b pb-2">Supporting Documents</h2>
 
-                     <div>
-             <Label>Upload Supporting Documents (Temporarily Disabled)</Label>
-             <div className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg bg-gray-50 opacity-50">
-               <div className="space-y-2 text-center">
-                 <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                 <div className="text-sm text-gray-600">
-                   <span className="text-gray-500">File upload temporarily disabled</span>
-                   <p className="pl-1 text-gray-400">This feature will be available soon</p>
-                 </div>
-                 <p className="text-xs text-gray-400">PDF, PNG, JPG up to 5MB each</p>
-               </div>
-             </div>
+          <div>
+            <Label>Upload Supporting Documents (Temporarily Disabled)</Label>
+            <div className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg bg-gray-50 opacity-50">
+              <div className="space-y-2 text-center">
+                <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                <div className="text-sm text-gray-600">
+                  <span className="text-gray-500">File upload temporarily disabled</span>
+                  <p className="pl-1 text-gray-400">This feature will be available soon</p>
+                </div>
+                <p className="text-xs text-gray-400">PDF, PNG, JPG up to 5MB each</p>
+              </div>
+            </div>
 
             {supportingDocs.length > 0 && (
               <div className="mt-4 space-y-3">
@@ -518,13 +508,13 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
         <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
           <h3 className="font-semibold text-gray-900">Declaration</h3>
           <p className="text-sm text-gray-700">
-            I hereby certify that the information provided above is true and correct to the best of my knowledge. 
-            I understand that any false information may result in the rejection of my application and may be 
-            subject to legal action. I also acknowledge that I am a person of good moral character and integrity 
+            I hereby certify that the information provided above is true and correct to the best of my knowledge.
+            I understand that any false information may result in the rejection of my application and may be
+            subject to legal action. I also acknowledge that I am a person of good moral character and integrity
             with no derogatory records whatsoever.
           </p>
           <p className="text-sm text-gray-700">
-            This clearance is being requested for legal purposes only and I will use it in accordance with 
+            This clearance is being requested for legal purposes only and I will use it in accordance with
             the law and regulations.
           </p>
         </div>
@@ -556,7 +546,7 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
               className="fixed inset-0 bg-gray-500 bg-opacity-25 backdrop-blur-sm transition-opacity"
               onClick={closeImagePreview}
             />
-            
+
             <div className="relative transform overflow-hidden rounded-lg bg-white/95 backdrop-blur-sm text-left shadow-xl transition-all sm:my-8 w-full sm:max-w-3xl">
               <div className="flex flex-col items-center justify-center p-4">
                 <div className="mb-4 w-full flex justify-between items-center">
@@ -569,15 +559,15 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
-                
+
                 <div className="max-w-full max-h-[70vh] overflow-auto bg-gray-50 rounded-lg p-4">
-                  <img 
-                    src={selectedImagePreview} 
-                    alt="Document preview" 
+                  <img
+                    src={selectedImagePreview}
+                    alt="Document preview"
                     className="max-w-full h-auto rounded shadow-lg"
                   />
                 </div>
-                
+
                 <div className="mt-4">
                   <Button
                     onClick={closeImagePreview}
@@ -600,17 +590,17 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
               className="fixed inset-0 bg-gray-500 bg-opacity-25 backdrop-blur-sm transition-opacity"
               onClick={() => setShowSuccessModal(false)}
             />
-            
+
             <div className=" relative transform overflow-hidden rounded-lg bg-white/95 backdrop-blur-sm text-left shadow-xl transition-all sm:my-8 w-full sm:max-w-md">
               <div className="flex flex-col items-center justify-center p-6 text-center">
                 <div className="mb-4 p-3 rounded-full bg-green-100">
                   <CheckCircle className="h-16 w-16 text-green-600" />
                 </div>
-                
+
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">
                   Your Request Has Been Submitted
                 </h2>
-                
+
                 <div className="space-y-4 mb-6">
                   <div className="flex items-center gap-3 text-left">
                     <Clock className="h-5 w-5 text-blue-600 flex-shrink-0" />
@@ -618,14 +608,14 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
                       Document processing time is <strong>1-3 working days</strong>
                     </p>
                   </div>
-                  
+
                   <div className="flex items-center gap-3 text-left">
                     <Mail className="h-5 w-5 text-green-600 flex-shrink-0" />
                     <p className="text-gray-700">
                       An email will be received once the document is ready for pickup or download
                     </p>
                   </div>
-                  
+
                   <div className="flex items-start gap-3 text-left">
                     <DollarSign className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
                     <p className="text-gray-700">
@@ -633,7 +623,7 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="w-full">
                   <Button
                     onClick={handleCloseModal}
@@ -647,7 +637,7 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
           </div>
         </div>
       )}
-    
+
     </div>
   )
 }

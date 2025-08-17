@@ -12,8 +12,6 @@ interface ClaimClearanceButtonProps {
         age: string
         birthDate: string
         civilStatus: string
-        houseNumber: string
-        street: string
         purok: string
         type: string;
         requestDate: string;
@@ -35,7 +33,7 @@ const ClaimClearanceButton: React.FC<ClaimClearanceButtonProps> = ({ request }) 
         birthDate: request.birthDate,
         "birthPlace": "Philippines",
         civilStatus: request.civilStatus,
-        address: request.houseNumber + " " + request.street + " " + request.purok,
+        address: request.purok,
         "month": month,
         "day": day,
         "Residence Certificate": request.id,
