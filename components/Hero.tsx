@@ -31,12 +31,12 @@ const Hero = () => {
                 Your one-stop platform for accessing barangay services, submitting requests, and staying updated with community news.
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
-                <Button
+                {/* <Button
                   asChild
                   className="bg-white text-[#23479A] hover:bg-white/90"
                 >
                   <Link href="/account/signup">Register as Resident</Link>
-                </Button>
+                </Button> */}
                 <Button
                   asChild
                   variant="outline"
@@ -60,7 +60,7 @@ const Hero = () => {
           </div>
         </div>
       </section>
-      
+
       {/* ChatBot Component */}
       <ChatBot />
     </>
