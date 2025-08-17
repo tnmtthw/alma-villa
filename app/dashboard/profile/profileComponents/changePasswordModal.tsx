@@ -41,25 +41,25 @@ interface ShowPasswords {
 
 export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProps) {
   const { data: session } = useSession()
-  
+
   const [showPasswords, setShowPasswords] = useState<ShowPasswords>({
     current: false,
     new: false,
     confirm: false
   })
-  
+
   const [passwordData, setPasswordData] = useState<PasswordData>({
     currentPassword: "",
     newPassword: "",
     confirmPassword: ""
   })
-  
+
   const [passwordErrors, setPasswordErrors] = useState<PasswordErrors>({
     current: "",
     new: "",
     confirm: ""
   })
-  
+
   const [isChangingPassword, setIsChangingPassword] = useState(false)
 
   const handlePasswordChange = (field: keyof PasswordData, value: string) => {
@@ -146,15 +146,15 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
     setIsChangingPassword(true)
 
     try {
-      // Call the API to change password
-      const response = await fetch(`/api/user/profile?id=${session.user.id}`, {
+      // Call the correct API to change password
+      const response = await fetch(`/api/auth/change-password?id=${session.user.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           currentPassword: passwordData.currentPassword,
-          password: passwordData.newPassword
+          newPassword: passwordData.newPassword
         }),
       })
 
@@ -163,7 +163,6 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
         throw new Error(`Failed to change password: ${response.status} - ${errorData.error || 'Unknown error'}`)
       }
 
-      // Reset form and close modal
       resetForm()
       onClose()
 
@@ -172,7 +171,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
     } catch (error) {
       console.error('Error changing password:', error)
       const errorMessage = error instanceof Error ? error.message : "Failed to change password. Please try again."
-      
+
       // Check if it's an authentication error (wrong current password)
       if (errorMessage.includes('current password') || errorMessage.includes('invalid') || errorMessage.includes('unauthorized')) {
         setPasswordErrors(prev => ({
