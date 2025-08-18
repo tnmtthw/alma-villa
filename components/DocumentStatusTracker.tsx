@@ -5,12 +5,16 @@ import { Eye, Clock, CheckCircle, AlertCircle, FileText, Calendar } from "lucide
 import { useSession } from "next-auth/react"
 import useSWR from 'swr'
 
-import ClaimClearanceButton from './admincomponents/pdfgenerator/ClaimClearance'
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import ClaimResidency from './admincomponents/pdfgenerator/ClaimResidency'
+
+import ClaimClearanceButton from './admincomponents/pdfgenerator/ClaimClearance'
+import ClaimResidencyButton from './admincomponents/pdfgenerator/ClaimResidency'
+import ClaimIndigencyButton from './admincomponents/pdfgenerator/ClaimIndigency'
+import ClaimGoodMoralButton from './admincomponents/pdfgenerator/ClaimGoodMoral'
 
 const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) =>
   fetch(...args).then((res) => res.json())
@@ -20,6 +24,8 @@ interface DocumentRequest {
   fullName: string
   age: string
   birthDate: string
+  placeOfBirth: string
+  citizenship: string
   civilStatus: string
   houseNumber: string
   street: string
@@ -108,6 +114,7 @@ const DocumentStatusTracker = () => {
     fullName: doc.fullName,
     age: doc.age,
     birthDate: doc.birthDate,
+    placeOfBirth: doc.placeOfBirth,
     civilStatus: doc.civilStatus,
     houseNumber: doc.houseNumber,
     street: doc.street,
@@ -187,7 +194,13 @@ const DocumentStatusTracker = () => {
                     <ClaimClearanceButton request={request} />
                   )}
                   {request.status === "ready_for_claim" && request.type === "Certificate of Residency" && (
-                    <ClaimResidency request={request} />
+                    <ClaimResidencyButton request={request} />
+                  )}
+                  {request.status === "ready_for_claim" && request.type === "Certificate of Indigency" && (
+                    <ClaimIndigencyButton request={request} />
+                  )}
+                  {request.status === "ready_for_claim" && request.type === "Certificate of Good Moral Character" && (
+                    <ClaimGoodMoralButton request={request} />
                   )}
                   {/* <Button variant="outline" size="sm" className="text-gray-600 hover:text-[#23479A]">
                     <Eye className="h-3 w-3 mr-1" />
