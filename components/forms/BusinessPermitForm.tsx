@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { ArrowLeft, Upload, X, FileText, Building, User } from "lucide-react"
+import { useToast } from "@/components/ui/toast"
+import { useSession } from "next-auth/react"
 
 interface BusinessPermitFormProps {
   onBackAction: () => void
@@ -20,22 +22,22 @@ interface FormData {
   // Business Information (as per PDF format)
   businessName: string
   businessLocation: string
-  
+
   // Operator/Manager Information (as per PDF format)
   operatorName: string
   operatorAddress: string
-  
+
   // Payment Information (for PDF)
   amountPaid: string
   orNumbers: string
-  
+
   // Supporting documents
   attachments: File[]
 }
 
 const sampleData: FormData = {
   businessName: "Juan's Sari-Sari Store",
-  businessLocation: "Purok 1",
+  businessLocation: "Sitio 1",
   operatorName: "Juan Dela Cruz",
   operatorAddress: "123 Maharlika Street",
   amountPaid: "200",
@@ -53,6 +55,8 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
     orNumbers: "",
     attachments: []
   })
+  const { addToast } = useToast()
+  const { data: session } = useSession()
 
   const handleInputChange = (field: keyof FormData, value: any) => {
     setFormData(prev => ({
@@ -82,96 +86,77 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
     setFormData(sampleData)
   }
 
-  // PDF Generation Function
-  const generateBusinessPermitPDF = (data: FormData) => {
-    const currentDate = new Date()
-    const day = currentDate.getDate()
-    const month = currentDate.toLocaleString('default', { month: 'long' })
-    const year = currentDate.getFullYear()
-    
-    const content = `
-BARANGAY BUSINESS PERMIT
+  // Removed PDF generation; using API submission instead
 
-TO WHOM IT MAY CONCERN:
-
-This is to certify that the business or trade activity described below:
-
-( ${data.businessName} )
-
-BARANGAY ALMA VILLA
-
-Barangay Alma Villa, Gloria, Oriental Mindoro
-Location
-
-( ${data.operatorName} )
-
-Barangay Alma Villa, Gloria, Oriental Mindoro
-Address
-
-Being applied for the corresponding Mayor's Permit has been found to be:
-_______/Complying with the provisions of existing Barangay Ordinance,
-Rules and regulations being enforced in this Barangay.
-_______/ Partially complying with the provisions of existing Barangay
-Ordinances, rules and regulations being enforced in this Barangay
-In view of the foregoing, this Barangay thru the undersigned:
-
-_______/Interposes NO objection for the issuance of the corresponding
-Mayor's Permit being applied for.
-_______/Recommends only the issuance of a Temporary Mayor's Permit
-For not more than three (3) months and within that period the
-requirements under existing barangay ordinances, rules and
-regulations on that matter should be totally complied with, otherwise
-this barangay would take the necessary actions, with legal bounds, to
-stop its continued operation.
-
-Signed and issued this ${day} day of ${month} ${year} Alma Villa, Gloria Oriental Mindoro
-
-Amount paid: ${data.amountPaid}
-
-OR Numbers: ${data.orNumbers}
-
-Issued On: ${currentDate.toLocaleDateString()}
-Issued At: Barangay Alma Villa
-
-                    _____________________
-                    MARIFE M. SOL
-                    Punong Barangay
-
-Processing Fee: ₱200
-Processing Time: 3-5 days
-
-Submitted: ${new Date().toLocaleString()}
-    `
-    
-    // Create and download the file
-    const blob = new Blob([content], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `business-permit-${data.businessName.replace(/\s+/g, '-')}-${Date.now()}.txt`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     try {
-      // Generate PDF for admin
-      generateBusinessPermitPDF(formData)
-      
-      // Submit form data
+      // Validate required fields
+      const required: Array<keyof FormData> = [
+        'businessName', 'businessLocation', 'operatorName', 'operatorAddress', 'amountPaid', 'orNumbers'
+      ]
+      const missing = required.filter(f => !String(formData[f] ?? '').trim())
+      if (missing.length) {
+        addToast({
+          title: "Validation Error",
+          description: `Please fill in all required fields: ${missing.join(', ')}`,
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Prepare payload for Document API
+      const additionalInfo = `Amount Paid: ${formData.amountPaid}; OR Numbers: ${formData.orNumbers}`
+      const documentData = {
+        userId: session?.user.id,
+        fullName: formData.operatorName,
+        purok: formData.businessLocation,
+        additionalInfo,
+        purpose: `Business Permit for ${formData.businessName}`,
+        type: "Business Permit",
+      }
+
+      const response = await fetch('/api/document', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(documentData),
+      })
+
+      if (!response.ok) throw new Error('Failed to submit document')
+      const result = await response.json()
+      if (!result?.success) throw new Error(result?.error || 'Submission failed')
+
+      addToast({
+        title: "Success!",
+        description: "Business permit application submitted successfully!",
+        variant: "default",
+      })
+
       onSubmit({
         documentType: "business-permit",
         formData,
         submittedAt: new Date().toISOString()
       })
-      
+
+      // Reset form
+      setFormData({
+        businessName: "",
+        businessLocation: "",
+        operatorName: "",
+        operatorAddress: "",
+        amountPaid: "",
+        orNumbers: "",
+        attachments: []
+      })
+
     } catch (error) {
       console.error("Error submitting form:", error)
-      alert("There was an error submitting your application. Please try again.")
+      addToast({
+        title: "Error",
+        description: "There was an error submitting your application. Please try again.",
+        variant: "destructive",
+      })
     }
   }
 

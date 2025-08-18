@@ -67,15 +67,17 @@ model Document {
   id                String       @id @default(uuid()) @db.Uuid
   userId            String       @db.Uuid
   fullName          String?
-  suffix            String?
-  birthDate         String?
+  suffix            String? 
+  birthDate         String?   
+  citenzship        String?      @default("N/A")
+  placeOfBirth      String?      @default("N/A")
   age               String?
-  civilStatus       String?
+  civilStatus       String?      @default("N/A")
   purok             String?
-  residencyLength   String?
-  purpose           String?
-  additionalInfo    String?
-  type              String?
+  residencyLength   String?  
+  purpose           String?      @default("N/A")
+  additionalInfo    String?      @default("N/A")
+  type              String?      @default("N/A")
   status            String       @default("pending")
   createdAt         DateTime     @default(now())
   user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)

@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Upload, X, FileText } from "lucide-react"
+import { useToast } from "@/components/ui/toast"
+import { useSession } from "next-auth/react"
 
 interface GoodMoralFormProps {
   onSubmit: (formData: any) => void
@@ -19,13 +21,11 @@ interface FormData {
   dateOfBirth: string
   placeOfBirth: string
   civilStatus: string
-  age: string
   citizenship: string
   residentOf: string
-  
+
   // Purpose and supporting info
   purpose: string
-  urgentRequest: boolean
   attachments: File[]
 }
 
@@ -34,63 +34,10 @@ const sampleData: FormData = {
   dateOfBirth: "1985-08-15",
   placeOfBirth: "Gloria, Oriental Mindoro",
   civilStatus: "married",
-  age: "38",
   citizenship: "Filipino",
-  residentOf: "Purok 2",
+  residentOf: "Sitio 2",
   purpose: "Employment requirements",
-  urgentRequest: false,
   attachments: []
-}
-
-// PDF Generation Function
-const generateGoodMoralCertificatePDF = (data: FormData) => {
-  const currentDate = new Date()
-  const day = currentDate.getDate()
-  const month = currentDate.toLocaleString('default', { month: 'long' })
-  const year = currentDate.getFullYear()
-  
-  const content = `
-CERTIFICATE OF GOOD MORAL CHARACTER
-
-TO WHOM IT MAY CONCERN:
-
-This is to certify that ${data.fullName}, known to be of the following:
-
-Date of Birth: ${data.dateOfBirth}
-Place of Birth: ${data.placeOfBirth}
-Civil Status: ${data.civilStatus}
-Age: ${data.age}
-Citizenship: ${data.citizenship}
-
-A resident of ${data.residentOf}, Barangay Alma Villa, Gloria Oriental Mindoro.
-
-This further certifies that undersigned is concerned, above name subject is a person of GOOD MORAL and INTEGRITY and has NO DEROGATORY records and NO PENDING CASE in Barangay Alma Villa.
-
-This Certification is being issued upon the request of the party concerned for whatever legal purposes.
-
-Issued this ${day} of ${month}, ${year} at Barangay Alma Villa, Gloria Oriental Mindoro.
-
-                    _____________________
-                    BARANGAY CAPTAIN
-
-Document Fee: ₱50
-Processing Time: 1-2 days
-Purpose: ${data.purpose}
-${data.urgentRequest ? 'URGENT REQUEST - Priority processing requested' : ''}
-
-Submitted: ${new Date().toLocaleString()}
-  `
-  
-  // Create and download the file
-  const blob = new Blob([content], { type: 'text/plain' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `good-moral-certificate-${data.fullName.replace(/\s+/g, '-')}-${Date.now()}.txt`
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
 }
 
 export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormProps) {
@@ -99,15 +46,26 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
     dateOfBirth: "",
     placeOfBirth: "",
     civilStatus: "",
-    age: "",
     citizenship: "Filipino",
     residentOf: "",
     purpose: "",
-    urgentRequest: false,
     attachments: []
   })
-  
+
+  const calculateAge = (birthDate: string) => {
+    const today = new Date()
+    const birth = new Date(birthDate)
+    let age = today.getFullYear() - birth.getFullYear()
+    const monthDiff = today.getMonth() - birth.getMonth()
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--
+    }
+    return age.toString()
+  }
+
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { addToast } = useToast()
+  const { data: session } = useSession()
 
   const handleInputChange = (field: keyof FormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -135,19 +93,77 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
     setIsSubmitting(true)
 
     try {
-      // Generate PDF for admin
-      generateGoodMoralCertificatePDF(formData)
-      
-      // Submit form data
+      // Validate required fields (age is auto-calculated)
+      const required: Array<keyof FormData> = [
+        'fullName', 'dateOfBirth', 'placeOfBirth', 'civilStatus', 'citizenship', 'residentOf', 'purpose'
+      ]
+      const missing = required.filter(f => !String(formData[f] ?? '').trim())
+      if (missing.length) {
+        addToast({
+          title: "Validation Error",
+          description: `Please fill in all required fields: ${missing.join(', ')}`,
+          variant: "destructive",
+        })
+        return
+      }
+
+
+      const calculatedAge = formData.dateOfBirth ? calculateAge(formData.dateOfBirth) : ""
+
+      const documentData = {
+        userId: session?.user.id,
+        fullName: formData.fullName,
+        birthDate: formData.dateOfBirth,
+        placeOfBirth: formData.placeOfBirth,
+        age: calculatedAge,
+        civilStatus: formData.civilStatus,
+        citenzship: formData.citizenship,
+        purok: formData.residentOf,
+        purpose: formData.purpose,
+        type: "Certificate of Good Moral Character",
+      }
+
+      const response = await fetch('/api/document', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(documentData),
+      })
+
+      if (!response.ok) throw new Error('Failed to submit document')
+      const result = await response.json()
+      if (!result?.success) throw new Error(result?.error || 'Submission failed')
+
+      addToast({
+        title: "Success!",
+        description: "Good Moral certificate request submitted successfully!",
+        variant: "default",
+      })
+
       await onSubmit({
         documentType: "good-moral-character",
         formData,
         submittedAt: new Date().toISOString()
       })
-      
+
+      // Reset form
+      setFormData({
+        fullName: "",
+        dateOfBirth: "",
+        placeOfBirth: "",
+        civilStatus: "",
+        citizenship: "Filipino",
+        residentOf: "",
+        purpose: "",
+        attachments: []
+      })
+
     } catch (error) {
       console.error("Error submitting form:", error)
-      alert("There was an error submitting your request. Please try again.")
+      addToast({
+        title: "Error",
+        description: "There was an error submitting your request. Please try again.",
+        variant: "destructive",
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -181,7 +197,7 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
           {/* Personal Information Section */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium border-b pb-2">Personal Information</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="fullName">Full Name *</Label>
@@ -216,17 +232,6 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
                   placeholder="City/Municipality, Province"
                 />
               </div>
-              <div>
-                <Label htmlFor="age">Age *</Label>
-                <Input
-                  id="age"
-                  type="number"
-                  value={formData.age}
-                  onChange={(e) => handleInputChange("age", e.target.value)}
-                  required
-                  placeholder="Age"
-                />
-              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -240,11 +245,11 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="single">Single</SelectItem>
-                    <SelectItem value="married">Married</SelectItem>
-                    <SelectItem value="widowed">Widowed</SelectItem>
-                    <SelectItem value="separated">Separated</SelectItem>
-                    <SelectItem value="divorced">Divorced</SelectItem>
+                    <SelectItem value="Single">Single</SelectItem>
+                    <SelectItem value="Married">Married</SelectItem>
+                    <SelectItem value="Widowed">Widowed</SelectItem>
+                    <SelectItem value="Separated">Separated</SelectItem>
+                    <SelectItem value="Divorced">Divorced</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -259,17 +264,14 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
                 />
               </div>
               <div>
-                <Label htmlFor="residentOf">Resident of *</Label>
+                <Label htmlFor="residentOf">Sitio</Label>
                 <Input
                   id="residentOf"
                   value={formData.residentOf}
                   onChange={(e) => handleInputChange("residentOf", e.target.value)}
                   required
-                  placeholder="Street/Purok within Barangay Alma Villa"
+                  placeholder="Sitio"
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Enter specific street or purok (Barangay Alma Villa will be added automatically)
-                </p>
               </div>
             </div>
           </div>
@@ -277,7 +279,7 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
           {/* Purpose Section */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium border-b pb-2">Certificate Purpose</h3>
-            
+
             <div>
               <Label htmlFor="purpose">Purpose of This Certificate *</Label>
               <Input
@@ -349,20 +351,6 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
                 ))}
               </div>
             )}
-          </div>
-
-          {/* Urgent Request Option */}
-          <div className="flex items-center space-x-2">
-            <input
-              id="urgentRequest"
-              type="checkbox"
-              checked={formData.urgentRequest}
-              onChange={(e) => handleInputChange("urgentRequest", e.target.checked)}
-              className="rounded border-gray-300 text-[#23479A] focus:ring-[#23479A]"
-            />
-            <Label htmlFor="urgentRequest" className="text-sm">
-              This is an urgent request requiring immediate processing
-            </Label>
           </div>
 
           {/* Important Notice */}
