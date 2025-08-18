@@ -76,7 +76,7 @@ model Document {
   purpose           String?
   additionalInfo    String?
   type              String?
-  status            String       @default("Pending")
+  status            String       @default("pending")
   createdAt         DateTime     @default(now())
   user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

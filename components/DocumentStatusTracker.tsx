@@ -84,7 +84,14 @@ const getStatusConfig = (status: DocumentRequest["status"]) => {
       description: "Request requires attention"
     }
   }
-  return configs[status]
+  return configs[status] || {
+    label: "Unknown",
+    color: "text-gray-600",
+    bgColor: "bg-gray-50",
+    borderColor: "border-gray-200",
+    icon: FileText,
+    description: "Status not recognized"
+  }
 }
 
 const DocumentStatusTracker = () => {

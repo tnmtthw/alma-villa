@@ -72,6 +72,15 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null)
 
+  // Generate today's date string in local timezone (YYYY-MM-DD)
+  const todayLocalDateString = (() => {
+    const today = new Date()
+    const year = today.getFullYear()
+    const month = String(today.getMonth() + 1).padStart(2, '0')
+    const day = String(today.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  })()
+
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({
       ...prev,
@@ -164,6 +173,14 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
   }
 
   const handleBirthDateChange = (value: string) => {
+    if (value > todayLocalDateString) {
+      addToast({
+        title: "Invalid Birth Date",
+        description: "Birth date cannot be in the future.",
+        variant: "destructive",
+      })
+      return
+    }
     handleInputChange('birthDate', value)
   }
 
@@ -173,8 +190,18 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
     setIsSubmitting(true)
 
     try {
+      // Prevent future birth dates
+      if (formData.birthDate && formData.birthDate > todayLocalDateString) {
+        addToast({
+          title: "Invalid Birth Date",
+          description: "Birth date cannot be later than today.",
+          variant: "destructive",
+        })
+        return
+      }
+
       // Validate required fields
-      const requiredFields = ['fullName', 'birthDate', 'civilStatus', 'houseNumber', 'street', 'purok', 'residencyLength', 'purpose']
+      const requiredFields = ['fullName', 'birthDate', 'civilStatus', 'purok', 'residencyLength', 'purpose']
       const missingFields = requiredFields.filter(field => !formData[field as keyof FormData])
 
       if (missingFields.length > 0) {
@@ -317,6 +344,7 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
                 type="date"
                 className="mt-1"
                 required
+                max={todayLocalDateString}
                 value={formData.birthDate}
                 onChange={(e) => handleBirthDateChange(e.target.value)}
               />
