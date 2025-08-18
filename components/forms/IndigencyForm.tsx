@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Upload, X, FileText } from "lucide-react"
+import { useToast } from "@/components/ui/toast"
+import { useSession } from "next-auth/react"
 
 interface IndigencyFormProps {
   onSubmit: (formData: any) => void
@@ -19,10 +21,9 @@ interface FormData {
   // Personal Information - only what's needed for the PDF
   fullName: string
   age: string
-  
+
   // Purpose and supporting info
   purpose: string
-  urgentRequest: boolean
   attachments: File[]
 }
 
@@ -30,67 +31,21 @@ const sampleData: FormData = {
   fullName: "Rosa Maria Garcia",
   age: "48",
   purpose: "To apply for medical assistance for my son's operation",
-  urgentRequest: true,
   attachments: []
 }
 
-// PDF Generation Function
-const generateIndigencyCertificatePDF = (data: FormData) => {
-  const currentDate = new Date()
-  const day = currentDate.getDate()
-  const month = currentDate.toLocaleString('default', { month: 'long' })
-  const year = currentDate.getFullYear()
-  
-  const content = `
-CERTIFICATE OF INDIGENCY
-
-To whom it may concern:
-
-This is to certify that ${data.fullName}, legal age, resident of Alma Villa, Gloria Oriental Mindoro belongs to an indigent family.
-
-This further certifies that their only source of income is through daily paid labor and their income is not enough to suffice their daily consumption. The Family doesn't have any real property for taxation purposes according to the Assessor and Treasury office of this Municipality.
-
-This Certificate of Indigency is being issued upon the request for whatever legal purposes it may serve.
-
-Any instance extended to him/her is highly appreciated.
-
-ISSUED this ${day} day of ${month}, ${year} at the office of the Barangay Chairperson
-
-Certified by:
-
-_____________________
-BARANGAY CAPTAIN
-
-Document Fee: FREE
-Processing Time: 2-3 days
-Purpose: ${data.purpose}
-${data.urgentRequest ? 'URGENT REQUEST - Priority processing requested' : ''}
-
-Submitted: ${new Date().toLocaleString()}
-  `
-  
-  // Create and download the file
-  const blob = new Blob([content], { type: 'text/plain' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `certificate-of-indigency-${data.fullName.replace(/\s+/g, '-')}-${Date.now()}.txt`
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
-}
 
 export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormProps) {
   const [formData, setFormData] = useState<FormData>({
     fullName: "",
     age: "",
     purpose: "",
-    urgentRequest: false,
     attachments: []
   })
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { addToast } = useToast()
+  const { data: session } = useSession()
 
   const handleInputChange = (field: keyof FormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -118,19 +73,66 @@ export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormP
     setIsSubmitting(true)
 
     try {
-      // Generate PDF for admin
-      generateIndigencyCertificatePDF(formData)
-      
-      // Submit form data
+      // Validate required fields
+      const requiredFields: Array<keyof FormData> = ['fullName', 'age', 'purpose']
+      const missing = requiredFields.filter(field => !String(formData[field] ?? '').trim())
+      if (missing.length) {
+        addToast({
+          title: "Validation Error",
+          description: `Please fill in all required fields: ${missing.join(', ')}`,
+          variant: "destructive",
+        })
+        return
+      }
+
+
+      // Prepare payload for Document API
+      const documentData = {
+        userId: session?.user.id,
+        fullName: formData.fullName,
+        age: formData.age,
+        purpose: formData.purpose,
+        type: "Certificate of Indigency",
+      }
+
+      const response = await fetch('/api/document', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(documentData),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to submit document')
+      }
+
+      const result = await response.json()
+      if (!result?.success) {
+        throw new Error(result?.error || 'Submission failed')
+      }
+
+      addToast({
+        title: "Success!",
+        description: "Certificate of Indigency request submitted successfully!",
+        variant: "default",
+      })
+
+      // Notify parent (if needed)
       await onSubmit({
         documentType: "certificate-of-indigency",
         formData,
         submittedAt: new Date().toISOString()
       })
-      
+
+      // Reset form
+      setFormData({ fullName: "", age: "", purpose: "", attachments: [] })
+
     } catch (error) {
       console.error("Error submitting form:", error)
-      alert("There was an error submitting your request. Please try again.")
+      addToast({
+        title: "Error",
+        description: "There was an error submitting your request. Please try again.",
+        variant: "destructive",
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -164,7 +166,7 @@ export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormP
           {/* Personal Information Section */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium border-b pb-2">Personal Information</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="fullName">Full Name *</Label>
@@ -193,7 +195,7 @@ export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormP
           {/* Purpose Section */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium border-b pb-2">Certificate Purpose</h3>
-            
+
             <div>
               <Label htmlFor="purpose">Purpose of This Certificate *</Label>
               <Textarea
@@ -266,18 +268,6 @@ export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormP
                 ))}
               </div>
             )}
-          </div>
-
-          {/* Urgent Request Option */}
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="urgentRequest"
-              checked={formData.urgentRequest}
-              onCheckedChange={(checked: boolean) => handleInputChange("urgentRequest", checked)}
-            />
-            <Label htmlFor="urgentRequest" className="text-sm">
-              This is an urgent request requiring immediate processing
-            </Label>
           </div>
 
           {/* Important Notice */}
