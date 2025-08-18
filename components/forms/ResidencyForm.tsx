@@ -5,9 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Upload, X, FileText } from "lucide-react"
+import { useToast } from "@/components/ui/toast"
+import { useSession } from "next-auth/react"
 
 interface ResidencyFormProps {
   onSubmit: (formData: any) => void
@@ -19,53 +20,12 @@ interface FormData {
   fullName: string
   age: string
   address: string
-  
+
   // Purpose and supporting info
   purpose: string
-  urgentRequest: boolean
   attachments: File[]
 }
 
-// PDF Generation Function
-const generateResidencyCertificatePDF = (data: FormData) => {
-  const currentDate = new Date()
-  const day = currentDate.getDate()
-  const month = currentDate.toLocaleString('default', { month: 'long' })
-  const year = currentDate.getFullYear()
-  
-  const content = `
-CERTIFICATE OF RESIDENCY
-
-To whom it may concern:
-
-This is to Certify that ${data.fullName}, ${data.age} years old and Resident of this Barangay ,residing at ${data.address}, Barangay Alma Villa Gloria Oriental Mindoro.
-
-This certification is being issued upon the request of the party concerned for whatever legal purposes.
-
-Issued this ${day} day of ${month} ${year}, at Barangay Alma Villa, Gloria Oriental Mindoro.
-
-                    _____________________
-                    BARANGAY CAPTAIN
-
-Document Fee: ₱30
-Processing Time: 1 day
-Purpose: ${data.purpose}
-${data.urgentRequest ? 'URGENT REQUEST - Priority processing requested' : ''}
-
-Submitted: ${new Date().toLocaleString()}
-  `
-  
-  // Create and download the file
-  const blob = new Blob([content], { type: 'text/plain' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `certificate-of-residency-${data.fullName.replace(/\s+/g, '-')}-${Date.now()}.txt`
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
-}
 
 export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormProps) {
   const [formData, setFormData] = useState<FormData>({
@@ -73,11 +33,12 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
     age: "",
     address: "",
     purpose: "",
-    urgentRequest: false,
     attachments: []
   })
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { addToast } = useToast()
+  const { data: session } = useSession()
 
   const handleInputChange = (field: keyof FormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -105,19 +66,70 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
     setIsSubmitting(true)
 
     try {
-      // Generate PDF for admin
-      generateResidencyCertificatePDF(formData)
-      
-      // Submit form data
+      // Basic validation
+      const requiredFields: Array<keyof FormData> = ['fullName', 'age', 'address', 'purpose']
+      const missing = requiredFields.filter(field => !String(formData[field] ?? '').trim())
+      if (missing.length) {
+        addToast({
+          title: "Validation Error",
+          description: `Please fill in all required fields: ${missing.join(', ')}`,
+          variant: "destructive",
+        })
+        return
+      }
+
+      const documentData: Record<string, any> = {
+        userId: session?.user.id,
+        fullName: formData.fullName,
+        age: formData.age,
+        purok: formData.address,
+        purpose: formData.purpose,
+        type: "Certificate of Residency",
+      }
+
+      const response = await fetch('/api/document', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(documentData),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to submit document')
+      }
+
+      const result = await response.json()
+      if (!result?.success) {
+        throw new Error(result?.error || 'Submission failed')
+      }
+
+      addToast({
+        title: "Success!",
+        description: "Certificate of Residency request submitted successfully!",
+        variant: "default",
+      })
+
+      // Notify parent (if needed)
       await onSubmit({
         documentType: "certificate-of-residency",
         formData,
         submittedAt: new Date().toISOString()
       })
-      
+
+      // Reset form
+      setFormData({
+        fullName: "",
+        age: "",
+        address: "",
+        purpose: "",
+        attachments: []
+      })
     } catch (error) {
       console.error("Error submitting form:", error)
-      alert("There was an error submitting your request. Please try again.")
+      addToast({
+        title: "Error",
+        description: "There was an error submitting your request. Please try again.",
+        variant: "destructive",
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -127,9 +139,8 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
     setFormData({
       fullName: "Maria Elena Santos",
       age: "35",
-      address: "Purok 3",
+      address: "Sitio 3",
       purpose: "Bank account opening and loan application",
-      urgentRequest: false,
       attachments: []
     })
   }
@@ -158,7 +169,7 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
           {/* Personal Information Section */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium border-b pb-2">Personal Information</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2">
                 <Label htmlFor="fullName">Full Name *</Label>
@@ -201,7 +212,7 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
           {/* Purpose Section */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium border-b pb-2">Certificate Purpose</h3>
-            
+
             <div>
               <Label htmlFor="purpose">Purpose of This Certificate *</Label>
               <Input
@@ -273,18 +284,6 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
                 ))}
               </div>
             )}
-          </div>
-
-          {/* Urgent Request Option */}
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="urgentRequest"
-              checked={formData.urgentRequest}
-              onCheckedChange={(checked: boolean) => handleInputChange("urgentRequest", checked)}
-            />
-            <Label htmlFor="urgentRequest" className="text-sm">
-              This is an urgent request (additional fees may apply)
-            </Label>
           </div>
 
           {/* Submit Button */}

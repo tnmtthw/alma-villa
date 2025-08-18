@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
+import ClaimResidency from './admincomponents/pdfgenerator/ClaimResidency'
 
 const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) =>
   fetch(...args).then((res) => res.json())
@@ -181,16 +182,17 @@ const DocumentStatusTracker = () => {
                   <p className="text-sm text-gray-600 mb-1">Request ID: {request.id}</p>
                   <p className="text-xs text-gray-500">{statusConfig.description}</p>
                 </div>
-
                 <div className="flex gap-2 shrink-0">
-                  {request.status === "ready_for_claim" && (
+                  {request.status === "ready_for_claim" && request.type === "Barangay Clearance" && (
                     <ClaimClearanceButton request={request} />
                   )}
-
-                  <Button variant="outline" size="sm" className="text-gray-600 hover:text-[#23479A]">
+                  {request.status === "ready_for_claim" && request.type === "Certificate of Residency" && (
+                    <ClaimResidency request={request} />
+                  )}
+                  {/* <Button variant="outline" size="sm" className="text-gray-600 hover:text-[#23479A]">
                     <Eye className="h-3 w-3 mr-1" />
                     View
-                  </Button>
+                  </Button> */}
                 </div>
               </div>
 
