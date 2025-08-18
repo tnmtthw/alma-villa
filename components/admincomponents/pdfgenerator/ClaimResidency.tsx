@@ -5,7 +5,7 @@ import { PDFDocument } from 'pdf-lib';
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 
-interface ClaimResidencyProps {
+interface ClaimResidencyButtonProps {
     request: {
         id: string;
         fullName: string
@@ -18,7 +18,7 @@ interface ClaimResidencyProps {
 }
 
 
-const ClaimResidency: React.FC<ClaimResidencyProps> = ({ request }) => {
+const ClaimResidencyButton: React.FC<ClaimResidencyButtonProps> = ({ request }) => {
     const date = new Date(request.requestDate);
     const month = date.toLocaleString("en-US", { month: "long" }); // e.g., "August"
     const day = date.getDate(); // e.g., 10
@@ -68,4 +68,4 @@ const ClaimResidency: React.FC<ClaimResidencyProps> = ({ request }) => {
     );
 };
 
-export default ClaimResidency;
+export default ClaimResidencyButton;
