@@ -201,7 +201,7 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
       }
 
       // Validate required fields
-      const requiredFields = ['fullName', 'birthDate', 'civilStatus', 'purok', 'residencyLength', 'purpose']
+      const requiredFields = ['fullName', 'birthDate', 'civilStatus', 'purok', 'residencyLength', 'purpose', 'civilStatus']
       const missingFields = requiredFields.filter(field => !formData[field as keyof FormData])
 
       if (missingFields.length > 0) {
