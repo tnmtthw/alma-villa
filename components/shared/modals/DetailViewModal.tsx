@@ -91,17 +91,17 @@ export function DetailViewModal({
     switch (type) {
       case 'badge':
         return (
-          <Badge variant={badgeVariant} className="capitalize">
+          <Badge variant={badgeVariant} className="capitalize inline-flex items-center justify-center h-8 px-4 text-sm font-medium rounded-full shadow-sm border border-gray-200">
             {value}
           </Badge>
         )
 
       case 'date':
-        return new Date(value).toLocaleDateString('en-US', {
+        return <span className="text-gray-900">{new Date(value).toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'long',
           day: 'numeric'
-        })
+        })}</span>
 
       case 'email':
         return (
@@ -156,7 +156,7 @@ export function DetailViewModal({
           }
         }
         return (
-          <Badge className={`${getStatusColor(value)} capitalize`}>
+          <Badge className={`${getStatusColor(value)} capitalize inline-flex items-center justify-center h-8 px-4 text-sm font-medium rounded-full shadow-sm border`}>
             {value.replace('_', ' ')}
           </Badge>
         )
@@ -217,7 +217,7 @@ export function DetailViewModal({
             </button>
           )
         }
-        return <span>{value}</span>
+        return <span className="text-gray-900">{value}</span>
     }
   }
 
@@ -229,28 +229,28 @@ export function DetailViewModal({
       size={size}
       showCloseButton={false}
     >
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Custom Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-5">
             {showAvatar && (
-              <Avatar className="h-16 w-16">
+              <Avatar className="h-20 w-20 ring-4 ring-gray-100">
                 <AvatarImage src={avatarSrc} />
-                <AvatarFallback className="text-lg bg-[#23479A] text-white">
+                <AvatarFallback className="text-xl bg-[#23479A] text-white font-semibold">
                   {avatarFallback}
                 </AvatarFallback>
               </Avatar>
             )}
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+            <div className="flex-1">
+              <h2 className="text-2xl font-bold text-gray-900 mb-1">{title}</h2>
               {subtitle && (
-                <p className="text-gray-600 text-sm mt-1">{subtitle}</p>
+                <p className="text-gray-500 text-base">{subtitle}</p>
               )}
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3 flex-shrink-0">
             {headerBadge && (
-              <Badge variant={headerBadge.variant} className="capitalize">
+              <Badge variant={headerBadge.variant} className="capitalize px-3 py-1 text-sm font-medium">
                 {headerBadge.text}
               </Badge>
             )}
@@ -258,63 +258,84 @@ export function DetailViewModal({
               variant="ghost"
               size="sm"
               onClick={onClose}
-              className="h-8 w-8 p-0"
+              className="h-9 w-9 p-0 hover:bg-gray-100 rounded-full"
             >
               ×
             </Button>
           </div>
         </div>
 
-        <Separator />
+        <Separator className="my-8" />
 
-        {/* Sections */}
-        <div className="space-y-6 max-h-[60vh] overflow-y-auto">
-          {sections.map((section, sectionIndex) => (
-            <div key={sectionIndex}>
-              <div className="flex items-center gap-2 mb-4">
-                {section.icon && (
-                  <div className="text-[#23479A]">
-                    {section.icon}
-                  </div>
-                )}
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {section.title}
-                </h3>
+        {/* Sections with Right-aligned Scrollbar */}
+        <div className="relative">
+          <div 
+            className="space-y-8 max-h-[60vh] overflow-y-auto pr-4"
+            style={{
+              scrollbarWidth: 'thin',
+              scrollbarColor: '#CBD5E0 #F7FAFC'
+            }}
+          >
+            <style jsx>{`
+              div::-webkit-scrollbar {
+                width: 6px;
+              }
+              div::-webkit-scrollbar-track {
+                background: #F7FAFC;
+                border-radius: 3px;
+              }
+              div::-webkit-scrollbar-thumb {
+                background: #CBD5E0;
+                border-radius: 3px;
+              }
+              div::-webkit-scrollbar-thumb:hover {
+                background: #A0AEC0;
+              }
+            `}</style>
+            
+            {sections.map((section, sectionIndex) => (
+              <div key={sectionIndex} className="bg-gray-50/50 rounded-xl p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  {section.icon && (
+                    <div className="text-[#23479A] flex-shrink-0 bg-white p-2 rounded-lg shadow-sm">
+                      {section.icon}
+                    </div>
+                  )}
+                  <h3 className="text-xl font-semibold text-gray-900">
+                    {section.title}
+                  </h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                  {section.fields.map((field, fieldIndex) => (
+                    <div key={fieldIndex} className={`${field.className || ''}`}>
+                      <dt className="text-sm font-semibold text-gray-600 leading-tight mb-3 uppercase tracking-wide">
+                        {field.label}
+                      </dt>
+                      <dd className="text-base text-gray-900 flex items-center min-h-[28px]">
+                        {renderFieldValue(field)}
+                      </dd>
+                    </div>
+                  ))}
+                </div>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {section.fields.map((field, fieldIndex) => (
-                  <div key={fieldIndex} className={`space-y-1 ${field.className || ''}`}>
-                    <dt className="text-sm font-medium text-gray-500">
-                      {field.label}
-                    </dt>
-                    <dd className="text-sm text-gray-900">
-                      {renderFieldValue(field)}
-                    </dd>
-                  </div>
-                ))}
-              </div>
-
-              {sectionIndex < sections.length - 1 && (
-                <Separator className="mt-6" />
-              )}
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {/* Actions */}
         {actions && actions.length > 0 && (
           <>
-            <Separator />
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pt-4">
+            <Separator className="my-8" />
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 pt-4">
               {/* Secondary Actions (left side) */}
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-3 w-full sm:w-auto">
                 {actions.filter(action => action.variant === 'outline' || action.variant === 'secondary').map((action, index) => (
                   <Button
                     key={index}
                     variant={action.variant || 'outline'}
                     onClick={action.onClick}
-                    className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all duration-200 ${action.variant === 'secondary'
+                    className={`flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-all duration-200 rounded-lg ${action.variant === 'secondary'
                         ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 hover:border-blue-300'
                         : 'border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
                       }`}
@@ -326,13 +347,13 @@ export function DetailViewModal({
               </div>
 
               {/* Primary Actions (right side) */}
-              <div className="flex flex-wrap gap-3 w-full sm:w-auto">
+              <div className="flex flex-wrap gap-3 w-full sm:w-auto justify-end">
                 {actions.filter(action => action.variant === 'destructive').map((action, index) => (
                   <Button
                     key={index}
                     variant="outline"
                     onClick={action.onClick}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium border-red-300 text-red-700 hover:bg-red-50 hover:border-red-400 transition-all duration-200"
+                    className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium border-red-300 text-red-700 hover:bg-red-50 hover:border-red-400 transition-all duration-200 rounded-lg"
                   >
                     {action.icon}
                     {action.label}
@@ -342,7 +363,7 @@ export function DetailViewModal({
                   <Button
                     key={index}
                     onClick={action.onClick}
-                    className="flex items-center gap-2 px-6 py-2 text-sm font-medium bg-[#23479A] text-white hover:bg-[#1e3a82] transition-all duration-200 shadow-sm hover:shadow-md"
+                    className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium bg-[#23479A] text-white hover:bg-[#1e3a82] transition-all duration-200 shadow-sm hover:shadow-md rounded-lg"
                   >
                     {action.icon}
                     {action.label}
