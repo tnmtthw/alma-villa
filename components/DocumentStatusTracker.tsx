@@ -44,6 +44,7 @@ interface DocumentRequest {
   businessName?: string
   businessLocation?: string
   operatorName?: string
+  operatorAddress?: string
   updatedAt?: string
 }
 
@@ -219,7 +220,18 @@ const DocumentStatusTracker = () => {
                     <ClaimGoodMoralButton request={request} />
                   )}
                   {request.status === "ready_for_claim" && request.type === "Business Permit" && (
-                    <ClaimBusinessButton request={request} />
+                    <ClaimBusinessButton
+                      request={{
+                        id: request.id,
+                        businessName: request.businessName!,
+                        businessLocation: request.businessLocation!,
+                        operatorName: request.operatorName!,
+                        operatorAddress: request.operatorAddress!,
+                        updatedAt: request.updatedAt!,
+                        requestDate: request.requestDate,
+                        fee: request.fee,
+                      }}
+                    />
                   )}
                   {/* <Button variant="outline" size="sm" className="text-gray-600 hover:text-[#23479A]">
                     <Eye className="h-3 w-3 mr-1" />
