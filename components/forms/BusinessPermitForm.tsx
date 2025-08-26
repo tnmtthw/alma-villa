@@ -110,8 +110,10 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
       const additionalInfo = `Amount Paid: ${formData.amountPaid}; OR Numbers: ${formData.orNumbers}`
       const documentData = {
         userId: session?.user.id,
-        fullName: formData.operatorName,
-        purok: formData.businessLocation,
+        businessName: formData.businessName,
+        businessLocation: formData.businessLocation,
+        operatorName: formData.operatorName,
+        operatorAddress: formData.operatorAddress,
         additionalInfo,
         purpose: `Business Permit for ${formData.businessName}`,
         type: "Business Permit",
@@ -229,7 +231,7 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="businessLocation">Location *</Label>
+              <Label htmlFor="businessLocation">Sitio *</Label>
               <Input
                 id="businessLocation"
                 placeholder="Street/Purok (location within Barangay Alma Villa)"
@@ -265,7 +267,7 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="operatorAddress">Address *</Label>
+              <Label htmlFor="operatorAddress">Sitio *</Label>
               <Input
                 id="operatorAddress"
                 placeholder="Street/Purok (address within Barangay Alma Villa)"
@@ -274,7 +276,7 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
                 onChange={(e) => handleInputChange('operatorAddress', e.target.value)}
               />
               <p className="text-xs text-gray-500">
-                Enter specific address within Barangay Alma Villa, Gloria, Oriental Mindoro
+                Enter specific street or purok within Barangay Alma Villa, Gloria, Oriental Mindoro
               </p>
             </div>
           </CardContent>

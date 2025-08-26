@@ -15,6 +15,7 @@ import ClaimClearanceButton from './admincomponents/pdfgenerator/ClaimClearance'
 import ClaimResidencyButton from './admincomponents/pdfgenerator/ClaimResidency'
 import ClaimIndigencyButton from './admincomponents/pdfgenerator/ClaimIndigency'
 import ClaimGoodMoralButton from './admincomponents/pdfgenerator/ClaimGoodMoral'
+import ClaimBusinessButton from './admincomponents/pdfgenerator/ClaimBusiness'
 
 const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) =>
   fetch(...args).then((res) => res.json())
@@ -38,6 +39,12 @@ interface DocumentRequest {
   fee?: string
   progress?: number
   rejectionReason?: string
+
+  // FOR BUSINESS PERMIT
+  businessName?: string
+  businessLocation?: string
+  operatorName?: string
+  updatedAt?: string
 }
 
 const getStatusConfig = (status: DocumentRequest["status"]) => {
@@ -125,6 +132,15 @@ const DocumentStatusTracker = () => {
       day: "numeric",
       year: "numeric"
     }),
+
+    // FOR BUSINESS PERMIT
+    businessName: doc.businessName,
+    businessLocation: doc.businessLocation,
+    operatorName: doc.operatorName,
+    operatorAddress: doc.operatorAddress,
+    updatedAt: doc.updatedAt,
+    // FOR BUSINESS PERMIT
+
     status: doc.status,
     purpose: doc.purpose,
     fee: "₱50.00", // Example: replace with real fee field if available
@@ -201,6 +217,9 @@ const DocumentStatusTracker = () => {
                   )}
                   {request.status === "ready_for_claim" && request.type === "Certificate of Good Moral Character" && (
                     <ClaimGoodMoralButton request={request} />
+                  )}
+                  {request.status === "ready_for_claim" && request.type === "Business Permit" && (
+                    <ClaimBusinessButton request={request} />
                   )}
                   {/* <Button variant="outline" size="sm" className="text-gray-600 hover:text-[#23479A]">
                     <Eye className="h-3 w-3 mr-1" />
