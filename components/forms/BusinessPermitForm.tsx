@@ -19,19 +19,12 @@ interface BusinessPermitFormProps {
 }
 
 interface FormData {
-  // Business Information (as per PDF format)
   businessName: string
   businessLocation: string
-
-  // Operator/Manager Information (as per PDF format)
   operatorName: string
   operatorAddress: string
-
-  // Payment Information (for PDF)
   amountPaid: string
   orNumbers: string
-
-  // Supporting documents
   attachments: File[]
 }
 

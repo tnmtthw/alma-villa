@@ -8,84 +8,64 @@ datasource db {
 }
 
 model User {
-  id                String   @id @default(uuid()) @db.Uuid
-
-  // Personal Details
-  lastName          String?
-  firstName         String?
-  middleName        String?
-  suffix            String?
-  birthDate         String?
-  age               String?
-  gender            String?
-  civilStatus       String?
-  nationality       String?
-  religion          String?
-
-  // Contact Info
-  email             String?   @unique
-  mobileNumber      String?
-  emergencyContact  String?
-  emergencyNumber   String?
-
-  // Address
-  houseNumber       String?
-  street            String?
-  purok             String?
-  barangay          String?
-  city              String?
-  province          String?
-  zipCode           String?
-  residencyLength   String?
-
-
-  // Government ID
-  type            String
-  frontId         String
-  backId          String
-
-  // Face Verification
-  capturedPhoto     String?
-  
-  // Credentials
-  password          String
-  role              String       @default("Unverified")
-
-  // Login attempt tracking
-  loginAttempts     Int          @default(0)
-  lastFailedLogin   DateTime?
-  lockedUntil       DateTime?
-
-  resetToken        String?      @unique
-
-  createdAt         DateTime     @default(now())
-
-  document          Document[]
+  id               String     @id @default(uuid()) @db.Uuid
+  lastName         String?
+  firstName        String?
+  middleName       String?
+  suffix           String?
+  birthDate        String?
+  age              String?
+  gender           String?
+  civilStatus      String?
+  nationality      String?
+  religion         String?
+  email            String?    @unique
+  mobileNumber     String?
+  emergencyContact String?
+  emergencyNumber  String?
+  houseNumber      String?
+  street           String?
+  purok            String?
+  barangay         String?
+  city             String?
+  province         String?
+  zipCode          String?
+  residencyLength  String?
+  type             String
+  frontId          String
+  backId           String
+  capturedPhoto    String?
+  password         String
+  role             String     @default("Unverified")
+  loginAttempts    Int        @default(0)
+  lastFailedLogin  DateTime?
+  lockedUntil      DateTime?
+  resetToken       String?    @unique
+  createdAt        DateTime   @default(now())
+  document         Document[]
 }
 
 model Document {
-  id                String       @id @default(uuid()) @db.Uuid
-  userId            String       @db.Uuid
-  fullName          String?
-  suffix            String? 
-  birthDate         String?   
-  citenzship        String?      @default("N/A")
-  placeOfBirth      String?      @default("N/A")
-  age               String?
-  civilStatus       String?      @default("N/A")
-  purok             String?
-  residencyLength   String?  
-  purpose           String?      @default("N/A")
-  additionalInfo    String?      @default("N/A")
-  type              String?      @default("N/A")
-  status            String       @default("pending")
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-
-  // FOR BUSINESS PERMIT
-  businessName      String?      @default("N/A")
-  businessLocation  String?      @default("N/A")
-  operatorName      String?      @default("N/A")
-  operatorAddress   String?      @default("N/A")
-  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id               String   @id @default(uuid()) @db.Uuid
+  userId           String   @db.Uuid
+  fullName         String?
+  suffix           String?
+  birthDate        String?
+  citenzship       String?  @default("N/A")
+  placeOfBirth     String?  @default("N/A")
+  age              String?
+  civilStatus      String?  @default("N/A")
+  purok            String?
+  residencyLength  String?
+  purpose          String?  @default("N/A")
+  additionalInfo   String?  @default("N/A")
+  type             String?  @default("N/A")
+  status           String   @default("pending")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  businessName     String?  @default("N/A")
+  businessLocation String?  @default("N/A")
+  operatorName     String?  @default("N/A")
+  operatorAddress  String?  @default("N/A")
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
