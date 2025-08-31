@@ -15,6 +15,9 @@ import {
   Lock,
   Bell,
   Shield,
+  Edit,
+  Save,
+  X,
 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import useSWR, { mutate } from 'swr'
@@ -39,8 +42,17 @@ export default function AdminProfile() {
   const [emailNotifications, setEmailNotifications] = useState(true)
   const [smsNotifications, setSmsNotifications] = useState(false)
 
+  // Edit mode state
+  const [isEditMode, setIsEditMode] = useState(false)
+
   // Form states
   const [userData, setUserData] = useState<UserData>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    mobileNumber: ''
+  })
+  const [originalUserData, setOriginalUserData] = useState<UserData>({
     firstName: '',
     lastName: '',
     email: '',
@@ -65,12 +77,14 @@ export default function AdminProfile() {
   // Load user data when API data is available
   useEffect(() => {
     if (apiData) {
-      setUserData({
+      const newUserData = {
         firstName: apiData.firstName || '',
         lastName: apiData.lastName || '',
         email: apiData.email || '',
         mobileNumber: apiData.mobileNumber || ''
-      })
+      }
+      setUserData(newUserData)
+      setOriginalUserData(newUserData)
     }
   }, [apiData])
 
@@ -84,6 +98,19 @@ export default function AdminProfile() {
   const handlePasswordChange = (field: keyof PasswordData, value: string) => {
     setPasswordData(prev => ({ ...prev, [field]: value }))
     setPasswordMessage(null)
+  }
+
+  // Enter edit mode
+  const handleEditMode = () => {
+    setIsEditMode(true)
+    setProfileMessage(null)
+  }
+
+  // Cancel edit mode
+  const handleCancelEdit = () => {
+    setIsEditMode(false)
+    setUserData(originalUserData) // Reset to original data
+    setProfileMessage(null)
   }
 
   // Update profile information
@@ -114,6 +141,8 @@ export default function AdminProfile() {
 
       if (response.ok) {
         setProfileMessage({ type: 'success', text: 'Profile updated successfully!' })
+        setOriginalUserData(userData) // Update original data
+        setIsEditMode(false) // Exit edit mode
         // Refresh the user data
         mutate(`/api/user?id=${session.user.id}`)
       } else {
@@ -192,22 +221,29 @@ export default function AdminProfile() {
       <div className="grid gap-6">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User2 className="h-5 w-5 text-[#23479A]" />
-              Personal Information
-            </CardTitle>
-            <CardDescription>
-              Update your personal details and contact information.
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <User2 className="h-5 w-5 text-[#23479A]" />
+                  Personal Information
+                </CardTitle>
+                <CardDescription>
+                  Update your personal details and contact information.
+                </CardDescription>
+              </div>
+              {!isEditMode && (
+                <Button
+                  variant="outline"
+                  onClick={handleEditMode}
+                  className="flex items-center gap-2 hover:bg-[#23479A] hover:text-white hover:border-[#23479A] transition-all duration-200"
+                >
+                  <Edit className="h-4 w-4" />
+                  Edit
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* <div className="flex items-center gap-4">
-              <div className="h-24 w-24 rounded-full bg-gray-100 flex items-center justify-center">
-                <User2 className="h-12 w-12 text-gray-400" />
-              </div>
-              <Button variant="outline">Change Photo</Button>
-            </div> */}
-
             {profileMessage && (
               <div className={`p-3 rounded-md ${profileMessage.type === 'success'
                   ? 'bg-green-50 text-green-700 border border-green-200'
@@ -224,6 +260,8 @@ export default function AdminProfile() {
                   placeholder="Enter your first name"
                   value={userData.firstName}
                   onChange={(e) => handleProfileChange('firstName', e.target.value)}
+                  disabled={!isEditMode}
+                  className={!isEditMode ? "bg-gray-50 cursor-not-allowed" : ""}
                 />
               </div>
               <div className="space-y-2">
@@ -232,6 +270,8 @@ export default function AdminProfile() {
                   placeholder="Enter your last name"
                   value={userData.lastName}
                   onChange={(e) => handleProfileChange('lastName', e.target.value)}
+                  disabled={!isEditMode}
+                  className={!isEditMode ? "bg-gray-50 cursor-not-allowed" : ""}
                 />
               </div>
               <div className="space-y-2">
@@ -242,11 +282,14 @@ export default function AdminProfile() {
                     placeholder="Enter your email"
                     value={userData.email}
                     onChange={(e) => handleProfileChange('email', e.target.value)}
+                    disabled={!isEditMode}
+                    className={!isEditMode ? "bg-gray-50 cursor-not-allowed" : ""}
                   />
                   <Button
                     variant="outline"
                     size="sm"
                     className="w-10 h-10 p-0 hover:bg-[#23479A] hover:text-white hover:border-[#23479A] transition-all duration-200 hover:shadow-md"
+                    disabled={!isEditMode}
                   >
                     <Mail className="h-4 w-4" />
                   </Button>
@@ -259,24 +302,41 @@ export default function AdminProfile() {
                     placeholder="Enter your phone number"
                     value={userData.mobileNumber}
                     onChange={(e) => handleProfileChange('mobileNumber', e.target.value)}
+                    disabled={!isEditMode}
+                    className={!isEditMode ? "bg-gray-50 cursor-not-allowed" : ""}
                   />
                   <Button
                     variant="outline"
                     size="sm"
                     className="w-10 h-10 p-0 hover:bg-[#23479A] hover:text-white hover:border-[#23479A] transition-all duration-200 hover:shadow-md"
+                    disabled={!isEditMode}
                   >
                     <Phone className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
             </div>
-            <Button
-              className="bg-[#23479A] hover:bg-[#23479A]/90 text-white transition-all duration-200 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
-              onClick={handleUpdateProfile}
-              disabled={isSavingProfile}
-            >
-              {isSavingProfile ? 'Saving...' : 'Save Changes'}
-            </Button>
+            
+            {isEditMode && (
+              <div className="flex items-center gap-3">
+                <Button
+                  className="bg-[#23479A] hover:bg-[#23479A]/90 text-white transition-all duration-200 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2"
+                  onClick={handleUpdateProfile}
+                  disabled={isSavingProfile}
+                >
+                  <Save className="h-4 w-4" />
+                  {isSavingProfile ? 'Saving...' : 'Save Changes'}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleCancelEdit}
+                  className="flex items-center gap-2 hover:bg-gray-100 transition-all duration-200"
+                >
+                  <X className="h-4 w-4" />
+                  Cancel
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -339,7 +399,7 @@ export default function AdminProfile() {
           </CardContent>
         </Card>
 
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Bell className="h-5 w-5 text-[#23479A]" />
@@ -429,7 +489,7 @@ export default function AdminProfile() {
               </Button>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
     </div>
   )
