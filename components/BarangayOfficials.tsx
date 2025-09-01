@@ -100,9 +100,9 @@ const BarangayOfficials = () => {
     setExpandedKagawad(expandedKagawad === index ? null : index);
   };
 
-  const { elementRef: sectionRef, isVisible: sectionVisible } = useScrollAnimation({ threshold: 0.1 });
-  const { elementRef: headerRef, isVisible: headerVisible } = useScrollAnimation({ threshold: 0.3 });
-  const { elementRef: captainRef, isVisible: captainVisible } = useScrollAnimation({ threshold: 0.2 });
+  const { elementRef: sectionRef, isVisible: sectionVisible } = useScrollAnimation<HTMLElement>({ threshold: 0.1 });
+  const { elementRef: headerRef, isVisible: headerVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.3 });
+  const { elementRef: captainRef, isVisible: captainVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.2 });
 
   return (
     <section ref={sectionRef} className="pt-34 pb-24 sm:pt-32 sm:pb-32 bg-[#23479A] relative">
