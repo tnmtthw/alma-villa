@@ -25,7 +25,7 @@ const services = [
 ]
 
 const Services = () => {
-  const { elementRef: sectionRef, isVisible: sectionVisible } = useScrollAnimation<HTMLElement>({ threshold: 0.2 })
+  const { elementRef: sectionRef, isVisible: sectionVisible } = useScrollAnimation<HTMLElement>({ threshold: 0.1 })
 
   return (
     <section ref={sectionRef} className="relative -mt-28 px-4">

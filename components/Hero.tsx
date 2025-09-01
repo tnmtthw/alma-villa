@@ -7,7 +7,7 @@ import ChatBot from "@/components/Chatbot"
 import { useScrollAnimation } from "@/lib/useScrollAnimation"
 
 const Hero = () => {
-  const { elementRef: textRef, isVisible: textVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.3 })
+  const { elementRef: textRef, isVisible: textVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.2 })
   const { elementRef: imageRef, isVisible: imageVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.3 })
 
   return (

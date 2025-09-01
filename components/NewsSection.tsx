@@ -17,10 +17,10 @@ import Link from "next/link"
 import { useScrollAnimation } from "@/lib/useScrollAnimation"
 
 const NewsSection = () => {
-  const { elementRef: sectionRef, isVisible: sectionVisible } = useScrollAnimation<HTMLElement>({ threshold: 0.1 });
-  const { elementRef: headerRef, isVisible: headerVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.3 });
-  const { elementRef: featuredRef, isVisible: featuredVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.2 });
-  const { elementRef: recentRef, isVisible: recentVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.2 });
+  const { elementRef: sectionRef, isVisible: sectionVisible } = useScrollAnimation<HTMLElement>({ threshold: 0.05 });
+  const { elementRef: headerRef, isVisible: headerVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.2 });
+  const { elementRef: featuredRef, isVisible: featuredVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.15 });
+  const { elementRef: recentRef, isVisible: recentVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.15 });
 
   const newsItems = [
     {
