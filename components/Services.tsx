@@ -1,6 +1,7 @@
 "use client"
 
 import Card from "./Card"
+import { useScrollAnimation } from "@/lib/useScrollAnimation"
 
 const services = [
   {
@@ -24,16 +25,27 @@ const services = [
 ]
 
 const Services = () => {
+  const { elementRef: sectionRef, isVisible: sectionVisible } = useScrollAnimation({ threshold: 0.2 })
+
   return (
-    <section className="relative -mt-28 px-4">
+    <section ref={sectionRef} className="relative -mt-28 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {services.map((service) => (
-            <Card
+          {services.map((service, index) => (
+            <div
               key={service.title}
-              {...service}
-              className="bg-white shadow-xl hover:shadow-2xl transition-shadow duration-300"
-            />
+              className={`transition-all duration-700 ease-out ${
+                sectionVisible 
+                  ? 'translate-y-0 opacity-100' 
+                  : 'translate-y-8 opacity-0'
+              }`}
+              style={{ transitionDelay: `${index * 200}ms` }}
+            >
+              <Card
+                {...service}
+                className="bg-white shadow-xl hover:shadow-2xl transition-shadow duration-300"
+              />
+            </div>
           ))}
         </div>
       </div>

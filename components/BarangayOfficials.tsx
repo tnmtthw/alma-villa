@@ -1,291 +1,282 @@
 'use client'
 import React, { useState } from 'react';
-import { Phone, Mail, Calendar, Users, Award, ChevronDown, ChevronUp } from 'lucide-react';
+import { Users, ChevronDown, ChevronUp } from 'lucide-react';
+import { useScrollAnimation } from "@/lib/useScrollAnimation";
 
 const BarangayOfficials = () => {
+  const [expandedCaptain, setExpandedCaptain] = useState(false);
   const [expandedKagawad, setExpandedKagawad] = useState<number | null>(null);
 
   const barangayCaptain = {
     name: "Hon. Marife M. Sol",
     position: "Barangay Captain",
     image: "/assets/img/officials/BrgyCaptain.png",
-    email: "captain@barangay.gov.ph",
-    phone: "+63 912 345 6789",
-    officeHours: "Monday - Friday, 8:00 AM - 5:00 PM",
+    term: "2024-2028",
     bio: "Leading our community with dedication and vision for progress and unity.",
-    achievements: ["Community Development Award 2023", "Excellence in Public Service 2022"]
+    email: "almavillagloria@gmail.com",
+    phone: "+63 9355 0384 27"
   }
 
   const kagawads = [
     {
       name: "Hon. Ricka S. Soverano",
       position: "Kagawad 1",
-      committee: "Health & Sanitation",
       image: "/assets/img/officials/kagawad1.png",
-      email: "ricka.soverano@barangay.gov.ph",
-      phone: "+63 912 345 6790",
+      term: "2024-2028",
       bio: "Passionate about community health and wellness programs.",
-      achievements: ["Clean & Green Champion 2023"],
-      projects: ["Community Health Center Upgrade", "Waste Segregation Program"],
-      officeHours: "Tuesday & Thursday, 2:00 PM - 6:00 PM"
+      email: "almavillagloria@gmail.com",
+      phone: "+63 9355 0384 27"
     },
     {
       name: "Hon. Julito J. Mamitag",
       position: "Kagawad 2",
-      committee: "Education & Youth",
       image: "/assets/img/officials/kagawad2.png",
-      email: "julito.mamitag@barangay.gov.ph",
-      phone: "+63 912 345 6791",
+      term: "2024-2028",
       bio: "Dedicated to empowering youth through education programs.",
-      achievements: ["Youth Leadership Award 2023"],
-      projects: ["Scholarship Program", "Youth Skills Training Center"],
-      officeHours: "Monday & Wednesday, 1:00 PM - 5:00 PM"
+      email: "almavillagloria@gmail.com",
+      phone: "+63 9355 0384 27"
     },
     {
       name: "Hon. Agustin J. Malacas",
       position: "Kagawad 3",
-      committee: "Infrastructure & Public Works",
       image: "/assets/img/officials/kagawad3.png",
-      email: "agustin.malacas@barangay.gov.ph",
-      phone: "+63 912 345 6792",
+      term: "2024-2028",
       bio: "Focused on improving community infrastructure.",
-      achievements: ["Infrastructure Excellence Award 2022"],
-      projects: ["Road Improvement Program", "Drainage System Upgrade"],
-      officeHours: "Wednesday & Friday, 9:00 AM - 1:00 PM"
+      email: "almavillagloria@gmail.com",
+      phone: "+63 9355 0384 27"
     },
     {
       name: "Hon. John Mark C. Manrique",
       position: "Kagawad 4",
-      committee: "Peace & Order",
       image: "/assets/img/officials/kagawad2.png",
-      email: "johnmark.manrique@barangay.gov.ph",
-      phone: "+63 912 345 6793",
+      term: "2024-2028",
       bio: "Committed to maintaining community peace and safety.",
-      achievements: ["Community Safety Award 2023"],
-      projects: ["CCTV Installation Program", "Barangay Patrol Enhancement"],
-      officeHours: "Monday & Friday, 10:00 AM - 2:00 PM"
+      email: "almavillagloria@gmail.com",
+      phone: "+63 9355 0384 27"
     },
     {
       name: "Hon. Wody J. Fronda",
       position: "Kagawad 5",
-      committee: "Agriculture & Environment",
       image: "/assets/img/officials/kagawad1.png",
-      email: "wody.fronda@barangay.gov.ph",
-      phone: "+63 912 345 6794",
+      term: "2024-2028",
       bio: "Advocating for sustainable agriculture and environment.",
-      achievements: ["Environmental Stewardship Award 2023"],
-      projects: ["Urban Farming Initiative", "Tree Planting Program"],
-      officeHours: "Tuesday & Thursday, 8:00 AM - 12:00 PM"
+      email: "almavillagloria@gmail.com",
+      phone: "+63 9355 0384 27"
     },
     {
       name: "Hon. Miguela M. Motol",
       position: "Kagawad 6",
-      committee: "Women & Family Affairs",
       image: "/assets/img/officials/kagawad2.png",
-      email: "miguela.motol@barangay.gov.ph",
-      phone: "+63 912 345 6795",
+      term: "2024-2028",
       bio: "Empowering women and strengthening family bonds.",
-      achievements: ["Women's Leadership Award 2022"],
-      projects: ["Women's Livelihood Program", "Family Counseling Services"],
-      officeHours: "Monday & Wednesday, 3:00 PM - 7:00 PM"
+      email: "almavillagloria@gmail.com",
+      phone: "+63 9355 0384 27"
     },
     {
       name: "Hon. Jocelyn P. Supleo",
       position: "Kagawad 7",
-      committee: "Senior Citizens & PWD",
       image: "/assets/img/officials/kagawad3.png",
-      email: "jocelyn.supleo@barangay.gov.ph",
-      phone: "+63 912 345 6796",
+      term: "2024-2028",
       bio: "Serving senior citizens and PWD with compassion.",
-      achievements: ["Compassionate Service Award 2023"],
-      projects: ["Senior Citizens Center", "PWD Assistance Program"],
-      officeHours: "Tuesday & Friday, 1:00 PM - 5:00 PM"
+      email: "almavillagloria@gmail.com",
+      phone: "+63 9355 0384 27"
     }
   ]
 
-  const toggleExpand = (index: number) => {
-    setExpandedKagawad(expandedKagawad === index ? null : index);
-  };
-
   // Split kagawads into rows of 3
-  const getKagawadRows = (): typeof kagawads[] => {
-    const rows: typeof kagawads[] = [];
+  const getKagawadRows = () => {
+    const rows = [];
     for (let i = 0; i < kagawads.length; i += 3) {
       rows.push(kagawads.slice(i, i + 3));
     }
     return rows;
   };
 
+  const toggleCaptain = () => {
+    setExpandedCaptain(!expandedCaptain);
+  };
+
+  const toggleKagawad = (index: number) => {
+    setExpandedKagawad(expandedKagawad === index ? null : index);
+  };
+
+  const { elementRef: sectionRef, isVisible: sectionVisible } = useScrollAnimation({ threshold: 0.1 });
+  const { elementRef: headerRef, isVisible: headerVisible } = useScrollAnimation({ threshold: 0.3 });
+  const { elementRef: captainRef, isVisible: captainVisible } = useScrollAnimation({ threshold: 0.2 });
+
   return (
-    <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
-      <div className="max-w-7xl mx-auto px-4">
+    <section ref={sectionRef} className="pt-34 pb-24 sm:pt-32 sm:pb-32 bg-[#23479A] relative">
+      {/* Background Pattern */}
+      <div
+        className="absolute inset-x-0 bottom-0 h-[420px]"
+        style={{
+          backgroundImage: 'url(/assets/img/herosection.png)',
+          backgroundSize: 'contain',
+          backgroundPosition: 'bottom',
+          backgroundRepeat: 'repeat-x',
+          opacity: '0.15'
+        }}
+      />
+      
+      <div className="max-w-7xl mx-auto px-4 relative z-10">
         {/* Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-5xl font-bold bg-gradient-to-r from-[#23479A] to-[#23479A]/80 bg-clip-text text-transparent mb-6">
+        <div 
+          ref={headerRef}
+          className={`text-center mb-16 sm:mb-20 transition-all duration-800 ease-out ${
+            headerVisible 
+              ? 'translate-y-0 opacity-100' 
+              : 'translate-y-6 opacity-0'
+          }`}
+        >
+          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
             Barangay Officials
           </h2>
-          <p className="text-gray-600 text-xl max-w-2xl mx-auto">
-            Meet our dedicated leaders serving the community with passion and commitment
+          <p className="text-blue-100 text-lg sm:text-xl pb-20 max-w-2xl mx-auto">
+            Our dedicated leaders serving the community
           </p>
         </div>
 
         {/* Barangay Captain - Top Center */}
-        <div className="flex justify-center mb-16">
-          <div className="bg-white rounded-3xl shadow-xl p-8 max-w-lg hover:shadow-2xl transition-all duration-300 border border-gray-100">
-            <div className="flex flex-col items-center text-center">
-              <div className="relative w-48 h-48 mb-6 rounded-full overflow-hidden ring-4 ring-[#23479A] ring-offset-4">
+        <div 
+          ref={captainRef}
+          className={`flex justify-center mb-20 sm:mb-24 transition-all duration-1000 ease-out delay-300 ${
+            captainVisible 
+              ? 'translate-y-0 opacity-100' 
+              : 'translate-y-8 opacity-0'
+          }`}
+        >
+          <div 
+            className={`bg-white/10 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 cursor-pointer transition-all duration-500 ease-in-out relative ${
+              expandedCaptain ? 'max-w-4xl' : 'max-w-2xl'
+            } hover:shadow-2xl shadow-white/10`}
+            onClick={toggleCaptain}
+          >
+            {/* Floating Circular Profile Image */}
+            <div className="absolute -top-24 sm:-top-28 left-1/2 transform -translate-x-1/2 z-10">
+              <div className="relative w-44 h-44 sm:w-48 sm:h-48 rounded-full overflow-hidden border-4 border-white bg-white shadow-xl group">
                 <img
                   src={barangayCaptain.image}
                   alt={barangayCaptain.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
                 />
               </div>
-              
-              <div className="bg-[#23479A] text-white px-6 py-3 rounded-full text-sm font-bold mb-4 shadow-lg">
-                {barangayCaptain.position}
-              </div>
-              
-              <h3 className="text-2xl font-bold text-gray-800 mb-3">
-                {barangayCaptain.name}
-              </h3>
-              
-              <p className="text-gray-600 mb-6 italic text-lg">
-                {barangayCaptain.bio}
-              </p>
+            </div>
 
-              {/* Contact Info */}
-              <div className="space-y-3 mb-6 w-full">
-                <div className="flex items-center justify-center gap-3 text-gray-600">
-                  <Mail size={18} />
-                  <span>{barangayCaptain.email}</span>
+            {/* Blue Background Section */}
+            <div className="pt-36 sm:pt-40 pb-8 px-6 sm:px-8">
+              <div className="text-center">
+                <div className="bg-white text-[#23479A] px-4 sm:px-6 py-2 rounded-full text-sm sm:text-lg font-bold mb-6 shadow-lg inline-block">
+                  {barangayCaptain.position}
                 </div>
-                <div className="flex items-center justify-center gap-3 text-gray-600">
-                  <Phone size={18} />
-                  <span>{barangayCaptain.phone}</span>
-                </div>
-                <div className="flex items-center justify-center gap-3 text-gray-600">
-                  <Calendar size={18} />
-                  <span>{barangayCaptain.officeHours}</span>
-                </div>
-              </div>
+                
+                <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+                  {barangayCaptain.name}
+                </h3>
+                
+                <p className="text-blue-100 text-base sm:text-lg mb-4">
+                  Term: {barangayCaptain.term}
+                </p>
 
-              {/* Achievements */}
-              <div className="w-full">
-                <h4 className="font-semibold text-gray-800 mb-3 flex items-center justify-center gap-2">
-                  <Award size={18} />
-                  Recent Achievements
-                </h4>
-                <div className="space-y-2">
-                  {barangayCaptain.achievements.map((achievement: string, idx: number) => (
-                    <div key={idx} className="bg-yellow-50 text-yellow-800 px-4 py-2 rounded-full text-sm">
-                      {achievement}
+                {/* Expand/Collapse Indicator */}
+                <div className="flex items-center justify-center gap-2 text-white text-sm font-medium">
+                  {expandedCaptain ? 'Show Less' : 'Click to Expand'}
+                  {expandedCaptain ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </div>
+
+                {/* Expanded Content */}
+                {expandedCaptain && (
+                  <div className="mt-6 pt-6 border-t border-white/20 space-y-4 animate-fadeIn">
+                    <p className="text-blue-100 text-base sm:text-lg italic">
+                      {barangayCaptain.bio}
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/20">
+                        <p className="font-semibold text-white">Email</p>
+                        <p className="text-blue-100">{barangayCaptain.email}</p>
+                      </div>
+                      <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/20">
+                        <p className="font-semibold text-white">Phone</p>
+                        <p className="text-blue-100">{barangayCaptain.phone}</p>
+                      </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
 
         {/* Kagawads in Rows of 3 */}
-        <div className="space-y-12">
-          {getKagawadRows().map((row, rowIndex: number) => (
-            <div key={rowIndex} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
-              {row.map((kagawad, index: number) => {
+        <div className="space-y-8 sm:space-y-12 pt-12">
+          {getKagawadRows().map((row, rowIndex) => (
+            <div key={rowIndex} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 justify-items-center">
+              {row.map((kagawad, index) => {
                 const globalIndex = rowIndex * 3 + index;
                 return (
-                  <div key={kagawad.position} className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden w-full max-w-sm">
-                    {/* Card Header */}
-                    <div className="p-6 pb-4">
-                      <div className="flex flex-col items-center text-center">
-                        <div className="relative w-32 h-32 mb-4 rounded-full overflow-hidden ring-3 ring-[#23479A] ring-offset-2">
-                          <img
-                            src={kagawad.image}
-                            alt={kagawad.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        
-                        <div className="bg-[#23479A] text-white px-4 py-2 rounded-full text-sm font-bold mb-3 shadow-md">
+                  <div 
+                    key={kagawad.position} 
+                    className={`bg-white/10 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 ease-in-out border border-white/20 cursor-pointer relative w-full max-w-sm mt-12 sm:mt-16 shadow-white/10 ${
+                      expandedKagawad === globalIndex ? 'max-w-sm' : ''
+                    } transition-all duration-700 ease-out ${
+                      sectionVisible 
+                        ? 'translate-y-0 opacity-100' 
+                        : 'translate-y-8 opacity-0'
+                    }`}
+                    style={{ transitionDelay: `${globalIndex * 150}ms` }}
+                    onClick={() => toggleKagawad(globalIndex)}
+                  >
+                    {/* Floating Circular Profile Image */}
+                    <div className="absolute -top-20 sm:-top-22 left-1/2 transform -translate-x-1/2 z-10">
+                      <div className="relative w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden border-3 border-white bg-white shadow-lg group">
+                        <img
+                          src={kagawad.image}
+                          alt={kagawad.name}
+                          className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
+                        />
+                      </div>
+                    </div>
+                    
+                    {/* Blue Background Section */}
+                    <div className="pt-28 sm:pt-32 pb-6 px-4 sm:px-6">
+                      <div className="text-center">
+                        <div className="bg-white text-[#23479A] px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-bold mb-4 inline-block">
                           {kagawad.position}
                         </div>
                         
-                        <h3 className="text-lg font-bold text-gray-800 mb-2">
+                        <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">
                           {kagawad.name}
                         </h3>
                         
-                        <div className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-medium mb-3 flex items-center gap-1">
-                          <Users size={12} />
-                          {kagawad.committee}
-                        </div>
-
-                        <p className="text-gray-600 text-sm leading-relaxed">
-                          {kagawad.bio}
+                        <p className="text-blue-100 text-xs sm:text-sm mb-3">
+                          Term: {kagawad.term}
                         </p>
+
+                        {/* Expand/Collapse Indicator */}
+                        <div className="flex items-center justify-center gap-1 text-white text-xs font-medium">
+                          {expandedKagawad === globalIndex ? 'Show Less' : 'Click to Expand'}
+                          {expandedKagawad === globalIndex ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                        </div>
+
+                        {/* Expanded Content */}
+                        {expandedKagawad === globalIndex && (
+                          <div className="mt-4 pt-4 border-t border-white/20 space-y-3 animate-fadeIn">
+                            <p className="text-blue-100 text-xs sm:text-sm italic">
+                              {kagawad.bio}
+                            </p>
+                            <div className="space-y-2 text-xs">
+                              <div className="bg-white/10 backdrop-blur-sm p-3 rounded border border-white/20">
+                                <p className="font-semibold text-white">Email</p>
+                                <p className="text-blue-100">{kagawad.email}</p>
+                              </div>
+                              <div className="bg-white/10 backdrop-blur-sm p-3 rounded border border-white/20">
+                                <p className="font-semibold text-white">Phone</p>
+                                <p className="text-blue-100">{kagawad.phone}</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
-
-                    {/* Expandable Section */}
-                    <div className="px-6 pb-2">
-                      <button
-                        onClick={() => toggleExpand(globalIndex)}
-                        className="w-full flex items-center justify-center gap-2 py-2 text-[#23479A] hover:bg-blue-50 rounded-lg transition-colors duration-200 text-sm font-medium"
-                      >
-                        {expandedKagawad === globalIndex ? 'Show Less' : 'More Info'}
-                        {expandedKagawad === globalIndex ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                      </button>
-                    </div>
-
-                    {/* Expanded Content */}
-                    {expandedKagawad === globalIndex && (
-                      <div className="px-6 pb-6 space-y-4 border-t border-gray-100 pt-4">
-                        {/* Contact Info */}
-                        <div className="space-y-2">
-                          <h4 className="font-semibold text-gray-800 text-sm">Contact Information</h4>
-                          <div className="space-y-1 text-xs text-gray-600">
-                            <div className="flex items-center gap-2">
-                              <Mail size={12} />
-                              <span>{kagawad.email}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Phone size={12} />
-                              <span>{kagawad.phone}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Calendar size={12} />
-                              <span>{kagawad.officeHours}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Current Projects */}
-                        <div>
-                          <h4 className="font-semibold text-gray-800 text-sm mb-2">Current Projects</h4>
-                          <div className="space-y-1">
-                            {kagawad.projects.map((project: string, idx: number) => (
-                              <div key={idx} className="bg-green-50 text-green-700 px-2 py-1 rounded text-xs">
-                                {project}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Achievements */}
-                        <div>
-                          <h4 className="font-semibold text-gray-800 text-sm mb-2 flex items-center gap-1">
-                            <Award size={12} />
-                            Achievements
-                          </h4>
-                          <div className="space-y-1">
-                            {kagawad.achievements.map((achievement: string, idx: number) => (
-                              <div key={idx} className="bg-yellow-50 text-yellow-700 px-2 py-1 rounded text-xs">
-                                {achievement}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 );
               })}
@@ -293,27 +284,40 @@ const BarangayOfficials = () => {
           ))}
         </div>
 
-        {/* Committee Overview */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mt-16">
-          <h3 className="text-2xl font-bold text-center text-gray-800 mb-8">Committee Structure</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from(new Set(kagawads.map(k => k.committee))).map((committee, index: number) => {
-              const kagawad = kagawads.find(k => k.committee === committee);
-              if (!kagawad) return null;
-              
-              return (
-                <div key={committee} className="text-center p-4 bg-gradient-to-b from-blue-50 to-blue-100 rounded-xl">
-                  <div className="w-12 h-12 bg-[#23479A] rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Users className="text-white" size={20} />
-                  </div>
-                  <h4 className="font-bold text-gray-800 text-sm mb-1">{committee}</h4>
-                  <p className="text-xs text-gray-600">{kagawad.name}</p>
-                </div>
-              );
-            })}
+        {/* Term Information */}
+        <div 
+          className={`text-center mt-20 sm:mt-24 transition-all duration-800 ease-out delay-500 ${
+            sectionVisible 
+              ? 'translate-y-0 opacity-100' 
+              : 'translate-y-6 opacity-0'
+          }`}
+        >
+          <div className="bg-white rounded-xl shadow-md p-6 max-w-2xl mx-auto border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Current Term
+            </h3>
+            <p className="text-gray-600">
+              All officials are serving from <span className="font-semibold text-[#23479A]">2024-2028</span>
+            </p>
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out;
+        }
+      `}</style>
     </section>
   );
 };

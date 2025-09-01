@@ -1,6 +1,12 @@
+"use client"
+
 import Image from "next/image"
+import { useScrollAnimation } from "@/lib/useScrollAnimation"
 
 const Guide = () => {
+  const { elementRef: sectionRef, isVisible: sectionVisible } = useScrollAnimation({ threshold: 0.1 })
+  const { elementRef: titleRef, isVisible: titleVisible } = useScrollAnimation({ threshold: 0.3 })
+
   const steps = [
     {
       image: "/assets/img/Step1.png",
@@ -30,9 +36,16 @@ const Guide = () => {
   ]
 
   return (
-    <section className="py-16 bg-white">
+    <section ref={sectionRef} className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="text-center mb-16">
+        <div 
+          ref={titleRef}
+          className={`text-center mb-16 transition-all duration-800 ease-out ${
+            titleVisible 
+              ? 'translate-y-0 opacity-100' 
+              : 'translate-y-6 opacity-0'
+          }`}
+        >
           <p className="text-gray-600 mb-2">Sign up now</p>
           <h2 className="text-3xl font-bold text-gray-900">
             Sign up in 5 simple steps
@@ -46,25 +59,32 @@ const Guide = () => {
             {steps.slice(0, 3).map((step, index) => (
               <div
                 key={step.title}
-                className="flex flex-col items-center text-center p-4"
+                className={`flex flex-col items-center text-center p-4 transition-all duration-700 ease-out group cursor-pointer ${
+                  sectionVisible 
+                    ? 'translate-y-0 opacity-100' 
+                    : 'translate-y-8 opacity-0'
+                }`}
+                style={{ transitionDelay: `${index * 200}ms` }}
               >
-                {/* Illustration */}
-                <div className="mb-6 relative w-64 h-64">
+                {/* Illustration with hover zoom */}
+                <div className="mb-6 relative w-64 h-64 overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 ease-out group-hover:scale-105">
                   <Image
                     src={step.image}
                     alt={step.title}
                     fill
-                    className="object-contain"
+                    className="object-contain transition-transform duration-500 ease-out group-hover:scale-110"
                   />
                 </div>
 
-                {/* Content */}
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  {step.title}
-                </h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  {step.description}
-                </p>
+                {/* Content with hover effects */}
+                <div className="transition-all duration-300 ease-out group-hover:scale-105">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3 group-hover:text-[#23479A] transition-colors duration-300">
+                    {step.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm leading-relaxed group-hover:text-gray-800 transition-colors duration-300">
+                    {step.description}
+                  </p>
+                </div>
               </div>
             ))}
 
@@ -73,25 +93,32 @@ const Guide = () => {
               {steps.slice(3, 5).map((step, index) => (
                 <div
                   key={step.title}
-                  className="flex flex-col items-center text-center p-4 max-w-xs"
+                  className={`flex flex-col items-center text-center p-4 max-w-xs transition-all duration-700 ease-out group cursor-pointer ${
+                    sectionVisible 
+                      ? 'translate-y-0 opacity-100' 
+                      : 'translate-y-8 opacity-0'
+                  }`}
+                  style={{ transitionDelay: `${(index + 3) * 200}ms` }}
                 >
-                  {/* Illustration */}
-                  <div className="mb-6 relative w-64 h-64">
+                  {/* Illustration with hover zoom */}
+                  <div className="mb-6 relative w-64 h-64 overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 ease-out group-hover:scale-105">
                     <Image
                       src={step.image}
                       alt={step.title}
                       fill
-                      className="object-contain"
+                      className="object-contain transition-transform duration-500 ease-out group-hover:scale-110"
                     />
                   </div>
 
-                  {/* Content */}
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                    {step.title}
-                  </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    {step.description}
-                  </p>
+                  {/* Content with hover effects */}
+                  <div className="transition-all duration-300 ease-out group-hover:scale-105">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3 group-hover:text-[#23479A] transition-colors duration-300">
+                      {step.title}
+                    </h3>
+                    <p className="text-gray-600 text-sm leading-relaxed group-hover:text-gray-800 transition-colors duration-300">
+                      {step.description}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -108,29 +135,36 @@ const Guide = () => {
           {steps.map((step, index) => (
             <div
               key={step.title}
-              className="flex flex-col items-center text-center p-4"
+              className={`flex flex-col items-center text-center p-4 transition-all duration-700 ease-out group cursor-pointer ${
+                sectionVisible 
+                  ? 'translate-y-0 opacity-100' 
+                  : 'translate-y-8 opacity-0'
+              }`}
+              style={{ transitionDelay: `${index * 150}ms` }}
             >
-              {/* Illustration */}
-              <div className="mb-6 relative w-72 h-72">
+              {/* Illustration with hover zoom */}
+              <div className="mb-6 relative w-72 h-72 overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 ease-out group-hover:scale-105">
                 <Image
                   src={step.image}
                   alt={step.title}
                   fill
-                  className="object-contain"
+                  className="object-contain transition-transform duration-500 ease-out group-hover:scale-110"
                 />
               </div>
 
-              {/* Content */}
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                {step.title}
-              </h3>
-              <p className="text-gray-600 text-sm max-w-xs leading-relaxed">
-                {step.description}
-              </p>
+              {/* Content with hover effects */}
+              <div className="transition-all duration-300 ease-out group-hover:scale-105">
+                <h3 className="text-xl font-semibold text-gray-900 mb-3 group-hover:text-[#23479A] transition-colors duration-300">
+                  {step.title}
+                </h3>
+                <p className="text-gray-600 text-sm max-w-xs leading-relaxed group-hover:text-gray-800 transition-colors duration-300">
+                  {step.description}
+                </p>
+              </div>
 
               {/* Mobile Arrow (except for last item) */}
               {index < steps.length - 1 && (
-                <div className="mt-6 mb-2">
+                <div className="mt-6 mb-2 transition-transform duration-300 group-hover:scale-110">
                   <svg className="w-6 h-8" fill="none" stroke="#2563EB" strokeWidth="2">
                     <path d="M12 5v14M19 12l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
