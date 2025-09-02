@@ -1,13 +1,23 @@
 'use client'
 import React, { useState } from 'react';
-import { Users, ChevronDown, ChevronUp } from 'lucide-react';
-import { useScrollAnimation } from "@/lib/useScrollAnimation";
+import { ChevronRight, Mail, Phone, Calendar } from 'lucide-react';
+
+type Official = {
+  id: string;
+  name: string;
+  position: string;
+  image: string;
+  term: string;
+  bio: string;
+  email: string;
+  phone: string;
+};
 
 const BarangayOfficials = () => {
-  const [expandedCaptain, setExpandedCaptain] = useState(false);
-  const [expandedKagawad, setExpandedKagawad] = useState<number | null>(null);
+  const [selectedOfficial, setSelectedOfficial] = useState<Official | null>(null);
 
   const barangayCaptain = {
+    id: 'captain',
     name: "Hon. Marife M. Sol",
     position: "Barangay Captain",
     image: "/assets/img/officials/BrgyCaptain.png",
@@ -19,6 +29,7 @@ const BarangayOfficials = () => {
 
   const kagawads = [
     {
+      id: 'kagawad1',
       name: "Hon. Ricka S. Soverano",
       position: "Kagawad 1",
       image: "/assets/img/officials/kagawad1.png",
@@ -28,6 +39,7 @@ const BarangayOfficials = () => {
       phone: "+63 9355 0384 27"
     },
     {
+      id: 'kagawad2',
       name: "Hon. Julito J. Mamitag",
       position: "Kagawad 2",
       image: "/assets/img/officials/kagawad2.png",
@@ -37,6 +49,7 @@ const BarangayOfficials = () => {
       phone: "+63 9355 0384 27"
     },
     {
+      id: 'kagawad3',
       name: "Hon. Agustin J. Malacas",
       position: "Kagawad 3",
       image: "/assets/img/officials/kagawad3.png",
@@ -46,6 +59,7 @@ const BarangayOfficials = () => {
       phone: "+63 9355 0384 27"
     },
     {
+      id: 'kagawad4',
       name: "Hon. John Mark C. Manrique",
       position: "Kagawad 4",
       image: "/assets/img/officials/kagawad2.png",
@@ -55,6 +69,7 @@ const BarangayOfficials = () => {
       phone: "+63 9355 0384 27"
     },
     {
+      id: 'kagawad5',
       name: "Hon. Wody J. Fronda",
       position: "Kagawad 5",
       image: "/assets/img/officials/kagawad1.png",
@@ -64,6 +79,7 @@ const BarangayOfficials = () => {
       phone: "+63 9355 0384 27"
     },
     {
+      id: 'kagawad6',
       name: "Hon. Miguela M. Motol",
       position: "Kagawad 6",
       image: "/assets/img/officials/kagawad2.png",
@@ -73,6 +89,7 @@ const BarangayOfficials = () => {
       phone: "+63 9355 0384 27"
     },
     {
+      id: 'kagawad7',
       name: "Hon. Jocelyn P. Supleo",
       position: "Kagawad 7",
       image: "/assets/img/officials/kagawad3.png",
@@ -83,241 +100,210 @@ const BarangayOfficials = () => {
     }
   ]
 
-  // Split kagawads into rows of 3
-  const getKagawadRows = () => {
-    const rows = [];
-    for (let i = 0; i < kagawads.length; i += 3) {
-      rows.push(kagawads.slice(i, i + 3));
-    }
-    return rows;
-  };
-
-  const toggleCaptain = () => {
-    setExpandedCaptain(!expandedCaptain);
-  };
-
-  const toggleKagawad = (index: number) => {
-    setExpandedKagawad(expandedKagawad === index ? null : index);
-  };
-
-  const { elementRef: sectionRef, isVisible: sectionVisible } = useScrollAnimation<HTMLElement>({ threshold: 0.05 });
-  const { elementRef: headerRef, isVisible: headerVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.2 });
-  const { elementRef: captainRef, isVisible: captainVisible } = useScrollAnimation<HTMLDivElement>({ threshold: 0.15 });
+  const allOfficials = [barangayCaptain, ...kagawads];
 
   return (
-    <section ref={sectionRef} className="pt-34 pb-24 sm:pt-32 sm:pb-32 bg-[#23479A] relative">
-      {/* Background Pattern */}
-      <div
-        className="absolute inset-x-0 bottom-0 h-[420px]"
-        style={{
-          backgroundImage: 'url(/assets/img/herosection.png)',
-          backgroundSize: 'contain',
-          backgroundPosition: 'bottom',
-          backgroundRepeat: 'repeat-x',
-          opacity: '0.15'
-        }}
-      />
-      
-      <div className="max-w-7xl mx-auto px-4 relative z-10">
+    <section className="py-20 bg-gradient-to-br from-slate-50 to-white">
+      <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
-        <div 
-          ref={headerRef}
-          className={`text-center mb-16 sm:mb-20 transition-all duration-800 ease-out ${
-            headerVisible 
-              ? 'translate-y-0 opacity-100' 
-              : 'translate-y-6 opacity-0'
-          }`}
-        >
-          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
             Barangay Officials
           </h2>
-          <p className="text-blue-100 text-lg sm:text-xl pb-20 max-w-2xl mx-auto">
-            Our dedicated leaders serving the community
+          <div className="w-24 h-1 bg-gradient-to-r from-blue-600 to-indigo-600 mx-auto mb-6 rounded-full"></div>
+          <p className="text-slate-600 text-lg max-w-2xl mx-auto">
+            Our dedicated leaders serving the community with integrity and commitment
           </p>
         </div>
 
-        {/* Barangay Captain - Top Center */}
-        <div 
-          ref={captainRef}
-          className={`flex justify-center mb-20 sm:mb-24 transition-all duration-1000 ease-out delay-300 ${
-            captainVisible 
-              ? 'translate-y-0 opacity-100' 
-              : 'translate-y-8 opacity-0'
-          }`}
-        >
-          <div 
-            className={`bg-white/10 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 cursor-pointer transition-all duration-500 ease-in-out relative ${
-              expandedCaptain ? 'max-w-4xl' : 'max-w-2xl'
-            } hover:shadow-2xl shadow-white/10`}
-            onClick={toggleCaptain}
-          >
-            {/* Floating Circular Profile Image */}
-            <div className="absolute -top-24 sm:-top-28 left-1/2 transform -translate-x-1/2 z-10">
-              <div className="relative w-44 h-44 sm:w-48 sm:h-48 rounded-full overflow-hidden border-4 border-white bg-white shadow-xl group">
-                <img
-                  src={barangayCaptain.image}
-                  alt={barangayCaptain.name}
-                  className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
-                />
+        {/* Main Layout */}
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Officials Grid */}
+          <div className="lg:col-span-2">
+            {/* Barangay Captain - Featured */}
+            <div className="mb-12">
+              <h3 className="text-2xl font-semibold text-slate-800 mb-6 flex items-center">
+                <div className="w-8 h-8 bg-[#23479A] rounded-lg mr-3 flex items-center justify-center">
+                  <div className="w-3 h-3 bg-white rounded-sm"></div>
+                </div>
+                Leadership
+              </h3>
+              <div 
+                className="group cursor-pointer"
+                onClick={() => setSelectedOfficial(selectedOfficial?.id === barangayCaptain.id ? null : barangayCaptain)}
+              >
+                <div className="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 border border-slate-200 overflow-hidden">
+                  <div className="p-6 flex items-center space-x-6">
+                    <div className="relative">
+                      <div className="w-20 h-20 rounded-xl overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
+                        <img
+                          src={barangayCaptain.image}
+                          alt={barangayCaptain.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                      <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center">
+                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3 mb-2">
+                        <span className="px-3 py-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-medium rounded-full">
+                          {barangayCaptain.position}
+                        </span>
+                        <span className="text-slate-500 text-sm">{barangayCaptain.term}</span>
+                      </div>
+                      <h4 className="text-xl font-semibold text-slate-900 mb-1">
+                        {barangayCaptain.name}
+                      </h4>
+                      <p className="text-slate-600 text-sm line-clamp-2">
+                        {barangayCaptain.bio}
+                      </p>
+                    </div>
+                    <ChevronRight className={`w-5 h-5 text-slate-400 transition-transform duration-200 ${selectedOfficial?.id === barangayCaptain.id ? 'rotate-90' : ''}`} />
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Blue Background Section */}
-            <div className="pt-36 sm:pt-40 pb-8 px-6 sm:px-8">
-              <div className="text-center">
-                <div className="bg-white text-[#23479A] px-4 sm:px-6 py-2 rounded-full text-sm sm:text-lg font-bold mb-6 shadow-lg inline-block">
-                  {barangayCaptain.position}
+            {/* Kagawads */}
+            <div>
+              <h3 className="text-2xl font-semibold text-slate-800 mb-6 flex items-center">
+                <div className="w-8 h-8 bg-[#23479A] rounded-lg mr-3 flex items-center justify-center">
+                  <div className="w-3 h-3 bg-white rounded-sm"></div>
                 </div>
-                
-                <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3">
-                  {barangayCaptain.name}
-                </h3>
-                
-                <p className="text-blue-100 text-base sm:text-lg mb-4">
-                  Term: {barangayCaptain.term}
-                </p>
-
-                {/* Expand/Collapse Indicator */}
-                <div className="flex items-center justify-center gap-2 text-white text-sm font-medium">
-                  {expandedCaptain ? 'Show Less' : 'Click to Expand'}
-                  {expandedCaptain ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                </div>
-
-                {/* Expanded Content */}
-                {expandedCaptain && (
-                  <div className="mt-6 pt-6 border-t border-white/20 space-y-4 animate-fadeIn">
-                    <p className="text-blue-100 text-base sm:text-lg italic">
-                      {barangayCaptain.bio}
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                      <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/20">
-                        <p className="font-semibold text-white">Email</p>
-                        <p className="text-blue-100">{barangayCaptain.email}</p>
-                      </div>
-                      <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg border border-white/20">
-                        <p className="font-semibold text-white">Phone</p>
-                        <p className="text-blue-100">{barangayCaptain.phone}</p>
+                Council Members
+              </h3>
+              <div className="space-y-3">
+                {kagawads.map((kagawad, index) => (
+                  <div 
+                    key={kagawad.id}
+                    className="group cursor-pointer"
+                    onClick={() => setSelectedOfficial(selectedOfficial?.id === kagawad.id ? null : kagawad)}
+                  >
+                    <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-slate-200 overflow-hidden">
+                      <div className="p-4 flex items-center space-x-4">
+                        <div className="w-14 h-14 rounded-lg overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200 flex-shrink-0">
+                          <img
+                            src={kagawad.image}
+                            alt={kagawad.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <span className="px-2 py-0.5 bg-slate-100 text-slate-700 text-xs font-medium rounded-md">
+                              {kagawad.position}
+                            </span>
+                          </div>
+                          <h4 className="font-medium text-slate-900 truncate">
+                            {kagawad.name}
+                          </h4>
+                          <p className="text-slate-500 text-sm truncate">
+                            {kagawad.bio}
+                          </p>
+                        </div>
+                        <ChevronRight className={`w-4 h-4 text-slate-400 transition-transform duration-200 flex-shrink-0 ${selectedOfficial?.id === kagawad.id ? 'rotate-90' : ''}`} />
                       </div>
                     </div>
                   </div>
-                )}
+                ))}
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Kagawads in Rows of 3 */}
-        <div className="space-y-8 sm:space-y-12 pt-12">
-          {getKagawadRows().map((row, rowIndex) => (
-            <div key={rowIndex} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 justify-items-center">
-              {row.map((kagawad, index) => {
-                const globalIndex = rowIndex * 3 + index;
-                return (
-                  <div 
-                    key={kagawad.position} 
-                    className={`bg-white/10 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 ease-in-out border border-white/20 cursor-pointer relative w-full max-w-sm mt-12 sm:mt-16 shadow-white/10 ${
-                      expandedKagawad === globalIndex ? 'max-w-sm' : ''
-                    } transition-all duration-700 ease-out ${
-                      sectionVisible 
-                        ? 'translate-y-0 opacity-100' 
-                        : 'translate-y-8 opacity-0'
-                    }`}
-                    style={{ transitionDelay: `${globalIndex * 150}ms` }}
-                    onClick={() => toggleKagawad(globalIndex)}
-                  >
-                    {/* Floating Circular Profile Image */}
-                    <div className="absolute -top-20 sm:-top-22 left-1/2 transform -translate-x-1/2 z-10">
-                      <div className="relative w-36 h-36 sm:w-40 sm:h-40 rounded-full overflow-hidden border-3 border-white bg-white shadow-lg group">
+          {/* Details Panel */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-8">
+              {selectedOfficial ? (
+                <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+                  <div className="relative">
+                    <div className="h-32 bg-[#23479A]"></div>
+                    <div className="absolute -bottom-12 left-6">
+                      <div className="w-24 h-24 rounded-2xl overflow-hidden border-4 border-white shadow-lg bg-gradient-to-br from-slate-100 to-slate-200">
                         <img
-                          src={kagawad.image}
-                          alt={kagawad.name}
-                          className="w-full h-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-110"
+                          src={selectedOfficial.image}
+                          alt={selectedOfficial.name}
+                          className="w-full h-full object-cover"
                         />
                       </div>
                     </div>
+                  </div>
+                  
+                  <div className="pt-16 p-6">
+                    <div className="mb-4">
+                      <span className="px-3 py-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-medium rounded-full">
+                        {selectedOfficial.position}
+                      </span>
+                    </div>
                     
-                    {/* Blue Background Section */}
-                    <div className="pt-28 sm:pt-32 pb-6 px-4 sm:px-6">
-                      <div className="text-center">
-                        <div className="bg-white text-[#23479A] px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-bold mb-4 inline-block">
-                          {kagawad.position}
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">
+                      {selectedOfficial.name}
+                    </h3>
+                    
+                    <p className="text-slate-600 mb-6 leading-relaxed">
+                      {selectedOfficial.bio}
+                    </p>
+                    
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-3 p-3 bg-slate-50 rounded-lg">
+                        <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <Mail className="w-4 h-4 text-blue-600" />
                         </div>
-                        
-                        <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">
-                          {kagawad.name}
-                        </h3>
-                        
-                        <p className="text-blue-100 text-xs sm:text-sm mb-3">
-                          Term: {kagawad.term}
-                        </p>
-
-                        {/* Expand/Collapse Indicator */}
-                        <div className="flex items-center justify-center gap-1 text-white text-xs font-medium">
-                          {expandedKagawad === globalIndex ? 'Show Less' : 'Click to Expand'}
-                          {expandedKagawad === globalIndex ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                        <div>
+                          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Email</p>
+                          <p className="text-sm text-slate-900">{selectedOfficial.email}</p>
                         </div>
-
-                        {/* Expanded Content */}
-                        {expandedKagawad === globalIndex && (
-                          <div className="mt-4 pt-4 border-t border-white/20 space-y-3 animate-fadeIn">
-                            <p className="text-blue-100 text-xs sm:text-sm italic">
-                              {kagawad.bio}
-                            </p>
-                            <div className="space-y-2 text-xs">
-                              <div className="bg-white/10 backdrop-blur-sm p-3 rounded border border-white/20">
-                                <p className="font-semibold text-white">Email</p>
-                                <p className="text-blue-100">{kagawad.email}</p>
-                              </div>
-                              <div className="bg-white/10 backdrop-blur-sm p-3 rounded border border-white/20">
-                                <p className="font-semibold text-white">Phone</p>
-                                <p className="text-blue-100">{kagawad.phone}</p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
+                      </div>
+                      
+                      <div className="flex items-center space-x-3 p-3 bg-slate-50 rounded-lg">
+                        <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                          <Phone className="w-4 h-4 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Phone</p>
+                          <p className="text-sm text-slate-900">{selectedOfficial.phone}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center space-x-3 p-3 bg-slate-50 rounded-lg">
+                        <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <Calendar className="w-4 h-4 text-purple-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Term</p>
+                          <p className="text-sm text-slate-900">{selectedOfficial.term}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                );
-              })}
+                </div>
+              ) : (
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center">
+                  <div className="w-16 h-16 bg-slate-100 rounded-2xl mx-auto mb-4 flex items-center justify-center">
+                    <div className="w-8 h-8 border-2 border-slate-300 rounded-full"></div>
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                    Select an Official
+                  </h3>
+                  <p className="text-slate-500 text-sm">
+                    Click on any official to view their detailed information and contact details.
+                  </p>
+                </div>
+              )}
             </div>
-          ))}
+          </div>
         </div>
 
-        {/* Term Information */}
-        <div 
-          className={`text-center mt-20 sm:mt-24 transition-all duration-800 ease-out delay-500 ${
-            sectionVisible 
-              ? 'translate-y-0 opacity-100' 
-              : 'translate-y-6 opacity-0'
-          }`}
-        >
-          <div className="bg-white rounded-xl shadow-md p-6 max-w-2xl mx-auto border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Current Term
-            </h3>
-            <p className="text-gray-600">
-              All officials are serving from <span className="font-semibold text-[#23479A]">2024-2028</span>
-            </p>
+        {/* Term Info */}
+        <div className="mt-16 text-center">
+          <div className="inline-flex items-center px-6 py-3 bg-white rounded-2xl shadow-sm border border-slate-200">
+            <Calendar className="w-5 h-5 text-slate-500 mr-3" />
+            <span className="text-slate-600">Current Term: </span>
+            <span className="font-semibold text-slate-900 ml-1">2024-2028</span>
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
-        }
-      `}</style>
     </section>
   );
 };
