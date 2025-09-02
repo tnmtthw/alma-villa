@@ -27,6 +27,16 @@ const Navbar = () => {
   const isDashboard = pathname?.startsWith("/dashboard")
   const { data: session } = useSession();
 
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault()
+    if (typeof window === "undefined") return
+    if (pathname === "/") {
+      window.location.reload()
+    } else {
+      window.location.assign("/")
+    }
+  }
+
   if (isDashboard) {
     return null
   }
@@ -35,7 +45,7 @@ const Navbar = () => {
     <nav className="w-full border-b bg-white">
       <div className="flex h-16 items-center px-4 max-w-7xl mx-auto justify-between">
         <div className="flex items-center space-x-3">
-          <Link href="/" className="flex items-center space-x-3">
+          <Link href="/" onClick={handleLogoClick} className="flex items-center space-x-3">
             <Image
               src="/assets/img/Logo.png"
               alt="Alma Villa Logo"

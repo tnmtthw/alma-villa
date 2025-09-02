@@ -17,7 +17,6 @@ import {
   Eye,
   CheckCircle,
   XCircle,
-  AlertTriangle,
   Download,
   RefreshCw,
   CreditCard,
@@ -348,7 +347,6 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
     { title: "Payment", value: stats.paymentPending, icon: CreditCard, color: "text-yellow-600" },
     { title: "Ready", value: stats.readyForClaim, icon: CheckCircle, color: "text-green-600" },
     { title: "Completed", value: stats.completed, icon: CheckCircle, color: "text-gray-600" },
-    { title: "Urgent", value: stats.urgent, icon: AlertTriangle, color: "text-red-600" },
   ]
 
   // Loading state
@@ -423,16 +421,12 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
             <Download className="h-4 w-4" />
             <span className="hidden sm:inline">Export</span>
           </Button>
-          <Button className="bg-[#23479A] hover:bg-[#23479A]/90 flex items-center justify-center gap-2 w-full sm:w-auto">
-            <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Manual Request</span>
-            <span className="sm:hidden">Add Request</span>
-          </Button>
+          {/** Manual Request button temporarily disabled **/}
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 md:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 md:gap-4">
         {statsConfig.map((stat, index) => (
           <StatsCard
             key={index}

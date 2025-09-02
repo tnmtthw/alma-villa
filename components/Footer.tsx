@@ -1,8 +1,10 @@
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import Image from "next/image"
 import { Facebook, Mail, MapPin, Phone, Clock } from "lucide-react"
 
 const Footer = () => {
+  const pathname = usePathname()
   const currentYear = new Date().getFullYear()
 
   const footerLinks = [
@@ -59,7 +61,19 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
           {/* Logo and Description */}
           <div className="lg:col-span-2 space-y-4">
-            <Link href="/" className="flex items-center space-x-3 group">
+            <Link
+              href="/"
+              onClick={(e) => {
+                e.preventDefault()
+                if (typeof window === 'undefined') return
+                if (pathname === '/') {
+                  window.location.reload()
+                } else {
+                  window.location.assign('/')
+                }
+              }}
+              className="flex items-center space-x-3 group"
+            >
               <Image
                 src="/assets/img/Logo.png"
                 alt="Alma Villa Logo"

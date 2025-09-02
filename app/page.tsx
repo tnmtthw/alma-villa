@@ -7,6 +7,8 @@ import BarangayOfficials from "@/components/BarangayOfficials"
 import ScrollToTop from "@/components/ScrollToTop"
 
 export default function Home() {
+  
+
   return (
     <main>
       <ScrollToTop />

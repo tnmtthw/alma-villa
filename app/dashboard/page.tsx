@@ -119,7 +119,7 @@ const quickActions = [
     title: "Community News",
     description: "Latest announcements",
     icon: Bell,
-    href: "/news",
+    href: "/dashboard/news",
     color: "bg-gradient-to-br from-amber-500 to-amber-600",
     textColor: "text-white"
   },

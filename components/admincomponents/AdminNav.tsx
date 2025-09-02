@@ -20,6 +20,7 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
+  RefreshCw,
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { useSession } from "next-auth/react"
@@ -287,9 +288,17 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
 
 
 
-                {/* Help */}
-                <button className="hidden sm:flex items-center justify-center h-8 w-8 md:h-10 md:w-10 rounded-lg hover:bg-gray-100 transition-colors">
-                  <HelpCircle className="h-4 w-4 md:h-5 md:w-5" />
+                {/* Refresh */}
+                <button
+                  onClick={() => {
+                    if (typeof window !== 'undefined') {
+                      window.location.reload()
+                    }
+                  }}
+                  title="Refresh"
+                  className="hidden sm:flex items-center justify-center h-8 w-8 md:h-10 md:w-10 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <RefreshCw className="h-4 w-4 md:h-5 md:w-5" />
                 </button>
 
                 {/* Profile Dropdown */}

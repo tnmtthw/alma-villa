@@ -38,6 +38,7 @@ import {
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import useSWR from 'swr'
+import { usePathname } from "next/navigation"
 
 interface NavigationItem {
   icon: React.ElementType
@@ -64,7 +65,7 @@ const navigationItems: NavigationItem[] = [
   {
     icon: Newspaper,
     label: "News",
-    href: "/news",
+    href: "/dashboard/news",
   },
   {
     icon: FileText,
@@ -77,6 +78,7 @@ const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) => fet
 
 export function MainNav() {
   const { data: session } = useSession()
+  const pathname = usePathname()
 
   const { data } = useSWR(`/api/user?id=${session?.user.id}`, fetcher)
 
@@ -148,7 +150,22 @@ export function MainNav() {
         </Sheet>
 
         {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2 mr-4 md:mr-6">
+        <Link
+          href="/"
+          onClick={(e) => {
+            e.preventDefault()
+            if (typeof window === 'undefined') return
+            if (pathname?.startsWith('/dashboard')) {
+              return
+            }
+            if (pathname === '/') {
+              window.location.reload()
+            } else {
+              window.location.assign('/')
+            }
+          }}
+          className="flex items-center space-x-2 mr-4 md:mr-6"
+        >
           <Image
             src="/assets/img/Logo.png"
             alt="Alma Villa Logo"

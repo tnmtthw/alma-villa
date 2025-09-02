@@ -207,10 +207,7 @@ export default function AdminDashboard() {
             <Download className="h-4 w-4" />
             Export
           </button>
-          <button className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            <Plus className="h-4 w-4" />
-            New Request
-          </button>
+          {/** New Request button removed per requirement **/}
         </div>
       </div>
 
