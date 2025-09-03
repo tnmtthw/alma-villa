@@ -28,11 +28,17 @@ const ClaimClearanceButton: React.FC<ClaimClearanceButtonProps> = ({ request }) 
     const date = new Date(request.requestDate);
     const month = date.toLocaleString("en-US", { month: "short" });
     const day = date.getDate();
+    const birthDate = new Date(request.birthDate);
+    const formattedBirthDate = birthDate.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+    }).replace(/([A-Za-z]+)\s/, "$1. ");
 
     const formData = {
         fullName: request.fullName,
         age: request.age,
-        birthDate: request.birthDate,
+        birthDate: formattedBirthDate,
         civilStatus: request.civilStatus,
         placeOfBirth: request.placeOfBirth,
         citizenship: request.citizenship,
