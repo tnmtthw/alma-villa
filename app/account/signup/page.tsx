@@ -6,7 +6,6 @@ import SignUpPage from "@/components/registration/SignUpPage"
 export default function SignUp() {
   return (
     <main>
- 
       <SignUpPage />
     </main>
   )

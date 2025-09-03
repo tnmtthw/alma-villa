@@ -15,6 +15,7 @@ model User {
   suffix           String?
   birthDate        String?
   age              String?
+  placeOfBirth     String?
   gender           String?
   civilStatus      String?
   nationality      String?

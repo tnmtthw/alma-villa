@@ -25,6 +25,7 @@ interface FormData {
   suffix: string;
   birthDate: string;
   age: string;
+  placeOfBirth: string;
   gender: string;
   civilStatus: string;
   nationality: string;
@@ -50,6 +51,7 @@ const initialFormData: FormData = {
   suffix: "",
   birthDate: "",
   age: "",
+  placeOfBirth: "",
   gender: "",
   civilStatus: "",
   nationality: "",
@@ -75,6 +77,7 @@ const sampleData: FormData = {
   suffix: "",
   birthDate: "1990-01-15",
   age: "35", // Will be calculated automatically
+  placeOfBirth: "Makati City",
   gender: "male",
   civilStatus: "single",
   nationality: "Filipino",
@@ -111,7 +114,7 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
   // Set isClient to true after component mounts (client-side only)
   useEffect(() => {
     setIsClient(true)
-    
+
     // Load saved data from localStorage only on client-side
     const savedData = localStorage.getItem('residentInfoData')
     if (savedData) {
@@ -128,7 +131,7 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
           street: parsedData.street || "N/A"
         }
         setFormData(updatedData)
-        
+
         // Check if the loaded data shows a minor or future date
         if (updatedData.birthDate) {
           // AUTO-DETECT on page load for saved data
@@ -160,30 +163,30 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
   // Calculate age automatically when birthDate changes
   const calculateAge = (birthDate: string): string => {
     if (!birthDate) return ""
-    
+
     const today = new Date()
     const birth = new Date(birthDate)
     let age = today.getFullYear() - birth.getFullYear()
     const monthDiff = today.getMonth() - birth.getMonth()
-    
+
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
       age--
     }
-    
+
     return age.toString()
   }
 
   // Validate if the date is in the future
   const isBirthDateInFuture = (birthDate: string): boolean => {
     if (!birthDate) return false
-    
+
     const birthDateObj = new Date(birthDate)
     const today = new Date()
-    
+
     // Set time to 00:00:00 for accurate date comparison
     today.setHours(0, 0, 0, 0)
     birthDateObj.setHours(0, 0, 0, 0)
-    
+
     return birthDateObj > today
   }
 
@@ -198,21 +201,21 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
     // INSTANT FUTURE DATE DETECTION
     const isDateInFuture = isBirthDateInFuture(birthDate)
     setIsFutureDate(isDateInFuture)
-    
+
     if (!isDateInFuture) {
       // INSTANT LEGAL AGE DETECTION
       const calculatedAge = calculateAge(birthDate)
       const ageNumber = parseInt(calculatedAge)
       const isPersonMinor = ageNumber < 18 && ageNumber >= 0
-      
+
       setIsMinor(isPersonMinor)
-      
+
       // Auto-update age in form
       setFormData(prev => ({
         ...prev,
         age: calculatedAge
       }))
-      
+
       // Immediate feedback logs
       if (isPersonMinor) {
         console.log(`🚫 Auto-detected: Minor (Age ${calculatedAge}) - Registration blocked`)
@@ -222,7 +225,7 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
     } else {
       setIsMinor(false)
       console.log('🚫 Auto-detected: Future birth date - Invalid selection')
-      
+
       // Clear age for future dates
       setFormData(prev => ({
         ...prev,
@@ -235,7 +238,7 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
   const formatMobileNumber = (value: string): string => {
     // Remove all non-digit characters
     const digits = value.replace(/\D/g, '')
-    
+
     // If it starts with 63, keep it as is
     if (digits.startsWith('63')) {
       const withoutCountryCode = digits.slice(2)
@@ -243,7 +246,7 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
       const limited = withoutCountryCode.slice(0, 10)
       return `+63${limited}`
     }
-    
+
     // If it starts with 0, replace with +63
     if (digits.startsWith('0')) {
       const withoutZero = digits.slice(1)
@@ -251,7 +254,7 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
       const limited = withoutZero.slice(0, 10)
       return `+63${limited}`
     }
-    
+
     // If it's just digits, add +63
     // Limit to 10 digits (total 11: +63 + 10)
     const limited = digits.slice(0, 10)
@@ -260,14 +263,14 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target
-    
+
     if (id === 'birthDate') {
       // Always update the form data first
       setFormData(prev => ({
         ...prev,
         [id]: value
       }))
-      
+
       // INSTANT AUTO-DETECTION when user selects a birthdate
       validateBirthDate(value)
     } else if (id === 'mobileNumber' || id === 'emergencyNumber') {
@@ -298,6 +301,7 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
       // middleName is optional
       'birthDate',
       'age',
+      'placeOfBirth',
       'gender',
       'civilStatus',
       'nationality',
@@ -318,7 +322,7 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
     })
 
     // Ensure auto-filled fields are present (they should always be)
-    const autoFieldsPresent = 
+    const autoFieldsPresent =
       formData.barangay === "Alma Villa" &&
       formData.city === "Gloria" &&
       formData.province === "Oriental Mindoro" &&
@@ -332,12 +336,12 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
 
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     // Double-check if user is minor or has future date before proceeding
     if (isMinor || isFutureDate) {
       return // Prevent form submission
     }
-    
+
     // Ensure all required backend fields are properly set before proceeding
     const completeFormData = {
       ...formData,
@@ -349,15 +353,15 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
       province: "Oriental Mindoro", // Fixed province
       zipCode: "5209" // Fixed ZIP code
     }
-    
+
     // Update the stored data with complete information
     if (isClient) {
       localStorage.setItem('residentInfoData', JSON.stringify(completeFormData))
     }
-    
+
     // Log for verification during development (remove in production)
     console.log('Registration Data Being Collected:', completeFormData)
-    
+
     onNextAction()
   }
 
@@ -400,7 +404,7 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
           <Alert className="border-red-200 bg-red-50">
             <AlertTriangle className="h-4 w-4 text-red-600" />
             <AlertDescription className="text-red-800">
-              <strong>You are not of legal age.</strong> Registration is only available for individuals who are 18 years old or above. 
+              <strong>You are not of legal age.</strong> Registration is only available for individuals who are 18 years old or above.
               Please contact the barangay office directly for assistance if you need services as a minor.
             </AlertDescription>
           </Alert>
@@ -465,11 +469,10 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                   <Input
                     id="birthDate"
                     type="date"
-                    className={`mt-1 transition-all duration-200 ${
-                      isFutureDate ? 'border-red-400 focus:border-red-500 bg-red-50' : 
-                      isMinor ? 'border-orange-400 focus:border-orange-500 bg-orange-50' : 
-                      formData.birthDate && !isFutureDate && !isMinor ? 'border-green-400 focus:border-green-500 bg-green-50' : ''
-                    }`}
+                    className={`mt-1 transition-all duration-200 ${isFutureDate ? 'border-red-400 focus:border-red-500 bg-red-50' :
+                      isMinor ? 'border-orange-400 focus:border-orange-500 bg-orange-50' :
+                        formData.birthDate && !isFutureDate && !isMinor ? 'border-green-400 focus:border-green-500 bg-green-50' : ''
+                      }`}
                     required
                     value={formData.birthDate}
                     onChange={handleInputChange}
@@ -497,18 +500,28 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                   <Input
                     id="age"
                     type="number"
-                    className={`mt-1 bg-gray-100 transition-all duration-200 ${
-                      isFutureDate ? 'border-red-400 bg-red-50' :
-                      isMinor ? 'border-orange-400 bg-orange-50' : 
-                      formData.age && !isMinor ? 'border-green-400 bg-green-50' : ''
-                    }`}
+                    className={`mt-1 bg-gray-100 transition-all duration-200 ${isFutureDate ? 'border-red-400 bg-red-50' :
+                      isMinor ? 'border-orange-400 bg-orange-50' :
+                        formData.age && !isMinor ? 'border-green-400 bg-green-50' : ''
+                      }`}
                     required
                     value={formData.age}
                     readOnly
                     placeholder={
-                      isFutureDate ? "⚠️ Invalid date" : 
-                      formData.birthDate ? "🎂 Auto-calculated" : "Select birth date first"
+                      isFutureDate ? "⚠️ Invalid date" :
+                        formData.birthDate ? "🎂 Auto-calculated" : "Select birth date first"
                     }
+                  />
+                </div>
+                <div className="col-span-2">
+                  <Label htmlFor="nationality">Place of Birth</Label>
+                  <Input
+                    id="placeOfBirth"
+                    placeholder="Enter place of birth"
+                    className="mt-1"
+                    required
+                    value={formData.placeOfBirth}
+                    onChange={handleInputChange}
                   />
                 </div>
                 <div>
@@ -721,14 +734,13 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
             type="submit"
             onClick={handleNext}
             disabled={!isFormValid()}
-            className={`rounded-[2px] px-8 ${
-              isMinor || isFutureDate
-                ? "bg-gray-400 hover:bg-gray-400 cursor-not-allowed" 
-                : "bg-[#23479A] hover:bg-[#23479A]/90"
-            } text-white disabled:opacity-50 disabled:cursor-not-allowed`}
+            className={`rounded-[2px] px-8 ${isMinor || isFutureDate
+              ? "bg-gray-400 hover:bg-gray-400 cursor-not-allowed"
+              : "bg-[#23479A] hover:bg-[#23479A]/90"
+              } text-white disabled:opacity-50 disabled:cursor-not-allowed`}
             title={
               isFutureDate ? "Birth date cannot be in the future" :
-              isMinor ? "You must be 18 or older to proceed" : ""
+                isMinor ? "You must be 18 or older to proceed" : ""
             }
           >
             Next Step
