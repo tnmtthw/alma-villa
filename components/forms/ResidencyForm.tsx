@@ -9,6 +9,9 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Upload, X, FileText } from "lucide-react"
 import { useToast } from "@/components/ui/toast"
 import { useSession } from "next-auth/react"
+import useSWR from 'swr'
+
+const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) => fetch(...args).then((res) => res.json());
 
 interface ResidencyFormProps {
   onSubmit: (formData: any) => void
@@ -28,17 +31,19 @@ interface FormData {
 
 
 export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormProps) {
+  const { addToast } = useToast()
+  const { data: session } = useSession()
+  const { data } = useSWR(`/api/user?id=${session?.user.id}`, fetcher)
+
   const [formData, setFormData] = useState<FormData>({
-    fullName: "",
-    age: "",
-    address: "",
+    fullName: data.firstName + " " + data.lastName,
+    age: data.age,
+    address: data.purok,
     purpose: "",
     attachments: []
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { addToast } = useToast()
-  const { data: session } = useSession()
 
   const handleInputChange = (field: keyof FormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }))

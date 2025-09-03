@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { FileText, History, MessageSquare, Bell, Plus, ChevronRight, TrendingUp, Clock, CheckCircle, ArrowUpRight, Activity, Calendar, Users, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import DocumentStatusTracker from "@/components/DocumentStatusTracker"
+import DocumentStatusTracker from "@/app/dashboard/DocumentStatusTracker"
 import ScrollToTop from "@/components/ScrollToTop"
 import { useSession } from "next-auth/react"
 import useSWR from 'swr'

@@ -20,8 +20,8 @@ interface ClaimResidencyButtonProps {
 
 const ClaimResidencyButton: React.FC<ClaimResidencyButtonProps> = ({ request }) => {
     const date = new Date(request.requestDate);
-    const month = date.toLocaleString("en-US", { month: "long" }); // e.g., "August"
-    const day = date.getDate(); // e.g., 10
+    const month = date.toLocaleString("en-US", { month: "short" });
+    const day = date.getDate();
 
     const formData = {
         fullName: request.fullName,

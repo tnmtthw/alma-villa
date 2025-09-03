@@ -9,6 +9,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { Upload, X, ArrowLeft, Eye, CheckCircle, Clock, Mail, DollarSign } from "lucide-react"
 import { useToast } from "@/components/ui/toast"
 import { useSession } from "next-auth/react"
+import useSWR from 'swr'
+
+const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) => fetch(...args).then((res) => res.json());
+
 
 interface BarangayClearanceFormProps {
   onBackAction: () => void
@@ -24,6 +28,8 @@ interface FormData {
   suffix: string
   birthDate: string
   civilStatus: string
+  placeOfBirth: string
+  citizenship: string
 
   // Address Information
   purok: string
@@ -43,6 +49,8 @@ const sampleData: FormData = {
   suffix: "Jr.",
   birthDate: "1990-01-15",
   civilStatus: "single",
+  placeOfBirth: "Makati City",
+  citizenship: "Filipino",
   purok: "Sitio 1",
   residencyLength: "5",
   purpose: "employment",
@@ -53,19 +61,24 @@ const sampleData: FormData = {
 
 export default function BarangayClearanceForm({ onBackAction }: BarangayClearanceFormProps) {
   const { addToast } = useToast()
+  const { data: session } = useSession()
+  const { data } = useSWR(`/api/user?id=${session?.user.id}`, fetcher)
+
   const [formData, setFormData] = useState<FormData>({
-    fullName: "",
-    suffix: "",
-    birthDate: "",
-    civilStatus: "",
-    purok: "",
-    residencyLength: "",
+    fullName: data.firstName + " " + data.lastName,
+    suffix: data.suffix,
+    birthDate: data.birthDate,
+    placeOfBirth: data.placeOfBirth,
+    citizenship: data.nationality,
+    civilStatus: data.civilStatus,
+    purok: data.purok,
+    residencyLength: data.residencyLength,
     purpose: "",
     additionalInfo: "",
     contactNumber: "",
     emailAddress: ""
   })
-  const { data: session } = useSession()
+
 
   const [supportingDocs, setSupportingDocs] = useState<DocumentFile[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -223,6 +236,8 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
         fullName: formData.fullName,
         suffix: formData.suffix,
         birthDate: formData.birthDate,
+        placeOfBirth: formData.placeOfBirth,
+        citizenship: formData.citizenship,
         age: calculatedAge,
         civilStatus: formData.civilStatus,
         purok: formData.purok,
@@ -258,6 +273,8 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
           fullName: "",
           suffix: "",
           birthDate: "",
+          placeOfBirth: "",
+          citizenship: "",
           civilStatus: "",
           purok: "",
           residencyLength: "",
@@ -337,6 +354,7 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
               />
             </div>
 
+
             <div>
               <Label htmlFor="birthDate">Date of Birth</Label>
               <Input
@@ -347,6 +365,28 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
                 max={todayLocalDateString}
                 value={formData.birthDate}
                 onChange={(e) => handleBirthDateChange(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="placeOfBirth">Place of Birth</Label>
+              <Input
+                id="placeOfBirth"
+                placeholder="Enter place of birth"
+                className="mt-1"
+                value={formData.placeOfBirth}
+                onChange={(e) => handleInputChange('suffix', e.target.value)}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="citizenship">Citizenship</Label>
+              <Input
+                id="citizenship"
+                placeholder="Enter citizenship"
+                className="mt-1"
+                value={formData.citizenship}
+                onChange={(e) => handleInputChange('suffix', e.target.value)}
               />
             </div>
 
@@ -376,30 +416,6 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
           <h2 className="text-xl font-semibold text-gray-900 border-b pb-2">Address Information</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* <div>
-              <Label htmlFor="houseNumber">House/Unit Number</Label>
-              <Input
-                id="houseNumber"
-                placeholder="Enter house number"
-                className="mt-1"
-                required
-                value={formData.houseNumber}
-                onChange={(e) => handleInputChange('houseNumber', e.target.value)}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="street">Street Name</Label>
-              <Input
-                id="street"
-                placeholder="Enter street name"
-                className="mt-1"
-                required
-                value={formData.street}
-                onChange={(e) => handleInputChange('street', e.target.value)}
-              />
-            </div> */}
-
             <div>
               <Label htmlFor="purok">Sitio</Label>
               <Input

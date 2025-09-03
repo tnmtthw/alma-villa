@@ -16,7 +16,7 @@ interface ClaimIndigencyButtonProps {
 
 const ClaimIndigencyButton: React.FC<ClaimIndigencyButtonProps> = ({ request }) => {
     const date = new Date(request.requestDate);
-    const month = date.toLocaleString("en-US", { month: "long" }); // e.g., "August"
+    const month = date.toLocaleString("en-US", { month: "short" });
     const day = date.getDate(); // e.g., 10
 
     const formData = {

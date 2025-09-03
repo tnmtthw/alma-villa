@@ -52,7 +52,7 @@ model Document {
   fullName         String?
   suffix           String?
   birthDate        String?
-  citenzship       String?  @default("N/A")
+  citizenship      String?  @default("N/A")
   placeOfBirth     String?  @default("N/A")
   age              String?
   civilStatus      String?  @default("N/A")

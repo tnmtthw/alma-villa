@@ -11,11 +11,11 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 
-import ClaimClearanceButton from './admincomponents/pdfgenerator/ClaimClearance'
-import ClaimResidencyButton from './admincomponents/pdfgenerator/ClaimResidency'
-import ClaimIndigencyButton from './admincomponents/pdfgenerator/ClaimIndigency'
-import ClaimGoodMoralButton from './admincomponents/pdfgenerator/ClaimGoodMoral'
-import ClaimBusinessButton from './admincomponents/pdfgenerator/ClaimBusiness'
+import ClaimClearanceButton from '../../components/admincomponents/pdfgenerator/ClaimClearance'
+import ClaimResidencyButton from '../../components/admincomponents/pdfgenerator/ClaimResidency'
+import ClaimIndigencyButton from '../../components/admincomponents/pdfgenerator/ClaimIndigency'
+import ClaimGoodMoralButton from '../../components/admincomponents/pdfgenerator/ClaimGoodMoral'
+import ClaimBusinessButton from '../../components/admincomponents/pdfgenerator/ClaimBusiness'
 
 const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) =>
   fetch(...args).then((res) => res.json())
@@ -123,6 +123,7 @@ const DocumentStatusTracker = () => {
     age: doc.age,
     birthDate: doc.birthDate,
     placeOfBirth: doc.placeOfBirth,
+    citizenship: doc.citizenship,
     civilStatus: doc.civilStatus,
     houseNumber: doc.houseNumber,
     street: doc.street,

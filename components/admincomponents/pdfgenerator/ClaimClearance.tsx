@@ -12,6 +12,8 @@ interface ClaimClearanceButtonProps {
         age: string
         birthDate: string
         civilStatus: string
+        placeOfBirth: string
+        citizenship: string
         purok: string
         type: string;
         requestDate: string;
@@ -24,15 +26,16 @@ interface ClaimClearanceButtonProps {
 
 const ClaimClearanceButton: React.FC<ClaimClearanceButtonProps> = ({ request }) => {
     const date = new Date(request.requestDate);
-    const month = date.toLocaleString("en-US", { month: "long" }); // e.g., "August"
-    const day = date.getDate(); // e.g., 10
+    const month = date.toLocaleString("en-US", { month: "short" });
+    const day = date.getDate();
 
     const formData = {
         fullName: request.fullName,
         age: request.age,
         birthDate: request.birthDate,
-        "birthPlace": "Philippines",
         civilStatus: request.civilStatus,
+        placeOfBirth: request.placeOfBirth,
+        citizenship: request.citizenship,
         address: request.purok,
         "month": month,
         "day": day,

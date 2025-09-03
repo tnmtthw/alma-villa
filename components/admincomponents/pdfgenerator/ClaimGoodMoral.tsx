@@ -21,12 +21,19 @@ interface ClaimGoodMoralButtonProps {
 
 const ClaimGoodMoralButton: React.FC<ClaimGoodMoralButtonProps> = ({ request }) => {
     const date = new Date(request.requestDate);
-    const month = date.toLocaleString("en-US", { month: "long" }); // e.g., "August"
-    const day = date.getDate(); // e.g., 10
+    const month = date.toLocaleString("en-US", { month: "short" });
+    const day = date.getDate();
+    const birthDate = new Date(request.birthDate);
+    const formattedBirthDate = birthDate.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+    }).replace(/([A-Za-z]+)\s/, "$1. ");
+
 
     const formData = {
         fullName: request.fullName,
-        birthDate: request.birthDate,
+        birthDate: formattedBirthDate,
         placeOfBirth: request.placeOfBirth,
         civilStatus: request.civilStatus,
         age: request.age,

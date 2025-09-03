@@ -21,7 +21,7 @@ interface ClaimBusinessButtonProps {
 
 const ClaimBusinessButton: React.FC<ClaimBusinessButtonProps> = ({ request }) => {
     const date = new Date(request.requestDate);
-    const month = date.toLocaleString("en-US", { month: "long" }); // e.g., "August"
+    const month = date.toLocaleString("en-US", { month: "short" });
     const day = date.getDate();
 
     const updatedDate = new Date(request.updatedAt);

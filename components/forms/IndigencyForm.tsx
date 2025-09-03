@@ -11,6 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Upload, X, FileText } from "lucide-react"
 import { useToast } from "@/components/ui/toast"
 import { useSession } from "next-auth/react"
+import useSWR from 'swr'
+
+const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) => fetch(...args).then((res) => res.json());
 
 interface IndigencyFormProps {
   onSubmit: (formData: any) => void
@@ -36,16 +39,19 @@ const sampleData: FormData = {
 
 
 export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormProps) {
+  const { addToast } = useToast()
+  const { data: session } = useSession()
+  const { data } = useSWR(`/api/user?id=${session?.user.id}`, fetcher)
+
   const [formData, setFormData] = useState<FormData>({
-    fullName: "",
-    age: "",
+    fullName: data.firstName + " " + data.lastName,
+    age: data.age,
     purpose: "",
     attachments: []
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { addToast } = useToast()
-  const { data: session } = useSession()
+
 
   const handleInputChange = (field: keyof FormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }))

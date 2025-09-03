@@ -9,6 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Upload, X, FileText } from "lucide-react"
 import { useToast } from "@/components/ui/toast"
 import { useSession } from "next-auth/react"
+import useSWR from 'swr'
+
+const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) => fetch(...args).then((res) => res.json());
 
 interface GoodMoralFormProps {
   onSubmit: (formData: any) => void
@@ -41,13 +44,17 @@ const sampleData: FormData = {
 }
 
 export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormProps) {
+  const { addToast } = useToast()
+  const { data: session } = useSession()
+  const { data } = useSWR(`/api/user?id=${session?.user.id}`, fetcher)
+
   const [formData, setFormData] = useState<FormData>({
-    fullName: "",
-    dateOfBirth: "",
-    placeOfBirth: "",
-    civilStatus: "",
-    citizenship: "Filipino",
-    residentOf: "",
+    fullName: data.firstName + " " + data.lastName,
+    dateOfBirth: data.birthDate,
+    placeOfBirth: data.placeOfBirth,
+    civilStatus: data.civilStatus,
+    citizenship: data.nationality,
+    residentOf: data.purok,
     purpose: "",
     attachments: []
   })
@@ -64,8 +71,6 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
   }
 
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { addToast } = useToast()
-  const { data: session } = useSession()
 
   const handleInputChange = (field: keyof FormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -117,7 +122,7 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
         placeOfBirth: formData.placeOfBirth,
         age: calculatedAge,
         civilStatus: formData.civilStatus,
-        citenzship: formData.citizenship,
+        citizenship: formData.citizenship,
         purok: formData.residentOf,
         purpose: formData.purpose,
         type: "Certificate of Good Moral Character",
@@ -151,7 +156,7 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
         dateOfBirth: "",
         placeOfBirth: "",
         civilStatus: "",
-        citizenship: "Filipino",
+        citizenship: "",
         residentOf: "",
         purpose: "",
         attachments: []
