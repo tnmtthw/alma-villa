@@ -1,23 +1,20 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import CreateEventModal from "@/components/admincomponents/events/CreateEventModal"
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  Calendar, 
-  Clock, 
+import CreateEventModal from "@/app/admin/events/CreateEventModal"
+import {
+  Plus,
+  Search,
+  Calendar,
+  Clock,
   MapPin,
   Eye,
   Edit,
   Trash2,
-  Settings,
-  Users,
   AlertTriangle,
   Megaphone,
   MoreHorizontal
@@ -37,9 +34,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import useSWR, { mutate } from "swr"
 
 interface Event {
-  id?: number
+  id?: string
   title: string
   excerpt: string
   content?: string
@@ -55,86 +53,13 @@ interface Event {
   updatedAt?: string
 }
 
-const mockEvents: Event[] = [
-  {
-    id: 1,
-    title: "Community Clean-Up Drive This Weekend",
-    excerpt: "Join us for a community-wide clean-up drive this Saturday, June 8th. Let's work together to keep our barangay clean and beautiful.",
-    category: "Event",
-    categoryColor: "bg-green-100 text-green-800",
-    date: "2024-06-08",
-    time: "8:00 AM",
-    location: "Barangay Hall",
-    priority: "normal",
-    status: "published",
-    views: 245,
-    createdAt: "2024-06-05",
-    updatedAt: "2024-06-05"
-  },
-  {
-    id: 2,
-    title: "New Health Services Available at Barangay Health Center",
-    excerpt: "We're excited to announce expanded health services including free blood pressure monitoring, diabetes screening, and maternal care consultations.",
-    category: "Health",
-    categoryColor: "bg-blue-100 text-blue-800",
-    date: "2024-06-03",
-    time: "All Day",
-    location: "Health Center",
-    priority: "important",
-    status: "published",
-    views: 189,
-    createdAt: "2024-06-03",
-    updatedAt: "2024-06-03"
-  },
-  {
-    id: 3,
-    title: "Water Interruption Notice - June 10-11",
-    excerpt: "Scheduled water maintenance will affect Areas 1-3. Please store water in advance. Emergency water supply will be available at the barangay hall.",
-    category: "Notice",
-    categoryColor: "bg-orange-100 text-orange-800",
-    date: "2024-06-10",
-    time: "6:00 AM - 6:00 PM",
-    location: "Areas 1-3",
-    priority: "urgent",
-    status: "published",
-    views: 356,
-    createdAt: "2024-06-08",
-    updatedAt: "2024-06-08"
-  },
-  {
-    id: 4,
-    title: "Senior Citizens Monthly Assembly",
-    excerpt: "All senior citizens are invited to our monthly assembly featuring health talks, recreational activities, and distribution of benefits.",
-    category: "Event",
-    categoryColor: "bg-purple-100 text-purple-800",
-    date: "2024-06-15",
-    time: "2:00 PM",
-    location: "Community Center",
-    priority: "normal",
-    status: "draft",
-    views: 0,
-    createdAt: "2024-06-12",
-    updatedAt: "2024-06-12"
-  },
-  {
-    id: 5,
-    title: "New Online Document Request System Launch",
-    excerpt: "Submit your document requests online! No more long queues. Access our new digital platform for faster, more convenient service.",
-    category: "Announcement",
-    categoryColor: "bg-indigo-100 text-indigo-800",
-    date: "2024-06-01",
-    time: "All Day",
-    location: "Online",
-    priority: "important",
-    status: "published",
-    views: 567,
-    createdAt: "2024-06-01",
-    updatedAt: "2024-06-01"
-  }
-]
+const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) =>
+  fetch(...args).then((res) => res.json())
 
 export default function EventsPage() {
-  const [events, setEvents] = useState<Event[]>(mockEvents)
+  const { data: eventData } = useSWR(`/api/event`, fetcher)
+  const events: Event[] = eventData?.events || []
+
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [categoryFilter, setCategoryFilter] = useState("all")
@@ -143,21 +68,25 @@ export default function EventsPage() {
   const [editingEvent, setEditingEvent] = useState<Event | null>(null)
   const [modalMode, setModalMode] = useState<"create" | "edit">("create")
 
-  const filteredEvents = events.filter(event => {
-    const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         event.excerpt.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = statusFilter === "all" || event.status === statusFilter
-    const matchesCategory = categoryFilter === "all" || event.category === categoryFilter
-    const matchesPriority = priorityFilter === "all" || event.priority === priorityFilter
-    
+  const filteredEvents = events.filter((event) => {
+    const matchesSearch =
+      event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.excerpt.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStatus =
+      statusFilter === "all" || event.status === statusFilter
+    const matchesCategory =
+      categoryFilter === "all" || event.category === categoryFilter
+    const matchesPriority =
+      priorityFilter === "all" || event.priority === priorityFilter
+
     return matchesSearch && matchesStatus && matchesCategory && matchesPriority
   })
 
   const getPriorityIcon = (priority: string) => {
     switch (priority) {
-      case 'urgent':
+      case "urgent":
         return <AlertTriangle className="h-4 w-4 text-red-600" />
-      case 'important':
+      case "important":
         return <Megaphone className="h-4 w-4 text-blue-600" />
       default:
         return <Calendar className="h-4 w-4 text-gray-600" />
@@ -166,28 +95,40 @@ export default function EventsPage() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'published':
-        return <Badge className="bg-green-100 text-green-800 border-green-200">Published</Badge>
-      case 'draft':
-        return <Badge className="bg-gray-100 text-gray-800 border-gray-200">Draft</Badge>
-      case 'archived':
-        return <Badge className="bg-red-100 text-red-800 border-red-200">Archived</Badge>
+      case "published":
+        return (
+          <Badge className="bg-green-100 text-green-800 border-green-200">
+            Published
+          </Badge>
+        )
+      case "draft":
+        return (
+          <Badge className="bg-gray-100 text-gray-800 border-gray-200">
+            Draft
+          </Badge>
+        )
+      case "archived":
+        return (
+          <Badge className="bg-red-100 text-red-800 border-red-200">
+            Archived
+          </Badge>
+        )
       default:
         return null
     }
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     })
   }
 
-  const handleEditEvent = (eventId?: number) => {
+  const handleEditEvent = (eventId?: string) => {
     if (!eventId) return
-    const eventToEdit = events.find(event => event.id === eventId)
+    const eventToEdit = events.find((event) => event.id === eventId)
     if (eventToEdit) {
       setEditingEvent(eventToEdit)
       setModalMode("edit")
@@ -202,38 +143,54 @@ export default function EventsPage() {
   }
 
   const handleSaveEvent = (eventData: Event) => {
-    if (modalMode === "create") {
-      // Add new event
-      setEvents(prev => [eventData, ...prev])
-    } else {
-      // Update existing event
-      setEvents(prev => prev.map(event => 
-        event.id === eventData.id ? eventData : event
-      ))
-    }
+    // TODO: Call API to save event, then revalidate SWR
+    console.log("Saving event:", eventData)
   }
 
-  const handleDeleteEvent = (eventId?: number) => {
+  const handleDeleteEvent = async (eventId?: string) => {
     if (!eventId) return
+
     if (confirm("Are you sure you want to delete this event?")) {
-      setEvents(events.filter(event => event.id !== eventId))
+      try {
+        const res = await fetch(`/api/event?id=${eventId}`, {
+          method: "DELETE",
+        })
+
+        if (!res.ok) throw new Error("Failed to delete event")
+
+        // Revalidate SWR cache so UI updates
+        mutate("/api/event")
+      } catch (error) {
+        console.error("Error deleting event:", error)
+        alert("Failed to delete event")
+      }
     }
   }
 
-  const handleToggleStatus = (eventId?: number) => {
+  const handleToggleStatus = async (eventId?: string, currentStatus?: string) => {
     if (!eventId) return
-    setEvents(events.map(event => 
-      event.id === eventId 
-        ? { ...event, status: event.status === "published" ? "draft" : "published" }
-        : event
-    ))
+    try {
+      const newStatus = currentStatus === "published" ? "draft" : "published"
+      const res = await fetch(`/api/event?id=${eventId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      })
+      if (!res.ok) throw new Error("Failed to toggle status")
+      mutate("/api/event")
+    } catch (error) {
+      console.error("Error toggling status:", error)
+      alert("Failed to toggle status")
+    }
   }
+
+
 
   const stats = {
     total: events.length,
-    published: events.filter(e => e.status === "published").length,
-    draft: events.filter(e => e.status === "draft").length,
-    urgent: events.filter(e => e.priority === "urgent").length
+    published: events.filter((e) => e.status === "published").length,
+    draft: events.filter((e) => e.status === "draft").length,
+    urgent: events.filter((e) => e.priority === "urgent").length,
   }
 
   return (
@@ -241,10 +198,14 @@ export default function EventsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Events & Announcements</h1>
-          <p className="text-gray-600 mt-1 text-sm md:text-base">Manage homepage announcements, events, and notices</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+            Events & Announcements
+          </h1>
+          <p className="text-gray-600 mt-1 text-sm md:text-base">
+            Manage homepage announcements, events, and notices
+          </p>
         </div>
-        <Button 
+        <Button
           onClick={handleCreateEvent}
           className="bg-[#23479A] hover:bg-[#23479A]/90 w-full sm:w-auto"
         >
@@ -259,8 +220,12 @@ export default function EventsPage() {
           <CardContent className="p-3 md:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs md:text-sm font-medium text-gray-600">Total Events</p>
-                <p className="text-lg md:text-2xl font-bold text-gray-900">{stats.total}</p>
+                <p className="text-xs md:text-sm font-medium text-gray-600">
+                  Total Events
+                </p>
+                <p className="text-lg md:text-2xl font-bold text-gray-900">
+                  {stats.total}
+                </p>
               </div>
               <Calendar className="h-6 w-6 md:h-8 md:w-8 text-blue-600" />
             </div>
@@ -271,8 +236,12 @@ export default function EventsPage() {
           <CardContent className="p-3 md:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs md:text-sm font-medium text-gray-600">Published</p>
-                <p className="text-lg md:text-2xl font-bold text-green-600">{stats.published}</p>
+                <p className="text-xs md:text-sm font-medium text-gray-600">
+                  Published
+                </p>
+                <p className="text-lg md:text-2xl font-bold text-green-600">
+                  {stats.published}
+                </p>
               </div>
               <Eye className="h-6 w-6 md:h-8 md:w-8 text-green-600" />
             </div>
@@ -283,8 +252,12 @@ export default function EventsPage() {
           <CardContent className="p-3 md:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs md:text-sm font-medium text-gray-600">Drafts</p>
-                <p className="text-lg md:text-2xl font-bold text-gray-600">{stats.draft}</p>
+                <p className="text-xs md:text-sm font-medium text-gray-600">
+                  Drafts
+                </p>
+                <p className="text-lg md:text-2xl font-bold text-gray-600">
+                  {stats.draft}
+                </p>
               </div>
               <Edit className="h-6 w-6 md:h-8 md:w-8 text-gray-600" />
             </div>
@@ -295,8 +268,12 @@ export default function EventsPage() {
           <CardContent className="p-3 md:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs md:text-sm font-medium text-gray-600">Urgent</p>
-                <p className="text-lg md:text-2xl font-bold text-red-600">{stats.urgent}</p>
+                <p className="text-xs md:text-sm font-medium text-gray-600">
+                  Urgent
+                </p>
+                <p className="text-lg md:text-2xl font-bold text-red-600">
+                  {stats.urgent}
+                </p>
               </div>
               <AlertTriangle className="h-6 w-6 md:h-8 md:w-8 text-red-600" />
             </div>
@@ -347,7 +324,10 @@ export default function EventsPage() {
                 </SelectContent>
               </Select>
 
-              <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+              <Select
+                value={priorityFilter}
+                onValueChange={setPriorityFilter}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Priority" />
                 </SelectTrigger>
@@ -379,22 +359,31 @@ export default function EventsPage() {
                   <div className="flex-1 space-y-2 min-w-0">
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                        <h3 className="font-semibold text-gray-900 text-base md:text-lg">{event.title}</h3>
+                        <h3 className="font-semibold text-gray-900 text-base md:text-lg">
+                          {event.title}
+                        </h3>
                         <div className="flex items-center gap-2">
                           {getStatusBadge(event.status)}
-                          <Badge variant="outline" className={`${event.categoryColor} border-transparent text-xs`}>
+                          <Badge
+                            variant="outline"
+                            className={`${event.categoryColor} border-transparent text-xs`}
+                          >
                             {event.category}
                           </Badge>
                         </div>
                       </div>
                     </div>
 
-                    <p className="text-gray-600 text-xs md:text-sm leading-relaxed">{event.excerpt}</p>
+                    <p className="text-gray-600 text-xs md:text-sm leading-relaxed">
+                      {event.excerpt}
+                    </p>
 
                     <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-4 md:gap-6 text-xs md:text-sm text-gray-500">
                       <div className="flex items-center gap-1">
                         <Calendar className="h-3 w-3 md:h-4 md:w-4" />
-                        <span className="truncate">{formatDate(event.date)}</span>
+                        <span className="truncate">
+                          {formatDate(event.date)}
+                        </span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Clock className="h-3 w-3 md:h-4 md:w-4" />
@@ -426,12 +415,12 @@ export default function EventsPage() {
                         <Edit className="h-4 w-4 mr-2" />
                         Edit
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleToggleStatus(event.id)}>
+                      <DropdownMenuItem onClick={() => handleToggleStatus(event.id, event.status)}>
                         <Eye className="h-4 w-4 mr-2" />
                         {event.status === "published" ? "Unpublish" : "Publish"}
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         onClick={() => handleDeleteEvent(event.id)}
                         className="text-red-600"
                       >
@@ -452,22 +441,29 @@ export default function EventsPage() {
         <Card className="p-12">
           <div className="text-center">
             <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No events found</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No events found
+            </h3>
             <p className="text-gray-500 mb-4">
-              {searchTerm || statusFilter !== "all" || categoryFilter !== "all" || priorityFilter !== "all"
+              {searchTerm ||
+                statusFilter !== "all" ||
+                categoryFilter !== "all" ||
+                priorityFilter !== "all"
                 ? "Try adjusting your search or filters"
-                : "Get started by creating your first event or announcement"
-              }
+                : "Get started by creating your first event or announcement"}
             </p>
-            {!searchTerm && statusFilter === "all" && categoryFilter === "all" && priorityFilter === "all" && (
-              <Button 
-                onClick={handleCreateEvent}
-                className="bg-[#23479A] hover:bg-[#23479A]/90"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Create Your First Event
-              </Button>
-            )}
+            {!searchTerm &&
+              statusFilter === "all" &&
+              categoryFilter === "all" &&
+              priorityFilter === "all" && (
+                <Button
+                  onClick={handleCreateEvent}
+                  className="bg-[#23479A] hover:bg-[#23479A]/90"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Your First Event
+                </Button>
+              )}
           </div>
         </Card>
       )}
@@ -485,4 +481,4 @@ export default function EventsPage() {
       />
     </div>
   )
-} 
+}

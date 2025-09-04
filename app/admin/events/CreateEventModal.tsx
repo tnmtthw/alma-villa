@@ -21,22 +21,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { 
-  Calendar, 
-  Clock, 
-  MapPin, 
-  AlertTriangle, 
-  Save, 
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  AlertTriangle,
+  Save,
   X,
   Eye,
-  EyeOff 
+  EyeOff
 } from "lucide-react"
 
 interface Event {
-  id?: number
+  id?: string
   title: string
   excerpt: string
-  content?: string
   category: string
   categoryColor: string
   date: string
@@ -82,7 +81,6 @@ export default function CreateEventModal({
   const [formData, setFormData] = useState<Event>({
     title: "",
     excerpt: "",
-    content: "",
     category: "Event",
     categoryColor: "bg-green-100 text-green-800",
     date: "",
@@ -105,7 +103,6 @@ export default function CreateEventModal({
         setFormData({
           title: "",
           excerpt: "",
-          content: "",
           category: "Event",
           categoryColor: "bg-green-100 text-green-800",
           date: "",
@@ -122,7 +119,7 @@ export default function CreateEventModal({
   const handleInputChange = (field: keyof Event, value: string) => {
     setFormData(prev => {
       const updated = { ...prev, [field]: value }
-      
+
       // Update category color when category changes
       if (field === "category") {
         const categoryOption = categoryOptions.find(opt => opt.value === value)
@@ -130,10 +127,10 @@ export default function CreateEventModal({
           updated.categoryColor = categoryOption.color
         }
       }
-      
+
       return updated
     })
-    
+
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: "" }))
@@ -167,6 +164,8 @@ export default function CreateEventModal({
     return Object.keys(newErrors).length === 0
   }
 
+
+
   const handleSave = async (status: "draft" | "published") => {
     if (!validateForm()) return
 
@@ -176,28 +175,41 @@ export default function CreateEventModal({
       const eventToSave: Event = {
         ...formData,
         status,
-        updatedAt: new Date().toISOString()
       }
+
+      let savedEvent: Event
 
       if (mode === "create") {
-        eventToSave.id = Date.now() // Simple ID generation for demo
-        eventToSave.createdAt = new Date().toISOString()
-        eventToSave.views = 0
+        const res = await fetch("/api/event", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(eventToSave),
+        })
+
+        if (!res.ok) throw new Error("Failed to create event")
+        savedEvent = await res.json()
+      } else {
+        const res = await fetch(`/api/event?id=${event?.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(eventToSave),
+        })
+
+        if (!res.ok) throw new Error("Failed to update event")
+        savedEvent = await res.json()
       }
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      onSave(eventToSave)
+      onSave(savedEvent)
       onClose()
     } catch (error) {
       console.error("Error saving event:", error)
-      // Handle error (you could show a toast notification)
+      // TODO: Show toast or alert if needed
     } finally {
       setIsSaving(false)
     }
   }
 
+  // Get category color for preview badge
   const getCategoryColor = (category: string) => {
     const categoryOption = categoryOptions.find(opt => opt.value === category)
     return categoryOption?.color || "bg-gray-100 text-gray-800"
@@ -212,7 +224,7 @@ export default function CreateEventModal({
             {mode === "create" ? "Create New Event" : "Edit Event"}
           </DialogTitle>
           <DialogDescription className="text-sm md:text-base">
-            {mode === "create" 
+            {mode === "create"
               ? "Create a new event or announcement for the homepage"
               : "Edit the event details and content"
             }
@@ -357,22 +369,6 @@ export default function CreateEventModal({
             )}
           </div>
 
-          {/* Full Content (Optional) */}
-          <div className="space-y-2">
-            <Label htmlFor="content" className="text-sm font-medium">Full Content (Optional)</Label>
-            <Textarea
-              id="content"
-              value={formData.content || ""}
-              onChange={(e) => handleInputChange("content", e.target.value)}
-              placeholder="Detailed information about the event (optional)..."
-              rows={4}
-              className="text-sm"
-            />
-            <p className="text-xs text-gray-500">
-              Additional details that can be shown in expanded view
-            </p>
-          </div>
-
           {/* Preview */}
           <div className="space-y-2">
             <Label>Preview</Label>
@@ -383,11 +379,10 @@ export default function CreateEventModal({
                     {formData.category}
                   </Badge>
                   {formData.priority !== "normal" && (
-                    <Badge variant="outline" className={`${
-                      formData.priority === "urgent" 
-                        ? "bg-red-100 text-red-800" 
-                        : "bg-blue-100 text-blue-800"
-                    } border-transparent text-xs`}>
+                    <Badge variant="outline" className={`${formData.priority === "urgent"
+                      ? "bg-red-100 text-red-800"
+                      : "bg-blue-100 text-blue-800"
+                      } border-transparent text-xs`}>
                       {formData.priority}
                     </Badge>
                   )}
