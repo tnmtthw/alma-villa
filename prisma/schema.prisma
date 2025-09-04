@@ -15,7 +15,6 @@ model User {
   suffix           String?
   birthDate        String?
   age              String?
-  placeOfBirth     String?
   gender           String?
   civilStatus      String?
   nationality      String?
@@ -43,6 +42,7 @@ model User {
   lockedUntil      DateTime?
   resetToken       String?    @unique
   createdAt        DateTime   @default(now())
+  placeOfBirth     String?
   document         Document[]
 }
 
@@ -52,7 +52,6 @@ model Document {
   fullName         String?
   suffix           String?
   birthDate        String?
-  citizenship      String?  @default("N/A")
   placeOfBirth     String?  @default("N/A")
   age              String?
   civilStatus      String?  @default("N/A")
@@ -68,5 +67,6 @@ model Document {
   businessLocation String?  @default("N/A")
   operatorName     String?  @default("N/A")
   operatorAddress  String?  @default("N/A")
+  citizenship      String?  @default("N/A")
   user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
