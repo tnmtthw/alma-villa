@@ -25,9 +25,11 @@ import {
   Calendar,
   Clock,
   MapPin,
+  AlertTriangle,
   Save,
+  X,
   Eye,
-  Image as ImageIcon
+  EyeOff
 } from "lucide-react"
 
 interface Event {
@@ -41,7 +43,7 @@ interface Event {
   location: string
   priority: "normal" | "important" | "urgent"
   status: "published" | "draft" | "archived"
-  image?: string
+  views?: number
   createdAt?: string
   updatedAt?: string
 }
@@ -85,22 +87,19 @@ export default function CreateEventModal({
     time: "",
     location: "",
     priority: "normal",
-    status: "draft",
-    image: ""
+    status: "draft"
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSaving, setIsSaving] = useState(false)
-  const [uploading, setUploading] = useState(false)
-  const [previewImage, setPreviewImage] = useState<string | null>(null)
 
   // Reset form when modal opens/closes or event changes
   useEffect(() => {
     if (isOpen) {
       if (mode === "edit" && event) {
         setFormData(event)
-        setPreviewImage(event.image || null)
       } else {
+        // Reset to default values for create mode
         setFormData({
           title: "",
           excerpt: "",
@@ -110,10 +109,8 @@ export default function CreateEventModal({
           time: "",
           location: "",
           priority: "normal",
-          status: "draft",
-          image: ""
+          status: "draft"
         })
-        setPreviewImage(null)
       }
       setErrors({})
     }
@@ -122,61 +119,62 @@ export default function CreateEventModal({
   const handleInputChange = (field: keyof Event, value: string) => {
     setFormData(prev => {
       const updated = { ...prev, [field]: value }
+
+      // Update category color when category changes
       if (field === "category") {
         const categoryOption = categoryOptions.find(opt => opt.value === value)
         if (categoryOption) {
           updated.categoryColor = categoryOption.color
         }
       }
+
       return updated
     })
+
+    // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: "" }))
     }
   }
 
-  const handleImageUpload = async (file: File) => {
-    setUploading(true)
-    try {
-      const formData = new FormData()
-      formData.append("file", file)
-
-      // Define filename separately
-      const filename = `AlmaVilla/events/${file.name}`
-
-      const res = await fetch(`/api/upload?filename=${encodeURIComponent(filename)}`, {
-        method: "POST",
-        body: formData,
-      })
-
-      if (!res.ok) throw new Error("Failed to upload image")
-      const data = await res.json()
-
-      setFormData(prev => ({ ...prev, image: data.url }))
-      setPreviewImage(data.url)
-    } catch (error) {
-      console.error("Upload error:", error)
-    } finally {
-      setUploading(false)
-    }
-  }
-
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
-    if (!formData.title.trim()) newErrors.title = "Title is required"
-    if (!formData.excerpt.trim()) newErrors.excerpt = "Excerpt is required"
-    if (!formData.date) newErrors.date = "Date is required"
-    if (!formData.time.trim()) newErrors.time = "Time is required"
-    if (!formData.location.trim()) newErrors.location = "Location is required"
+
+    if (!formData.title.trim()) {
+      newErrors.title = "Title is required"
+    }
+
+    if (!formData.excerpt.trim()) {
+      newErrors.excerpt = "Excerpt is required"
+    }
+
+    if (!formData.date) {
+      newErrors.date = "Date is required"
+    }
+
+    if (!formData.time.trim()) {
+      newErrors.time = "Time is required"
+    }
+
+    if (!formData.location.trim()) {
+      newErrors.location = "Location is required"
+    }
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
   const handleSave = async (status: "draft" | "published") => {
     if (!validateForm()) return
+
     setIsSaving(true)
+
     try {
-      const eventToSave: Event = { ...formData, status }
+      const eventToSave: Event = {
+        ...formData,
+        status,
+      }
+
       let savedEvent: Event
 
       if (mode === "create") {
@@ -185,6 +183,7 @@ export default function CreateEventModal({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(eventToSave),
         })
+
         if (!res.ok) throw new Error("Failed to create event")
         savedEvent = await res.json()
       } else {
@@ -193,18 +192,22 @@ export default function CreateEventModal({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(eventToSave),
         })
+
         if (!res.ok) throw new Error("Failed to update event")
         savedEvent = await res.json()
       }
+
       onSave(savedEvent)
       onClose()
     } catch (error) {
       console.error("Error saving event:", error)
+      // TODO: Show toast or alert if needed
     } finally {
       setIsSaving(false)
     }
   }
 
+  // Get category color for preview badge
   const getCategoryColor = (category: string) => {
     const categoryOption = categoryOptions.find(opt => opt.value === category)
     return categoryOption?.color || "bg-gray-100 text-gray-800"
@@ -221,7 +224,8 @@ export default function CreateEventModal({
           <DialogDescription className="text-sm md:text-base">
             {mode === "create"
               ? "Create a new event or announcement for the homepage"
-              : "Edit the event details and content"}
+              : "Edit the event details and content"
+            }
           </DialogDescription>
         </DialogHeader>
 
@@ -238,24 +242,6 @@ export default function CreateEventModal({
             />
             {errors.title && (
               <p className="text-xs text-red-600">{errors.title}</p>
-            )}
-          </div>
-
-          {/* Event Image */}
-          <div className="space-y-2">
-            <Label htmlFor="image" className="text-sm font-medium">Event Image</Label>
-            <Input
-              id="image"
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0]
-                if (file) handleImageUpload(file)
-              }}
-            />
-            {uploading && <p className="text-xs text-gray-500">Uploading...</p>}
-            {previewImage && (
-              <img src={previewImage} alt="Preview" className="mt-2 h-32 rounded-md object-cover" />
             )}
           </div>
 
@@ -416,17 +402,55 @@ export default function CreateEventModal({
         </div>
 
         <DialogFooter className="flex flex-col sm:flex-row gap-2 pt-4">
-          <Button variant="outline" onClick={onClose} disabled={isSaving} className="w-full sm:w-auto">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            disabled={isSaving}
+            className="w-full sm:w-auto order-3 sm:order-1"
+          >
             Cancel
           </Button>
-          <Button variant="outline" onClick={() => handleSave("draft")} disabled={isSaving} className="w-full sm:w-auto">
-            {isSaving ? "Saving..." : "Save Draft"}
+          <Button
+            variant="outline"
+            onClick={() => handleSave("draft")}
+            disabled={isSaving}
+            className="w-full sm:w-auto order-2"
+          >
+            {isSaving ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-gray-600 mr-2" />
+                <span className="hidden sm:inline">Saving...</span>
+                <span className="sm:hidden">Saving Draft...</span>
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Save as Draft</span>
+                <span className="sm:hidden">Save Draft</span>
+              </>
+            )}
           </Button>
-          <Button onClick={() => handleSave("published")} disabled={isSaving} className="bg-[#23479A] hover:bg-[#23479A]/90 w-full sm:w-auto">
-            {isSaving ? "Publishing..." : "Publish"}
+          <Button
+            onClick={() => handleSave("published")}
+            disabled={isSaving}
+            className="bg-[#23479A] hover:bg-[#23479A]/90 w-full sm:w-auto order-1 sm:order-3"
+          >
+            {isSaving ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                <span className="hidden sm:inline">Publishing...</span>
+                <span className="sm:hidden">Publishing...</span>
+              </>
+            ) : (
+              <>
+                <Eye className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Publish Now</span>
+                <span className="sm:hidden">Publish</span>
+              </>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   )
-}
+} 
