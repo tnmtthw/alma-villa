@@ -1,27 +1,89 @@
+"use client"
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Home, ArrowLeft, Search, FileText, Phone, Mail } from "lucide-react"
+import { useSession } from "next-auth/react"
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 
 export default function NotFound() {
+  const { data: session } = useSession()
+  const router = useRouter()
+  const [canGoBack, setCanGoBack] = useState(false)
+
+  useEffect(() => {
+    // Check if user can go back in browser history
+    setCanGoBack(window.history.length > 1)
+  }, [])
+
+  const handleGoHome = () => {
+    if (session) {
+      // If user is signed in, try to go back to previous page
+      if (canGoBack) {
+        router.back()
+      } else {
+        // If no history, go to dashboard
+        router.push('/dashboard')
+      }
+    } else {
+      // If not signed in, go to home page
+      router.push('/')
+    }
+  }
+
+  const handleServicesClick = () => {
+    if (session) {
+      // If signed in, go to services page
+      router.push('/services')
+    } else {
+      // If not signed in, go to homepage and scroll to services section
+      router.push('/')
+      // Small delay to ensure page loads before scrolling
+      setTimeout(() => {
+        const servicesSection = document.getElementById('services-section')
+        if (servicesSection) {
+          servicesSection.scrollIntoView({ behavior: 'smooth' })
+        }
+      }, 100)
+    }
+  }
+
+  const handleContactClick = () => {
+    if (session) {
+      // If signed in, go to contact page
+      router.push('/contact')
+    } else {
+      // If not signed in, go to homepage and scroll to footer
+      router.push('/')
+      // Small delay to ensure page loads before scrolling
+      setTimeout(() => {
+        const footerSection = document.getElementById('footer')
+        if (footerSection) {
+          footerSection.scrollIntoView({ behavior: 'smooth' })
+        }
+      }, 100)
+    }
+  }
   const quickLinks = [
     {
-      title: "Go Home",
-      description: "Return to homepage",
-      href: "/",
-      icon: Home,
+      title: session ? "Go Back" : "Go Home",
+      description: session ? "Return to previous page" : "Return to homepage",
+      onClick: handleGoHome,
+      icon: session ? ArrowLeft : Home,
       color: "bg-blue-500 hover:bg-blue-600"
     },
     {
       title: "Services",
       description: "View our services",
-      href: "/services",
+      onClick: handleServicesClick,
       icon: FileText,
       color: "bg-emerald-500 hover:bg-emerald-600"
     },
     {
       title: "Contact Us",
       description: "Get in touch",
-      href: "/contact",
+      onClick: handleContactClick,
       icon: Phone,
       color: "bg-purple-500 hover:bg-purple-600"
     }
@@ -89,7 +151,7 @@ export default function NotFound() {
             {quickLinks.map((link, index) => {
               const Icon = link.icon
               return (
-                <Link key={index} href={link.href}>
+                <button key={index} onClick={link.onClick} className="w-full">
                   <div className="group bg-white/80 backdrop-blur-sm hover:bg-white border border-white/50 hover:border-white/80 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                     <div className={`inline-flex items-center justify-center w-12 h-12 ${link.color} text-white rounded-xl mb-4 group-hover:scale-110 transition-transform duration-300`}>
                       <Icon className="h-6 w-6" />
@@ -97,7 +159,7 @@ export default function NotFound() {
                     <h4 className="text-lg font-semibold text-gray-900 mb-2">{link.title}</h4>
                     <p className="text-sm text-gray-600">{link.description}</p>
                   </div>
-                </Link>
+                </button>
               )
             })}
           </div>
@@ -106,26 +168,26 @@ export default function NotFound() {
         {/* Navigation Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
           <Button
-            asChild
+            onClick={handleGoHome}
             size="lg"
             className="bg-[#23479A] hover:bg-[#23479A]/90 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
           >
-            <Link href="/" className="flex items-center gap-2">
-              <Home className="h-5 w-5" />
-              Back to Homepage
-            </Link>
+            <div className="flex items-center gap-2">
+              {session ? <ArrowLeft className="h-5 w-5" /> : <Home className="h-5 w-5" />}
+              {session ? "Go Back" : "Back to Homepage"}
+            </div>
           </Button>
           
           <Button
-            asChild
+            onClick={handleServicesClick}
             variant="outline"
             size="lg"
             className="border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10 px-8 py-3 rounded-xl font-semibold"
           >
-            <Link href="/services" className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <Search className="h-5 w-5" />
               Browse Services
-            </Link>
+            </div>
           </Button>
         </div>
 

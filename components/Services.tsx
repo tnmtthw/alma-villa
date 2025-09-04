@@ -28,7 +28,7 @@ const Services = () => {
   const { elementRef: sectionRef, isVisible: sectionVisible } = useScrollAnimation<HTMLElement>({ threshold: 0.1 })
 
   return (
-    <section ref={sectionRef} className="relative -mt-28 px-4">
+    <section id="services-section" ref={sectionRef} className="relative -mt-28 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((service, index) => (

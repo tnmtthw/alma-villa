@@ -24,7 +24,6 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   FileText,
-  History,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -34,6 +33,7 @@ import {
   HelpCircle,
   Moon,
   ChevronDown,
+  ListChecks,
 } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
@@ -57,11 +57,7 @@ const navigationItems: NavigationItem[] = [
     label: "Request",
     href: "/dashboard/request",
   },
-  {
-    icon: History,
-    label: "History",
-    href: "/history",
-  },
+ 
   {
     icon: Newspaper,
     label: "News",
@@ -70,7 +66,12 @@ const navigationItems: NavigationItem[] = [
   {
     icon: FileText,
     label: "Forms",
-    href: "/forms",
+    href: "/dashboard/Download",
+  },
+  {
+    icon: ListChecks,
+    label: "Track Requests",
+    href: "/dashboard/track",
   },
 ]
 

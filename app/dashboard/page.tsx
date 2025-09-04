@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link"
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { FileText, History, MessageSquare, Bell, Plus, ChevronRight, TrendingUp, Clock, CheckCircle, ArrowUpRight, Activity, Calendar, Users, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -103,16 +104,8 @@ const quickActions = [
     title: "Download Forms",
     description: "Printable application forms",
     icon: FileText,
-    href: "/forms",
+    href: "dashboard/Download",
     color: "bg-gradient-to-br from-emerald-500 to-emerald-600",
-    textColor: "text-white"
-  },
-  {
-    title: "View History",
-    description: "Track your submissions",
-    icon: History,
-    href: "/history",
-    color: "bg-gradient-to-br from-purple-500 to-purple-600",
     textColor: "text-white"
   },
   {
@@ -152,6 +145,7 @@ const upcomingEvents = [
 const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) => fetch(...args).then((res) => res.json());
 
 export default function DashboardPage() {
+  const [isSupportOpen, setIsSupportOpen] = useState(false)
   const { data: session } = useSession()
 
   const { data } = useSWR(`/api/user?id=${session?.user.id}`, fetcher)
@@ -236,8 +230,9 @@ export default function DashboardPage() {
             {stats.map((stat) => {
               const Icon = stat.icon
               return (
-                <Card key={stat.title} className={`bg-white/95 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${stat.borderColor} border-l-4`}>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 sm:pb-3 pt-4 sm:pt-6 px-4 sm:px-6">
+                <Link key={stat.title} href="/dashboard/track">
+                  <Card className={`bg-white/95 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${stat.borderColor} border-l-4 cursor-pointer`}>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 sm:pb-3 pt-4 sm:pt-6 px-4 sm:px-6">
                     <div className="space-y-1 min-w-0 flex-1">
                       <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 truncate">
                         {stat.title}
@@ -252,12 +247,13 @@ export default function DashboardPage() {
                     <div className={`p-2 sm:p-3 rounded-xl ${stat.bgColor} ring-2 ring-white shadow-sm flex-shrink-0`}>
                       <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${stat.color}`} />
                     </div>
-                  </CardHeader>
-                  <CardContent className="pb-4 sm:pb-6 px-4 sm:px-6">
-                    <p className="text-xs text-gray-500 mb-1">{stat.change}</p>
-                    <p className="text-xs sm:text-sm text-gray-600 leading-tight">{stat.description}</p>
-                  </CardContent>
-                </Card>
+                    </CardHeader>
+                    <CardContent className="pb-4 sm:pb-6 px-4 sm:px-6">
+                      <p className="text-xs text-gray-500 mb-1">{stat.change}</p>
+                      <p className="text-xs sm:text-sm text-gray-600 leading-tight">{stat.description}</p>
+                    </CardContent>
+                  </Card>
+                </Link>
               )
             })}
           </div>
@@ -375,7 +371,7 @@ export default function DashboardPage() {
                 <p className="text-sm sm:text-base text-gray-600">Access frequently used services</p>
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {quickActions.map((action, index) => {
                 const Icon = action.icon
                 return (
@@ -411,21 +407,39 @@ export default function DashboardPage() {
                   <Button
                     variant="secondary"
                     size="lg"
+                    onClick={() => setIsSupportOpen(true)}
                     className="bg-white text-[#23479A] hover:bg-gray-100 font-semibold px-6 sm:px-8 w-full sm:w-auto"
                   >
                     Contact Support
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="border-white text-white hover:bg-white/10 font-semibold px-6 sm:px-8 w-full sm:w-auto"
-                  >
-                    View Guide
                   </Button>
                 </div>
               </div>
             </CardContent>
           </Card>
+          {isSupportOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center">
+              <div className="absolute inset-0 bg-black/50" onClick={() => setIsSupportOpen(false)} />
+              <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-lg font-semibold text-gray-900">Contact Support</h4>
+                  <button onClick={() => setIsSupportOpen(false)} className="text-gray-500 hover:text-gray-700">✕</button>
+                </div>
+                <div className="space-y-3 text-gray-700">
+                  <div>
+                    <p className="text-sm text-gray-500">Phone</p>
+                    <p className="font-medium">+63 9355 0384 27</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Email</p>
+                    <p className="font-medium">almavilla.gloria@gmail.com</p>
+                  </div>
+                </div>
+                <div className="mt-6 flex justify-end gap-2">
+                  <Button variant="outline" className="px-4" onClick={() => setIsSupportOpen(false)}>Close</Button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </main>

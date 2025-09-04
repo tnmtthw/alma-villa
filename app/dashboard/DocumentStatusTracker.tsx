@@ -2,6 +2,7 @@
 
 
 import { Eye, Clock, CheckCircle, AlertCircle, FileText, Calendar } from "lucide-react"
+import Link from "next/link"
 import { useSession } from "next-auth/react"
 import useSWR from 'swr'
 
@@ -168,11 +169,12 @@ const DocumentStatusTracker = () => {
             </CardDescription>
           </div>
           <Button
+            asChild
             variant="outline"
             size="sm"
             className="text-gray-500 hover:text-[#23479A] border-gray-200 hover:border-[#23479A]/20 hover:bg-[#23479A]/5 w-full sm:w-auto"
           >
-            View All Requests
+            <Link href="/dashboard/track">View All Requests</Link>
           </Button>
         </div>
       </CardHeader>

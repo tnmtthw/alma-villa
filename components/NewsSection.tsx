@@ -1,6 +1,7 @@
 "use client"
 import React, { useMemo, useState } from "react"
 import { Calendar, Clock, ArrowRight, Megaphone, AlertTriangle, MapPin } from 'lucide-react'
+import SignInModal from './SignInModal'
 
 type NewsItem = {
   id: string
@@ -77,6 +78,7 @@ const getPriorityBadge = (priority: string) => {
 export default function DashboardNewsPage() {
   const [query, setQuery] = useState("")
   const [activeCategory, setActiveCategory] = useState<typeof categories[number]>("All")
+  const [isSignInModalOpen, setIsSignInModalOpen] = useState(false)
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -96,8 +98,16 @@ export default function DashboardNewsPage() {
     })
   }
 
+  const handleReadMoreClick = () => {
+    setIsSignInModalOpen(true)
+  }
+
+  const handleViewAllClick = () => {
+    setIsSignInModalOpen(true)
+  }
+
   return (
-    <div className="pb-10">
+    <div id="news-section" className="pb-10">
       {/* Hero Head */}
       <section className="relative bg-[#23479A]">
         <div
@@ -209,7 +219,10 @@ export default function DashboardNewsPage() {
                 </p>
 
                 {/* Read More Button */}
-                <button className="inline-flex items-center px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-[#23479A] hover:text-white hover:border-[#23479A] transition-all duration-200">
+                <button 
+                  onClick={handleReadMoreClick}
+                  className="inline-flex items-center px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-[#23479A] hover:text-white hover:border-[#23479A] transition-all duration-200"
+                >
                   Read More
                   <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </button>
@@ -250,7 +263,10 @@ export default function DashboardNewsPage() {
 
         {/* View All Button */}
         <div className="text-center mb-8 sm:mb-12">
-          <button className="inline-flex items-center px-6 sm:px-8 py-3 bg-[#23479A] hover:bg-[#23479A]/90 text-white rounded-lg font-medium transition-colors text-sm sm:text-base">
+          <button 
+            onClick={handleViewAllClick}
+            className="inline-flex items-center px-6 sm:px-8 py-3 bg-[#23479A] hover:bg-[#23479A]/90 text-white rounded-lg font-medium transition-colors text-sm sm:text-base"
+          >
             View All News & Announcements
             <ArrowRight className="h-4 w-4 ml-2" />
           </button>
@@ -278,6 +294,12 @@ export default function DashboardNewsPage() {
           </div>
         </div>
       </div>
+
+      {/* Sign In Modal */}
+      <SignInModal 
+        isOpen={isSignInModalOpen} 
+        onClose={() => setIsSignInModalOpen(false)} 
+      />
     </div>
   )
 }

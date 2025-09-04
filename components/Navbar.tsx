@@ -37,6 +37,34 @@ const Navbar = () => {
     }
   }
 
+  const handleNewsClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (pathname === "/") {
+      e.preventDefault()
+      const newsSection = document.getElementById('news-section')
+      if (newsSection) {
+        newsSection.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        })
+      }
+    }
+    // If not on homepage, let the default link behavior work
+  }
+
+  const handleServicesClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (pathname === "/") {
+      e.preventDefault()
+      const servicesSection = document.getElementById('services-section')
+      if (servicesSection) {
+        servicesSection.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        })
+      }
+    }
+    // If not on homepage, let the default link behavior work
+  }
+
   if (isDashboard) {
     return null
   }
@@ -82,6 +110,11 @@ const Navbar = () => {
                   <Link
                     key={item.href}
                     href={item.href}
+                    onClick={
+                      item.label === "News" ? handleNewsClick : 
+                      item.label === "Services" ? handleServicesClick : 
+                      undefined
+                    }
                     className="flex items-center px-3 py-3 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-[#23479A] transition-colors duration-200 w-full"
                   >
                     <item.icon className="mr-3 h-5 w-5" />
@@ -126,6 +159,11 @@ const Navbar = () => {
             <Link
               key={item.label}
               href={item.href}
+              onClick={
+                item.label === "News" ? handleNewsClick : 
+                item.label === "Services" ? handleServicesClick : 
+                undefined
+              }
               className="text-sm font-medium transition-colors hover:text-[#23479A]"
             >
               {item.label}
