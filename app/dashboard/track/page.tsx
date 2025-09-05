@@ -1,46 +1,43 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Download, Filter, Search, XCircle, CheckCircle2, Clock, Eye, FileText } from "lucide-react";
+import { Download, Filter, Search } from "lucide-react";
 
-type RequestStatus = "pending" | "review" | "processing" | "payment" | "ready" | "completed" | "declined" | "cancelled";
+// Import components
+import Modal from "./components/Modal";
+import RequestCard from "./components/RequestCard";
+import RequestTableRow from "./components/RequestTableRow";
+import { getStatusConfig } from "./components/StatusBadge";
 
-type RequestItem = {
-  id: string;
-  documentType: string;
-  reference: string;
-  requestedAt: string; // ISO
-  status: RequestStatus;
-};
+// Import hooks
+import { useModal } from "./hooks/useModal";
+import { useRequestActions } from "./hooks/useRequestActions";
 
-const seedRequests: RequestItem[] = [
-  { id: "1", documentType: "Barangay Clearance", reference: "AV-BC-000123", requestedAt: "2025-08-01T09:00:00Z", status: "pending" },
-  { id: "2", documentType: "Business Permit", reference: "AV-BP-000089", requestedAt: "2025-07-29T11:30:00Z", status: "review" },
-  { id: "3", documentType: "Certificate of Residency", reference: "AV-CR-000234", requestedAt: "2025-07-25T14:10:00Z", status: "processing" },
-  { id: "4", documentType: "Certificate of Indigency", reference: "AV-CI-000312", requestedAt: "2025-07-20T08:20:00Z", status: "payment" },
-  { id: "5", documentType: "Good Moral Certificate", reference: "AV-GM-000077", requestedAt: "2025-07-18T16:45:00Z", status: "ready" },
-  { id: "6", documentType: "Barangay Clearance", reference: "AV-BC-000098", requestedAt: "2025-07-10T10:05:00Z", status: "completed" },
-];
+// Import types and constants
+import { RequestStatus, RequestItem } from "./types";
+import { seedRequests } from "./constants/sampleData";
 
-const statusMeta: Record<RequestStatus, { label: string; badgeClass: string; dotColor: string }> = {
-  pending: { label: "Pending", badgeClass: "bg-amber-50 text-amber-700 border-amber-200", dotColor: "bg-amber-400" },
-  review: { label: "Under Review", badgeClass: "bg-blue-50 text-blue-700 border-blue-200", dotColor: "bg-blue-400" },
-  processing: { label: "Processing", badgeClass: "bg-purple-50 text-purple-700 border-purple-200", dotColor: "bg-purple-400" },
-  payment: { label: "Payment Required", badgeClass: "bg-yellow-50 text-yellow-700 border-yellow-200", dotColor: "bg-yellow-400" },
-  ready: { label: "Ready for Pickup", badgeClass: "bg-green-50 text-green-700 border-green-200", dotColor: "bg-green-400" },
-  completed: { label: "Completed", badgeClass: "bg-gray-50 text-gray-600 border-gray-200", dotColor: "bg-gray-400" },
-  declined: { label: "Declined", badgeClass: "bg-red-50 text-red-700 border-red-200", dotColor: "bg-red-400" },
-  cancelled: { label: "Cancelled", badgeClass: "bg-red-50 text-red-700 border-red-200", dotColor: "bg-red-400" },
-};
+/**
+ * TrackRequestsPage - Main component for tracking document requests
+ * Provides filtering, searching, and action management for document requests
+ */
 
 export default function TrackRequestsPage() {
   const [query, setQuery] = useState("");
   const [activeStatus, setActiveStatus] = useState<RequestStatus | "all">("all");
+  
+  // Custom hooks
+  const { modalState, openModal, closeModal, handleConfirm } = useModal();
+  const {
+    handleCancel,
+    handleDecline,
+    handleReceived,
+    handleReadyDownload,
+    handleClaim,
+    handleUpdateStatus
+  } = useRequestActions(openModal);
 
   const filtered = useMemo(() => {
     return seedRequests.filter((r) => {
@@ -50,6 +47,9 @@ export default function TrackRequestsPage() {
     });
   }, [query, activeStatus]);
 
+  /**
+   * Format ISO date string to readable format
+   */
   const formatDate = (iso: string) => {
     const date = new Date(iso);
     return date.toLocaleDateString('en-US', { 
@@ -61,39 +61,27 @@ export default function TrackRequestsPage() {
     });
   };
 
-  const handleCancel = (id: string) => {
-    alert(`Cancel request ${id}`);
-  };
-  const handleDecline = (id: string) => {
-    alert(`Decline request ${id}`);
-  };
-  const handleReadyDownload = (id: string) => {
-    alert(`Download for request ${id}`);
-  };
-
   const statuses: (RequestStatus | "all")[] = [
     "all",
-    "pending",
-    "review",
     "processing",
-    "payment",
-    "ready",
+    "approved",
+    "request_for_payment",
+    "ready_to_claim",
+    "ready_for_pickup",
     "completed",
-    "declined",
-    "cancelled",
+    "rejected",
   ];
 
   const statusCounts = useMemo(() => {
     const counts: Record<RequestStatus | "all", number> = { 
       all: seedRequests.length,
-      pending: 0,
-      review: 0,
       processing: 0,
-      payment: 0,
-      ready: 0,
+      approved: 0,
+      request_for_payment: 0,
+      ready_to_claim: 0,
+      ready_for_pickup: 0,
       completed: 0,
-      declined: 0,
-      cancelled: 0
+      rejected: 0
     };
     
     statuses.forEach(status => {
@@ -150,7 +138,7 @@ export default function TrackRequestsPage() {
                         .filter((s) => s !== "all")
                         .map((s) => (
                           <option key={s} value={s}>
-                            {statusMeta[s as RequestStatus].label} ({statusCounts[s] || 0})
+                            {getStatusConfig(s as RequestStatus).label} ({statusCounts[s] || 0})
                           </option>
                         ))}
                     </select>
@@ -181,80 +169,17 @@ export default function TrackRequestsPage() {
               <>
                 {/* Mobile Card View */}
                 <div className="block md:hidden">
-                  {filtered.map((r) => (
-                    <div key={r.id} className="border-b border-slate-100 last:border-b-0 p-4 hover:bg-slate-50/50 transition-colors">
-                      <div className="space-y-3">
-                        {/* Header Row */}
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-[#23479A]/10 rounded-lg flex-shrink-0">
-                              <FileText className="h-4 w-4 text-[#23479A]" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <h3 className="font-medium text-slate-900 text-sm leading-tight">
-                                {r.documentType}
-                              </h3>
-                              <p className="font-mono text-xs text-slate-600 mt-0.5">
-                                {r.reference}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1.5 flex-shrink-0">
-                            <div className={`w-2 h-2 rounded-full ${statusMeta[r.status].dotColor}`}></div>
-                            <Badge className={`${statusMeta[r.status].badgeClass} text-xs px-2 py-1`}>
-                              {statusMeta[r.status].label}
-                            </Badge>
-                          </div>
-                        </div>
-                        
-                        {/* Date */}
-                        <div className="text-xs text-slate-500">
-                          Requested: {formatDate(r.requestedAt)}
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex gap-2 pt-2">
-                          {(r.status === "pending" || r.status === "review" || r.status === "processing") && (
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 text-xs px-3 flex-1 sm:flex-none" 
-                              onClick={() => handleCancel(r.id)}
-                            >
-                              <XCircle className="h-3 w-3 mr-1" />
-                              Cancel
-                            </Button>
-                          )}
-                          {r.status === "payment" && (
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              className="text-amber-600 border-amber-200 hover:bg-amber-50 hover:border-amber-300 text-xs px-3 flex-1 sm:flex-none" 
-                              onClick={() => handleDecline(r.id)}
-                            >
-                              <Clock className="h-3 w-3 mr-1" />
-                              Decline
-                            </Button>
-                          )}
-                          {r.status === "ready" && (
-                            <Button 
-                              size="sm"
-                              className="bg-green-600 hover:bg-green-700 text-white text-xs px-3 flex-1 sm:flex-none" 
-                              onClick={() => handleReadyDownload(r.id)}
-                            >
-                              <Download className="h-3 w-3 mr-1" />
-                              Download
-                            </Button>
-                          )}
-                          <Link href={`/dashboard/request?id=${r.id}`} className="inline-flex flex-1 sm:flex-none">
-                            <Button variant="outline" size="sm" className="hover:bg-slate-50 text-xs px-3 w-full sm:w-auto">
-                              <Eye className="h-3 w-3 mr-1" />
-                              View
-                            </Button>
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
+                  {filtered.map((request) => (
+                    <RequestCard
+                      key={request.id}
+                      request={request}
+                      onCancel={handleCancel}
+                      onDecline={handleDecline}
+                      onDownload={handleReadyDownload}
+                      onUpdateStatus={handleUpdateStatus}
+                      onClaim={handleClaim}
+                      formatDate={formatDate}
+                    />
                   ))}
                 </div>
 
@@ -267,79 +192,21 @@ export default function TrackRequestsPage() {
                         <th className="text-left py-4 px-6 font-medium text-slate-700 text-sm">Document Type</th>
                         <th className="text-left py-4 px-6 font-medium text-slate-700 text-sm">Date Requested</th>
                         <th className="text-left py-4 px-6 font-medium text-slate-700 text-sm">Status</th>
-                        <th className="text-right py-4 px-6 font-medium text-slate-700 text-sm">Actions</th>
+                        <th className="text-center py-4 px-6 font-medium text-slate-700 text-sm">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {filtered.map((r) => (
-                        <tr key={r.id} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="py-4 px-6">
-                            <div className="font-mono text-sm font-medium text-slate-900">
-                              {r.reference}
-                            </div>
-                          </td>
-                          <td className="py-4 px-6">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 bg-[#23479A]/10 rounded-lg">
-                                <FileText className="h-4 w-4 text-[#23479A]" />
-                              </div>
-                              <span className="font-medium text-slate-900">{r.documentType}</span>
-                            </div>
-                          </td>
-                          <td className="py-4 px-6 text-slate-600 text-sm">
-                            {formatDate(r.requestedAt)}
-                          </td>
-                          <td className="py-4 px-6">
-                            <div className="flex items-center gap-2">
-                              <div className={`w-2 h-2 rounded-full ${statusMeta[r.status].dotColor}`}></div>
-                              <Badge className={`${statusMeta[r.status].badgeClass} font-medium text-xs`}>
-                                {statusMeta[r.status].label}
-                              </Badge>
-                            </div>
-                          </td>
-                          <td className="py-4 px-6">
-                            <div className="flex justify-end gap-2 min-w-[320px]">
-                              {(r.status === "pending" || r.status === "review" || r.status === "processing") && (
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 flex-1" 
-                                  onClick={() => handleCancel(r.id)}
-                                >
-                                  <XCircle className="h-4 w-4 mr-1.5" />
-                                  Cancel
-                                </Button>
-                              )}
-                              {r.status === "payment" && (
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  className="text-amber-600 border-amber-200 hover:bg-amber-50 hover:border-amber-300 flex-1" 
-                                  onClick={() => handleDecline(r.id)}
-                                >
-                                  <Clock className="h-4 w-4 mr-1.5" />
-                                  Decline
-                                </Button>
-                              )}
-                              {r.status === "ready" && (
-                                <Button 
-                                  size="sm"
-                                  className="bg-green-600 hover:bg-green-700 text-white flex-1" 
-                                  onClick={() => handleReadyDownload(r.id)}
-                                >
-                                  <Download className="h-4 w-4 mr-1.5" />
-                                  Download
-                                </Button>
-                              )}
-                              <Link href={`/dashboard/request?id=${r.id}`} className="inline-flex flex-1">
-                                <Button variant="outline" size="sm" className="hover:bg-slate-50 w-full">
-                                  <Eye className="h-4 w-4 mr-1.5" />
-                                  View
-                                </Button>
-                              </Link>
-                            </div>
-                          </td>
-                        </tr>
+                      {filtered.map((request) => (
+                        <RequestTableRow
+                          key={request.id}
+                          request={request}
+                          onCancel={handleCancel}
+                          onDecline={handleDecline}
+                          onDownload={handleReadyDownload}
+                          onUpdateStatus={handleUpdateStatus}
+                          onClaim={handleClaim}
+                          formatDate={formatDate}
+                        />
                       ))}
                     </tbody>
                   </table>
@@ -362,6 +229,15 @@ export default function TrackRequestsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Modal */}
+      <Modal
+        isOpen={modalState.isOpen}
+        type={modalState.type}
+        message={modalState.message}
+        onClose={closeModal}
+        onConfirm={handleConfirm}
+      />
     </main>
   );
 }

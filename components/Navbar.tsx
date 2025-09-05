@@ -51,19 +51,6 @@ const Navbar = () => {
     // If not on homepage, let the default link behavior work
   }
 
-  const handleServicesClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (pathname === "/") {
-      e.preventDefault()
-      const servicesSection = document.getElementById('services-section')
-      if (servicesSection) {
-        servicesSection.scrollIntoView({ 
-          behavior: 'smooth',
-          block: 'start'
-        })
-      }
-    }
-    // If not on homepage, let the default link behavior work
-  }
 
   if (isDashboard) {
     return null
@@ -112,7 +99,6 @@ const Navbar = () => {
                     href={item.href}
                     onClick={
                       item.label === "News" ? handleNewsClick : 
-                      item.label === "Services" ? handleServicesClick : 
                       undefined
                     }
                     className="flex items-center px-3 py-3 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-[#23479A] transition-colors duration-200 w-full"
@@ -161,7 +147,6 @@ const Navbar = () => {
               href={item.href}
               onClick={
                 item.label === "News" ? handleNewsClick : 
-                item.label === "Services" ? handleServicesClick : 
                 undefined
               }
               className="text-sm font-medium transition-colors hover:text-[#23479A]"

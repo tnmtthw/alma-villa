@@ -12,18 +12,20 @@ const Footer = () => {
       title: "Quick Links",
       links: [
         { label: "Home", href: "/" },
-        { label: "Services", href: "/services" },
-        { label: "Forms", href: "/forms" },
-        { label: "News", href: "/news" },
+        { label: "Dashboard", href: "/dashboard" },
+        { label: "Request Document", href: "/dashboard/request" },
+        { label: "Track Requests", href: "/dashboard/track" },
+        { label: "News", href: "/dashboard/news" },
+        { label: "Forms", href: "/dashboard/Download" },
       ],
     },
     {
       title: "Services",
       links: [
-        { label: "Document Request", href: "/request" },
-        { label: "Business Permit", href: "/services/business" },
-        { label: "Barangay Clearance", href: "/services/clearance" },
-        { label: "Certificates", href: "/services/certificates" },
+        { label: "Document Request", href: "/dashboard/request" },
+        { label: "Request Form", href: "/dashboard/request-form" },
+        { label: "Track Requests", href: "/dashboard/track" },
+        { label: "Download Forms", href: "/dashboard/Download" },
       ],
     },
     {
