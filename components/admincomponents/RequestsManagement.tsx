@@ -197,11 +197,10 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
     const normalizedStatus = status?.toLowerCase()
 
     const configs: Record<string, { label: string; color: string; icon: any }> = {
-      pending: { label: "Pending", color: "bg-orange-100 text-orange-800", icon: Clock },
-      under_review: { label: "Under Review", color: "bg-blue-100 text-blue-800", icon: Eye },
-      processing: { label: "Processing", color: "bg-purple-100 text-purple-800", icon: RefreshCw },
-      payment_pending: { label: "Payment Pending", color: "bg-yellow-100 text-yellow-800", icon: CreditCard },
-      ready_for_claim: { label: "Ready for Claim", color: "bg-green-100 text-green-800", icon: CheckCircle },
+      processing: { label: "Processing", color: "bg-blue-100 text-blue-800", icon: Eye },
+      approved: { label: "Approved", color: "bg-purple-100 text-purple-800", icon: RefreshCw },
+      request_for_payment: { label: "Request for Payment", color: "bg-yellow-100 text-yellow-800", icon: CreditCard },
+      ready_to_claim: { label: "Ready to Claim", color: "bg-green-100 text-green-800", icon: CheckCircle },
       completed: { label: "Completed", color: "bg-gray-100 text-gray-800", icon: CheckCircle },
       rejected: { label: "Rejected", color: "bg-red-100 text-red-800", icon: XCircle }
     }

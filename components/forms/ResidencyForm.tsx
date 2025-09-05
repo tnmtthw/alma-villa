@@ -231,7 +231,7 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
           </div>
 
           {/* File Upload Section */}
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
             <h3 className="text-lg font-medium border-b pb-2">Supporting Documents</h3>
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
               <div className="text-center">
@@ -260,36 +260,36 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
               </div>
             </div>
 
-            {/* Uploaded Files Display */}
-            {formData.attachments.length > 0 && (
-              <div className="space-y-2">
-                <Label>Uploaded Files:</Label>
-                {formData.attachments.map((file, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                  >
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm text-gray-700">{file.name}</span>
-                      <span className="text-xs text-gray-500">
-                        ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                      </span>
-                    </div>
-                    <Button
-                      type="button"
-                      onClick={() => removeFile(index)}
-                      variant="outline"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+ 
+          {formData.attachments.length > 0 && (
+            <div className="space-y-2">
+              <Label>Uploaded Files:</Label>
+              {formData.attachments.map((file, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                >
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-gray-500" />
+                    <span className="text-sm text-gray-700">{file.name}</span>
+                    <span className="text-xs text-gray-500">
+                      ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                    </span>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  <Button
+                    type="button"
+                    onClick={() => removeFile(index)}
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div> */}
 
           {/* Submit Button */}
           <div className="flex justify-end gap-4">
@@ -317,6 +317,6 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
           </div>
         </form>
       </CardContent>
-    </Card>
+    </Card >
   )
 }

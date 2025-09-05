@@ -488,7 +488,7 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
         </div>
 
         {/* Supporting Documents */}
-        <div className="space-y-6">
+        {/* <div className="space-y-6">
           <h2 className="text-xl font-semibold text-gray-900 border-b pb-2">Supporting Documents</h2>
 
           <div>
@@ -546,7 +546,7 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
               </div>
             )}
           </div>
-        </div>
+        </div> */}
 
         {/* Declaration */}
         <div className="space-y-4 bg-gray-50 p-4 rounded-lg">

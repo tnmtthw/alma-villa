@@ -54,19 +54,18 @@ export default function StatusUpdateModal({
         <div className="space-y-4">
           <div>
             <label className="text-sm font-medium text-gray-700">New Status</label>
-            <Select 
-              value={updateStatusData.newStatus} 
+            <Select
+              value={updateStatusData.newStatus}
               onValueChange={(value) => setUpdateStatusData({ ...updateStatusData, newStatus: value })}
             >
               <SelectTrigger className="mt-1">
                 <SelectValue placeholder="Select new status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="under_review">Under Review</SelectItem>
                 <SelectItem value="processing">Processing</SelectItem>
-                <SelectItem value="payment_pending">Payment Pending</SelectItem>
-                <SelectItem value="ready_for_claim">Ready for Claim</SelectItem>
+                <SelectItem value="approved">Approved</SelectItem>
+                <SelectItem value="request_for_payment">Request for Payment</SelectItem>
+                <SelectItem value="ready_to_claim">Ready to Claim</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
                 <SelectItem value="rejected">Rejected</SelectItem>
               </SelectContent>
@@ -103,7 +102,7 @@ export default function StatusUpdateModal({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={onSubmit}
             className="bg-[#23479A] hover:bg-[#23479A]/90"
             disabled={!updateStatusData.newStatus}

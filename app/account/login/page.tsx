@@ -35,10 +35,10 @@ export default function LoginPage() {
   // Check if account exists and its verification status
   const checkAccountStatus = async (userEmail = email) => {
     if (!userEmail || userEmail.length < 3) return
-    
+
     setIsCheckingStatus(true)
     setAccountStatus("checking")
-    
+
     try {
       const response = await fetch("/api/auth/check-lockout", {
         method: "POST",
@@ -65,7 +65,7 @@ export default function LoginPage() {
         setCooldownTime(0)
         setAttemptsLeft(result.attemptsLeft || 3)
         setAccountStatus("registered")
-        
+
         // Check if account is unverified
         if (result.role === "Unverified") {
           setAccountStatus("unverified")
@@ -153,18 +153,18 @@ export default function LoginPage() {
           setCooldownTime(parseInt(timeLeft) || 60)
           setAttemptsLeft(0)
           setErrorMessage(message || "Account temporarily locked due to too many failed attempts")
-          
+
           // Visual feedback for immediate lockout
           setTimeout(() => {
             setErrorMessage(`🔒 Account locked for ${timeLeft} seconds due to too many failed attempts`)
           }, 100)
-          
+
         } else if (response.error.startsWith("ATTEMPTS:")) {
           const [, attemptsLeft, message] = response.error.split(":", 3)
           const remainingAttempts = parseInt(attemptsLeft) || 0
           setAttemptsLeft(remainingAttempts)
           setIsLocked(false)
-          
+
           if (remainingAttempts === 0) {
             setErrorMessage("Too many failed attempts. Account will be locked.")
             // Recheck status immediately for potential lockout
@@ -172,7 +172,7 @@ export default function LoginPage() {
           } else {
             setErrorMessage(`${message}. ${remainingAttempts} attempt${remainingAttempts === 1 ? '' : 's'} remaining.`)
           }
-          
+
         } else if (response.error === "Unverified") {
           setAccountStatus("unverified")
           setErrorMessage("Your account is not verified. Please check your email to verify your account.")
@@ -181,10 +181,10 @@ export default function LoginPage() {
         } else {
           setErrorMessage(response.error || "Something went wrong. Please try again.")
         }
-        
+
         // After any failed attempt, recheck status for real-time updates
         setTimeout(() => checkAccountStatus(), 300)
-        
+
       } else if (response?.ok) {
         // Reset all states on successful login
         setAttemptsLeft(3)
@@ -192,7 +192,7 @@ export default function LoginPage() {
         setCooldownTime(0)
         setErrorMessage("")
         setAccountStatus(null)
-        
+
         // Small delay for better UX
         setTimeout(() => {
           // Role-based redirect logic
@@ -215,14 +215,14 @@ export default function LoginPage() {
       // Get session to determine user role
       const response = await fetch('/api/auth/session')
       const session = await response.json()
-      
+
       if (session?.user?.role) {
         const userRole = session.user.role
-        
+
         if (userRole === "Admin") {
           router.replace("/admin")
         } else if (userRole === "Verified" || userRole === "User") {
-          router.replace("/dashboard") 
+          router.replace("/dashboard")
         } else {
           // For other roles like "Unverified", redirect to homepage
           router.replace("/")
@@ -320,13 +320,12 @@ export default function LoginPage() {
 
             {/* Error Messages */}
             {errorMessage && (
-              <div className={`mb-4 p-3 rounded-[2px] text-sm ${
-                isLocked
+              <div className={`mb-4 p-3 rounded-[2px] text-sm ${isLocked
                   ? "bg-red-50 border border-red-200 text-red-600"
                   : attemptsLeft <= 1 && attemptsLeft > 0
-                  ? "bg-orange-50 border border-orange-200 text-orange-600" 
-                  : "bg-red-50 border border-red-200 text-red-600"
-              }`}>
+                    ? "bg-orange-50 border border-orange-200 text-orange-600"
+                    : "bg-red-50 border border-red-200 text-red-600"
+                }`}>
                 <div className="flex items-center gap-2">
                   {isLocked ? (
                     <Lock className="h-4 w-4" />
@@ -350,7 +349,7 @@ export default function LoginPage() {
                   </span>
                 </div>
                 <div className="mt-2 w-full bg-red-100 rounded-full h-1.5">
-                  <div 
+                  <div
                     className="bg-red-600 h-1.5 rounded-full transition-all duration-1000 ease-linear"
                     style={{ width: `${(cooldownTime / 60) * 100}%` }}
                   ></div>
@@ -451,15 +450,15 @@ export default function LoginPage() {
                 className="w-full bg-[#23479A] hover:bg-[#23479A]/90 text-white py-2 px-4 rounded-[2px] disabled:opacity-50 relative"
                 disabled={isLoading || isLocked || accountStatus === "unregistered" || isCheckingStatus}
               >
-                {isLocked && cooldownTime > 0 
-                  ? `🔒 Locked (${cooldownTime}s)` 
+                {isLocked && cooldownTime > 0
+                  ? `🔒 Locked (${cooldownTime}s)`
                   : accountStatus === "unregistered"
-                  ? "Account Not Found"
-                  : isLoading 
-                    ? "Signing in..." 
-                    : isCheckingStatus
-                    ? "Checking account..."
-                    : "Sign in"
+                    ? "Account Not Found"
+                    : isLoading
+                      ? "Signing in..."
+                      : isCheckingStatus
+                        ? "Checking account..."
+                        : "Sign in"
                 }
               </Button>
 

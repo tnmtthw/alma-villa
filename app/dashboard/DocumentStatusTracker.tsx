@@ -34,7 +34,7 @@ interface DocumentRequest {
   purok: string
   type: string
   requestDate: string
-  status: "pending" | "under_review" | "processing" | "ready_for_claim" | "completed" | "rejected"
+  status: "processing" | "approved" | "request_for_payment" | "ready_to_claim" | "completed" | "rejected"
   estimatedCompletion?: string
   purpose: string
   fee?: string
@@ -51,22 +51,6 @@ interface DocumentRequest {
 
 const getStatusConfig = (status: DocumentRequest["status"]) => {
   const configs = {
-    pending: {
-      label: "Pending Review",
-      color: "text-orange-600",
-      bgColor: "bg-orange-50",
-      borderColor: "border-orange-200",
-      icon: Clock,
-      description: "Your request is in queue for review"
-    },
-    under_review: {
-      label: "Under Review",
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
-      borderColor: "border-blue-200",
-      icon: Eye,
-      description: "Being reviewed by barangay staff"
-    },
     processing: {
       label: "Processing",
       color: "text-purple-600",
@@ -75,8 +59,24 @@ const getStatusConfig = (status: DocumentRequest["status"]) => {
       icon: FileText,
       description: "Document is being prepared"
     },
-    ready_for_claim: {
-      label: "Ready for Claim",
+    approved: {
+      label: "Approved",
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
+      borderColor: "border-blue-200",
+      icon: Eye,
+      description: "Document is Approved"
+    },
+    request_for_payment: {
+      label: "Request for Payment",
+      color: "text-orange-600",
+      bgColor: "bg-orange-50",
+      borderColor: "border-orange-200",
+      icon: Clock,
+      description: "Your request is in queue for review"
+    },
+    ready_to_claim: {
+      label: "Ready to Claim",
       color: "text-emerald-600",
       bgColor: "bg-emerald-50",
       borderColor: "border-emerald-200",
@@ -210,19 +210,19 @@ const DocumentStatusTracker = () => {
                   <p className="text-xs text-gray-500">{statusConfig.description}</p>
                 </div>
                 <div className="flex gap-2 shrink-0">
-                  {request.status === "ready_for_claim" && request.type === "Barangay Clearance" && (
+                  {request.status === "ready_to_claim" && request.type === "Barangay Clearance" && (
                     <ClaimClearanceButton request={request} />
                   )}
-                  {request.status === "ready_for_claim" && request.type === "Certificate of Residency" && (
+                  {request.status === "ready_to_claim" && request.type === "Certificate of Residency" && (
                     <ClaimResidencyButton request={request} />
                   )}
-                  {request.status === "ready_for_claim" && request.type === "Certificate of Indigency" && (
+                  {request.status === "ready_to_claim" && request.type === "Certificate of Indigency" && (
                     <ClaimIndigencyButton request={request} />
                   )}
-                  {request.status === "ready_for_claim" && request.type === "Certificate of Good Moral Character" && (
+                  {request.status === "ready_to_claim" && request.type === "Certificate of Good Moral Character" && (
                     <ClaimGoodMoralButton request={request} />
                   )}
-                  {request.status === "ready_for_claim" && request.type === "Business Permit" && (
+                  {request.status === "ready_to_claim" && request.type === "Business Permit" && (
                     <ClaimBusinessButton
                       request={{
                         id: request.id,
