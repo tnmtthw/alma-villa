@@ -26,7 +26,8 @@ const Hero = () => {
         />
 
         <div className="max-w-7xl mx-auto px-8 py-6 lg:py-10">
-          <div className="grid lg:grid-cols-2 gap-6 items-center">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            {/* Text Content - Left Side */}
             <div 
               ref={textRef}
               className={`relative z-10 text-white transition-all duration-1000 ease-out ${
@@ -42,12 +43,6 @@ const Hero = () => {
                 Your one-stop platform for accessing barangay services, submitting requests, and staying updated with community news.
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
-                {/* <Button
-                  asChild
-                  className="bg-white text-[#23479A] hover:bg-white/90"
-                >
-                  <Link href="/account/signup">Register as Resident</Link>
-                </Button> */}
                 <Button
                   asChild
                   variant="outline"
@@ -58,22 +53,25 @@ const Hero = () => {
               </div>
             </div>
 
+            {/* Image - Right Side */}
             <div 
               ref={imageRef}
-              className={`relative transition-all duration-1000 ease-out delay-300 ${
+              className={`relative flex justify-center lg:justify-end items-center transition-all duration-1000 ease-out delay-300 ${
                 imageVisible 
                   ? 'translate-x-0 opacity-100 scale-100' 
                   : 'translate-x-8 opacity-0 scale-95'
               }`}
             >
-              <Image
-                src="/assets/img/heroimage.png"
-                alt="Barangay Portal Illustration"
-                width={350}
-                height={350}
-                className="object-contain"
-                priority
-              />
+              <div className="relative w-full max-w-[400px] lg:max-w-[450px]">
+                <Image
+                  src="/assets/img/heroimage.png"
+                  alt="Barangay Portal Illustration"
+                  width={450}
+                  height={400}
+                  className="object-contain w-full h-auto ml-auto"
+                  priority
+                />
+              </div>
             </div>
           </div>
         </div>
