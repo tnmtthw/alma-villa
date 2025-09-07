@@ -17,6 +17,7 @@ import ClaimResidencyButton from '../../components/admincomponents/pdfgenerator/
 import ClaimIndigencyButton from '../../components/admincomponents/pdfgenerator/ClaimIndigency'
 import ClaimGoodMoralButton from '../../components/admincomponents/pdfgenerator/ClaimGoodMoral'
 import ClaimBusinessButton from '../../components/admincomponents/pdfgenerator/ClaimBusiness'
+import PaymentPage from './Payment'
 
 const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) =>
   fetch(...args).then((res) => res.json())
@@ -34,7 +35,7 @@ interface DocumentRequest {
   purok: string
   type: string
   requestDate: string
-  status: "processing" | "approved" | "request_for_payment" | "ready_to_claim" | "completed" | "rejected"
+  status: "processing" | "approved" | "payment_sent" | "ready_to_claim" | "completed" | "rejected"
   estimatedCompletion?: string
   purpose: string
   fee?: string
@@ -67,8 +68,8 @@ const getStatusConfig = (status: DocumentRequest["status"]) => {
       icon: Eye,
       description: "Document is Approved"
     },
-    request_for_payment: {
-      label: "Request for Payment",
+    payment_sent: {
+      label: "Payment Sent",
       color: "text-orange-600",
       bgColor: "bg-orange-50",
       borderColor: "border-orange-200",
@@ -210,6 +211,21 @@ const DocumentStatusTracker = () => {
                   <p className="text-xs text-gray-500">{statusConfig.description}</p>
                 </div>
                 <div className="flex gap-2 shrink-0">
+                  {/* PAYMENT BUTTON */}
+
+                  {request.status === "approved" && request.type === "Barangay Clearance" && (
+                    <PaymentPage request={request} />
+                  )}
+                  {request.status === "approved" && request.type === "Certificate of Residency" && (
+                    <PaymentPage request={request} />
+                  )}
+                  {request.status === "approved" && request.type === "Certificate of Indigency" && (
+                    <PaymentPage request={request} />
+                  )}
+                  {request.status === "approved" && request.type === "Certificate of Good Moral Character" && (
+                    <PaymentPage request={request} />
+                  )}
+                  {/* CLAIM BUTTON */}
                   {request.status === "ready_to_claim" && request.type === "Barangay Clearance" && (
                     <ClaimClearanceButton request={request} />
                   )}
