@@ -43,27 +43,27 @@ export default function RequestTableRow({
 }: RequestTableRowProps) {
   return (
     <tr className="hover:bg-slate-50/50 transition-colors">
-      <td className="py-4 px-6">
-        <div className="font-mono text-sm font-medium text-slate-900">
+      <td className="py-2.5 px-3">
+        <div className="font-mono text-xs font-medium text-slate-900">
           {request.reference}
         </div>
       </td>
-      <td className="py-4 px-6">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-[#23479A]/10 rounded-lg">
-            <FileText className="h-4 w-4 text-[#23479A]" />
+      <td className="py-2.5 px-3">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 bg-[#23479A]/10 rounded-lg">
+            <FileText className="h-3.5 w-3.5 text-[#23479A]" />
           </div>
-          <span className="font-medium text-slate-900">{request.documentType}</span>
+          <span className="font-medium text-slate-900 text-xs">{request.documentType}</span>
         </div>
       </td>
-      <td className="py-4 px-6 text-slate-600 text-sm">
+      <td className="py-2.5 px-3 text-slate-600 text-[11px]">
         {formatDate(request.requestedAt)}
       </td>
-      <td className="py-4 px-6">
+      <td className="py-2.5 px-3">
         <StatusBadge status={request.status} />
       </td>
-      <td className="py-4 px-6">
-        <div className="flex justify-center gap-2 min-w-[320px]">
+      <td className="py-2.5 px-3">
+        <div className="flex justify-center gap-1.5 min-w-[240px]">
           <ActionButtons
             status={request.status}
             requestId={request.id}

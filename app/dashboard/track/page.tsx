@@ -185,14 +185,14 @@ export default function TrackRequestsPage() {
 
                 {/* Desktop Table View */}
                 <div className="hidden md:block overflow-x-auto">
-                  <table className="w-full">
+                  <table className="w-full text-xs">
                     <thead>
                       <tr className="border-b border-slate-200">
-                        <th className="text-left py-4 px-6 font-medium text-slate-700 text-sm">Reference</th>
-                        <th className="text-left py-4 px-6 font-medium text-slate-700 text-sm">Document Type</th>
-                        <th className="text-left py-4 px-6 font-medium text-slate-700 text-sm">Date Requested</th>
-                        <th className="text-left py-4 px-6 font-medium text-slate-700 text-sm">Status</th>
-                        <th className="text-center py-4 px-6 font-medium text-slate-700 text-sm">Actions</th>
+                        <th className="text-left py-2.5 px-3 font-medium text-slate-700 text-[11px]">Reference</th>
+                        <th className="text-left py-2.5 px-3 font-medium text-slate-700 text-[11px]">Document Type</th>
+                        <th className="text-left py-2.5 px-3 font-medium text-slate-700 text-[11px]">Date Requested</th>
+                        <th className="text-left py-2.5 px-3 font-medium text-slate-700 text-[11px]">Status</th>
+                        <th className="text-center py-2.5 px-3 font-medium text-slate-700 text-[11px]">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">

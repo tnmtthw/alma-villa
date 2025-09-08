@@ -44,7 +44,7 @@ export default function ActionButtons({
           <Button 
             variant="outline" 
             size="sm"
-            className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 text-xs px-3 w-24" 
+            className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 text-[11px] px-2 py-1 w-24" 
             onClick={() => onCancel(requestId)}
           >
             <XCircle className="h-3 w-3 mr-1" />
@@ -57,7 +57,7 @@ export default function ActionButtons({
           <Button 
             variant="outline" 
             size="sm"
-            className="text-amber-600 border-amber-200 hover:bg-amber-50 hover:border-amber-300 text-xs px-3 w-24" 
+            className="text-amber-600 border-amber-200 hover:bg-amber-50 hover:border-amber-300 text-[11px] px-2 py-1 w-24" 
             onClick={() => onDecline(requestId)}
           >
             <Clock className="h-3 w-3 mr-1" />
@@ -69,7 +69,7 @@ export default function ActionButtons({
         return (
           <Button 
             size="sm"
-            className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 w-24" 
+            className="bg-blue-600 hover:bg-blue-700 text-white text-[11px] px-2 py-1 w-24" 
             onClick={() => onDownload(requestId)}
           >
             <CheckCircle2 className="h-3 w-3 mr-1" />
@@ -81,7 +81,7 @@ export default function ActionButtons({
         return (
           <Button 
             size="sm"
-            className="bg-green-600 hover:bg-green-700 text-white text-xs px-3 w-32" 
+            className="bg-green-600 hover:bg-green-700 text-white text-[11px] px-2 py-1 w-28" 
             onClick={() => onUpdateStatus(requestId)}
           >
             <CheckCircle2 className="h-3 w-3 mr-1" />
@@ -93,7 +93,7 @@ export default function ActionButtons({
         return (
           <Button 
             size="sm"
-            className="bg-gray-600 hover:bg-gray-700 text-white text-xs px-3 w-36" 
+            className="bg-gray-600 hover:bg-gray-700 text-white text-[11px] px-2 py-1 w-32" 
             onClick={() => onClaim(requestId)}
           >
             <CheckCircle2 className="h-3 w-3 mr-1" />

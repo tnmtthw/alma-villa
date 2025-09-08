@@ -89,11 +89,16 @@ export default function RequestDetailsModal({
                   <div className="mt-1">
                     {(() => {
                       const statusConfig = getStatusConfig(request.status)
-                      const StatusIcon = statusConfig.icon
+                      const safeConfig = statusConfig || {
+                        label: "Unknown",
+                        color: "bg-gray-100 text-gray-700",
+                        icon: FileText,
+                      }
+                      const StatusIcon = safeConfig.icon
                       return (
-                        <Badge className={`${statusConfig.color} border-transparent`}>
+                        <Badge className={`${safeConfig.color} border-transparent`}>
                           <StatusIcon className="h-3 w-3 mr-1" />
-                          {statusConfig.label}
+                          {safeConfig.label}
                         </Badge>
                       )
                     })()}

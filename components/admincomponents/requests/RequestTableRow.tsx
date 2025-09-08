@@ -66,7 +66,12 @@ export default function RequestTableRow({
   formatDate,
 }: RequestTableRowProps) {
   const statusConfig = getStatusConfig(request.status)
-  const StatusIcon = statusConfig.icon
+  const safeConfig = statusConfig || {
+    label: "Unknown",
+    color: "bg-gray-100 text-gray-700",
+    icon: FileText,
+  }
+  const StatusIcon = safeConfig.icon
 
   return (
     <TableRow className="hover:bg-gray-50/50">
@@ -102,10 +107,10 @@ export default function RequestTableRow({
 
       {/* Status */}
       <TableCell className="p-3 md:p-4">
-        <Badge className={`${statusConfig.color} text-xs`}>
+        <Badge className={`${safeConfig.color} text-xs`}>
           <StatusIcon className="h-3 w-3 mr-1" />
-          <span className="hidden sm:inline">{statusConfig.label}</span>
-          <span className="sm:hidden">{statusConfig.label.split(' ')[0]}</span>
+          <span className="hidden sm:inline">{safeConfig.label}</span>
+          <span className="sm:hidden">{safeConfig.label.split(' ')[0]}</span>
         </Badge>
       </TableCell>
 
