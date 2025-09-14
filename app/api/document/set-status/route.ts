@@ -9,11 +9,11 @@ export async function PATCH(request: Request) {
     const id = searchParams.get('id') || undefined;
 
     const body = await request.json();
-    const { status } = body;
+    const { ...rest } = body;
 
     await prisma.document.update({
         where: { id },
-        data: { status },
+        data: { ...rest },
     });
 
 

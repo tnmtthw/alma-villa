@@ -56,17 +56,25 @@ export default function PaymentReviewModal({
             <label className="text-sm font-medium text-gray-500">Payment Proof</label>
             <div className="mt-2 border border-gray-300 rounded-lg p-4 bg-gray-50">
               <div className="flex items-center justify-center h-48 bg-white rounded border-dashed border-2 border-gray-300">
-                <div className="text-center">
-                  <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600">Payment proof image</p>
-                  <p className="text-xs text-gray-500">{request.paymentProof}</p>
-                </div>
+                {request.proofOfPayment ? (
+                  <img
+                    src={request.proofOfPayment}
+                    alt="Payment Proof"
+                    className="h-full object-contain rounded"
+                  />
+                ) : (
+                  <div className="text-center">
+                    <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                    <p className="text-sm text-gray-600">No payment proof uploaded</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
+
           <div className="flex gap-3">
-            <Button 
+            <Button
               className="flex-1 bg-green-600 hover:bg-green-700 text-white"
               onClick={() => {
                 onApprovePayment(request)
@@ -76,7 +84,7 @@ export default function PaymentReviewModal({
               <CheckCircle className="h-4 w-4 mr-2" />
               Approve Payment
             </Button>
-            <Button 
+            <Button
               variant="destructive"
               className="flex-1"
               onClick={() => {

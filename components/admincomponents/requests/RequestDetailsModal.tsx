@@ -20,7 +20,7 @@ interface DocumentRequest {
   userPhone: string
   documentType: string
   purpose: string
-  status: "pending" | "under_review" | "processing" | "payment_pending" | "ready_for_claim" | "completed" | "rejected"
+  status: "processing" | "approved" | "payment_sent" | "ready_to_claim" | "completed" | "rejected"
   requestDate: string
   estimatedCompletion: string
   lastUpdated: string
@@ -31,6 +31,7 @@ interface DocumentRequest {
   adminNotes?: string
   urgentRequest: boolean
   formData: any
+  proofOfPayment?: string
   attachments: string[]
 }
 
@@ -212,7 +213,7 @@ export default function RequestDetailsModal({
           <Button variant="outline" onClick={onClose}>
             Close
           </Button>
-          <Button 
+          <Button
             onClick={() => onUpdateStatus(request)}
             className="bg-[#23479A] hover:bg-[#23479A]/90"
           >

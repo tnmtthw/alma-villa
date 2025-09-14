@@ -10,9 +10,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { 
-  MoreHorizontal, 
-  Eye, 
+import {
+  MoreHorizontal,
+  Eye,
   AlertTriangle,
   FileText,
   RefreshCw,
@@ -30,13 +30,13 @@ interface DocumentRequest {
   userPhone: string
   documentType: string
   purpose: string
-  status: "pending" | "under_review" | "processing" | "payment_pending" | "ready_for_claim" | "completed" | "rejected"
+  status: "processing" | "approved" | "payment_sent" | "ready_to_claim" | "completed" | "rejected"
   requestDate: string
   estimatedCompletion: string
   lastUpdated: string
   fee: string
   paymentReference?: string
-  paymentProof?: string
+  proofOfPayment?: string
   rejectionReason?: string
   adminNotes?: string
   urgentRequest: boolean
@@ -146,7 +146,7 @@ export default function RequestTableRow({
               <Edit className="mr-2 h-4 w-4" />
               Update Status
             </DropdownMenuItem>
-            {request.status === "payment_pending" && (
+            {request.status === "payment_sent" && (
               <DropdownMenuItem onClick={() => onPaymentReview(request)}>
                 <CreditCard className="mr-2 h-4 w-4" />
                 Review Payment

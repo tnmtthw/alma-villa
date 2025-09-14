@@ -89,6 +89,7 @@ const transformDocumentToRequest = (document: any): DocumentRequest => {
     estimatedCompletion: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days from now
     lastUpdated: document.createdAt || new Date().toISOString(),
     fee: "₱50.00", // Default fee
+    proofOfPayment: document.proofOfPayment || null,
     urgentRequest: false, // Default to false
     formData: {
       fullName: document.fullName,
@@ -280,12 +281,12 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
   const handleApprovePayment = async (request: DocumentRequest) => {
     try {
       const response = await fetch(`/api/document/set-status?id=${request.id}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          status: "processing"
+          status: "ready_to_claim"
         }),
       })
 
@@ -310,12 +311,12 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
   const handleRejectPayment = async (request: DocumentRequest) => {
     try {
       const response = await fetch(`/api/document/set-status?id=${request.id}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          status: "payment_pending"
+          status: "rejected"
         }),
       })
 
