@@ -68,6 +68,7 @@ model Document {
   operatorName     String?  @default("N/A")
   operatorAddress  String?  @default("N/A")
   citizenship      String?  @default("N/A")
+  proofOfPayment   String?  @default("N/A")
   user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
