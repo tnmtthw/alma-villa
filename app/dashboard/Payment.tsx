@@ -69,7 +69,7 @@ const PaymentPage: React.FC<PaymentProps> = ({ request }) => {
             await Promise.all([
                 fetch(`/api/document/set-status?id=${request.id}`, {
                     method: "PATCH",
-                    body: JSON.stringify({ status: "ready_to_claim" }),
+                    body: JSON.stringify({ status: "payment_sent" }),
                     headers: { "Content-Type": "application/json" },
                 }),
             ]);

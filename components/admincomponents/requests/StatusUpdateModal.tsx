@@ -64,7 +64,7 @@ export default function StatusUpdateModal({
               <SelectContent>
                 <SelectItem value="processing">Processing</SelectItem>
                 <SelectItem value="approved">Approved</SelectItem>
-                <SelectItem value="request_for_payment">Request for Payment</SelectItem>
+                <SelectItem value="payment_sent">Payment Sent</SelectItem>
                 <SelectItem value="ready_to_claim">Ready to Claim</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
                 <SelectItem value="rejected">Rejected</SelectItem>
@@ -72,7 +72,7 @@ export default function StatusUpdateModal({
             </Select>
           </div>
 
-          <div>
+          {/* <div>
             <label className="text-sm font-medium text-gray-700">Admin Notes</label>
             <textarea
               value={updateStatusData.adminNotes}
@@ -81,7 +81,7 @@ export default function StatusUpdateModal({
               className="mt-1 w-full p-3 border border-gray-300 rounded-md focus:ring-[#23479A] focus:border-[#23479A]"
               rows={3}
             />
-          </div>
+          </div> */}
 
           {updateStatusData.newStatus === "rejected" && (
             <div>
