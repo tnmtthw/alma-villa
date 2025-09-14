@@ -16,7 +16,7 @@ export default function Home() {
       <Services />
       <Guide />
       <BarangayOfficials />
-      <NewsSection />
+      {/* <NewsSection /> */}
     </main>
   )
 } 
