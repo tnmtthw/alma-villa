@@ -212,38 +212,38 @@ export default function CreateEventModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl w-[95vw] max-h-[95vh] overflow-y-auto bg-white">
-        <DialogHeader className="pb-4">
-          <DialogTitle className="flex items-center gap-2 text-lg md:text-xl">
-            <Calendar className="h-5 w-5 text-[#23479A]" />
+      <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto bg-white">
+        <DialogHeader className="pb-6 border-b border-gray-100">
+          <DialogTitle className="flex items-center gap-3 text-xl font-semibold text-gray-900">
+            <Calendar className="h-6 w-6 text-[#23479A]" />
             {mode === "create" ? "Create New Event" : "Edit Event"}
           </DialogTitle>
-          <DialogDescription className="text-sm md:text-base">
+          <DialogDescription className="text-sm text-gray-600 mt-2">
             {mode === "create"
               ? "Create a new event or announcement for the homepage"
               : "Edit the event details and content"}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 md:space-y-6 py-2 md:py-4">
+        <div className="space-y-6 py-6">
           {/* Title */}
-          <div className="space-y-2">
-            <Label htmlFor="title" className="text-sm font-medium">Event Title *</Label>
+          <div className="space-y-3">
+            <Label htmlFor="title" className="text-sm font-medium text-gray-700">Event Title *</Label>
             <Input
               id="title"
               value={formData.title}
               onChange={(e) => handleInputChange("title", e.target.value)}
               placeholder="Enter event title..."
-              className={`text-sm ${errors.title ? "border-red-300 focus:border-red-500" : ""}`}
+              className={`text-sm h-11 ${errors.title ? "border-red-300 focus:border-red-500" : "border-gray-300 focus:border-[#23479A]"}`}
             />
             {errors.title && (
-              <p className="text-xs text-red-600">{errors.title}</p>
+              <p className="text-xs text-red-600 mt-1">{errors.title}</p>
             )}
           </div>
 
           {/* Event Image */}
-          <div className="space-y-2">
-            <Label htmlFor="image" className="text-sm font-medium">Event Image</Label>
+          <div className="space-y-3">
+            <Label htmlFor="image" className="text-sm font-medium text-gray-700">Event Image</Label>
             <Input
               id="image"
               type="file"
@@ -252,22 +252,25 @@ export default function CreateEventModal({
                 const file = e.target.files?.[0]
                 if (file) handleImageUpload(file)
               }}
+              className="text-sm h-11 border-gray-300 focus:border-[#23479A]"
             />
-            {uploading && <p className="text-xs text-gray-500">Uploading...</p>}
+            {uploading && <p className="text-xs text-gray-500 mt-1">Uploading...</p>}
             {previewImage && (
-              <img src={previewImage} alt="Preview" className="mt-2 h-32 rounded-md object-cover" />
+              <div className="mt-3">
+                <img src={previewImage} alt="Preview" className="h-32 w-full rounded-lg object-cover border border-gray-200" />
+              </div>
             )}
           </div>
 
           {/* Category and Priority Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="category" className="text-sm font-medium">Category *</Label>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <Label htmlFor="category" className="text-sm font-medium text-gray-700">Category *</Label>
               <Select
                 value={formData.category}
                 onValueChange={(value) => handleInputChange("category", value)}
               >
-                <SelectTrigger className="text-sm">
+                <SelectTrigger className="text-sm h-11 border-gray-300 focus:border-[#23479A]">
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -284,13 +287,13 @@ export default function CreateEventModal({
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="priority" className="text-sm font-medium">Priority</Label>
+            <div className="space-y-3">
+              <Label htmlFor="priority" className="text-sm font-medium text-gray-700">Priority</Label>
               <Select
                 value={formData.priority}
                 onValueChange={(value) => handleInputChange("priority", value as Event["priority"])}
               >
-                <SelectTrigger className="text-sm">
+                <SelectTrigger className="text-sm h-11 border-gray-300 focus:border-[#23479A]">
                   <SelectValue placeholder="Select priority" />
                 </SelectTrigger>
                 <SelectContent>
@@ -308,18 +311,18 @@ export default function CreateEventModal({
           </div>
 
           {/* Excerpt */}
-          <div className="space-y-2">
-            <Label htmlFor="excerpt" className="text-sm font-medium">Short Description *</Label>
+          <div className="space-y-3">
+            <Label htmlFor="excerpt" className="text-sm font-medium text-gray-700">Short Description *</Label>
             <Textarea
               id="excerpt"
               value={formData.excerpt}
               onChange={(e) => handleInputChange("excerpt", e.target.value)}
               placeholder="Brief description that appears on the homepage..."
-              rows={3}
-              className={`text-sm ${errors.excerpt ? "border-red-300 focus:border-red-500" : ""}`}
+              rows={4}
+              className={`text-sm resize-none ${errors.excerpt ? "border-red-300 focus:border-red-500" : "border-gray-300 focus:border-[#23479A]"}`}
             />
             {errors.excerpt && (
-              <p className="text-xs text-red-600">{errors.excerpt}</p>
+              <p className="text-xs text-red-600 mt-1">{errors.excerpt}</p>
             )}
             <p className="text-xs text-gray-500">
               Keep it concise - this appears on the homepage cards
@@ -327,9 +330,9 @@ export default function CreateEventModal({
           </div>
 
           {/* Date and Time Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="date" className="text-sm font-medium">Event Date *</Label>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <Label htmlFor="date" className="text-sm font-medium text-gray-700">Event Date *</Label>
               <div className="relative">
                 <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
@@ -337,16 +340,16 @@ export default function CreateEventModal({
                   type="date"
                   value={formData.date}
                   onChange={(e) => handleInputChange("date", e.target.value)}
-                  className={`pl-10 text-sm ${errors.date ? "border-red-300 focus:border-red-500" : ""}`}
+                  className={`pl-10 text-sm h-11 ${errors.date ? "border-red-300 focus:border-red-500" : "border-gray-300 focus:border-[#23479A]"}`}
                 />
               </div>
               {errors.date && (
-                <p className="text-xs text-red-600">{errors.date}</p>
+                <p className="text-xs text-red-600 mt-1">{errors.date}</p>
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="time" className="text-sm font-medium">Event Time *</Label>
+            <div className="space-y-3">
+              <Label htmlFor="time" className="text-sm font-medium text-gray-700">Event Time *</Label>
               <div className="relative">
                 <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
@@ -354,18 +357,18 @@ export default function CreateEventModal({
                   value={formData.time}
                   onChange={(e) => handleInputChange("time", e.target.value)}
                   placeholder="e.g., 9:00 AM or All Day"
-                  className={`pl-10 text-sm ${errors.time ? "border-red-300 focus:border-red-500" : ""}`}
+                  className={`pl-10 text-sm h-11 ${errors.time ? "border-red-300 focus:border-red-500" : "border-gray-300 focus:border-[#23479A]"}`}
                 />
               </div>
               {errors.time && (
-                <p className="text-xs text-red-600">{errors.time}</p>
+                <p className="text-xs text-red-600 mt-1">{errors.time}</p>
               )}
             </div>
           </div>
 
           {/* Location */}
-          <div className="space-y-2">
-            <Label htmlFor="location" className="text-sm font-medium">Location *</Label>
+          <div className="space-y-3">
+            <Label htmlFor="location" className="text-sm font-medium text-gray-700">Location *</Label>
             <div className="relative">
               <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
@@ -373,56 +376,65 @@ export default function CreateEventModal({
                 value={formData.location}
                 onChange={(e) => handleInputChange("location", e.target.value)}
                 placeholder="e.g., Barangay Hall, Community Center, Online"
-                className={`pl-10 text-sm ${errors.location ? "border-red-300 focus:border-red-500" : ""}`}
+                className={`pl-10 text-sm h-11 ${errors.location ? "border-red-300 focus:border-red-500" : "border-gray-300 focus:border-[#23479A]"}`}
               />
             </div>
             {errors.location && (
-              <p className="text-xs text-red-600">{errors.location}</p>
+              <p className="text-xs text-red-600 mt-1">{errors.location}</p>
             )}
           </div>
 
           {/* Preview */}
-          <div className="space-y-2">
-            <Label>Preview</Label>
-            <div className="border rounded-lg p-4 bg-gray-50">
-              <div className="flex items-start gap-3">
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-gray-700">Preview</Label>
+            <div className="border border-gray-200 rounded-lg p-6 bg-gray-50">
+              <div className="flex items-start gap-3 mb-4">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Badge variant="outline" className={`${getCategoryColor(formData.category)} border-transparent text-xs`}>
+                  <Badge variant="outline" className={`${getCategoryColor(formData.category)} border-transparent text-xs px-2 py-1`}>
                     {formData.category}
                   </Badge>
                   {formData.priority !== "normal" && (
                     <Badge variant="outline" className={`${formData.priority === "urgent"
                       ? "bg-red-100 text-red-800"
                       : "bg-blue-100 text-blue-800"
-                      } border-transparent text-xs`}>
+                      } border-transparent text-xs px-2 py-1`}>
                       {formData.priority}
                     </Badge>
                   )}
                 </div>
               </div>
-              <h3 className="font-semibold text-gray-900 mt-2">
+              <h3 className="font-semibold text-gray-900 text-lg mb-3">
                 {formData.title || "Event Title"}
               </h3>
-              <p className="text-gray-600 text-sm mt-1">
+              <p className="text-gray-600 text-sm mb-4 leading-relaxed">
                 {formData.excerpt || "Event description will appear here..."}
               </p>
-              <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
-                <span>📅 {formData.date || "Date"}</span>
-                <span>🕒 {formData.time || "Time"}</span>
-                <span>📍 {formData.location || "Location"}</span>
+              <div className="flex items-center gap-6 text-xs text-gray-500">
+                <span className="flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  {formData.date || "Date"}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  {formData.time || "Time"}
+                </span>
+                <span className="flex items-center gap-1">
+                  <MapPin className="h-3 w-3" />
+                  {formData.location || "Location"}
+                </span>
               </div>
             </div>
           </div>
         </div>
 
-        <DialogFooter className="flex flex-col sm:flex-row gap-2 pt-4">
-          <Button variant="outline" onClick={onClose} disabled={isSaving} className="w-full sm:w-auto">
+        <DialogFooter className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-100">
+          <Button variant="outline" onClick={onClose} disabled={isSaving} className="w-full sm:w-auto h-11">
             Cancel
           </Button>
-          <Button variant="outline" onClick={() => handleSave("draft")} disabled={isSaving} className="w-full sm:w-auto">
+          <Button variant="outline" onClick={() => handleSave("draft")} disabled={isSaving} className="w-full sm:w-auto h-11">
             {isSaving ? "Saving..." : "Save Draft"}
           </Button>
-          <Button onClick={() => handleSave("published")} disabled={isSaving} className="bg-[#23479A] hover:bg-[#23479A]/90 w-full sm:w-auto">
+          <Button onClick={() => handleSave("published")} disabled={isSaving} className="bg-[#23479A] hover:bg-[#23479A]/90 w-full sm:w-auto h-11">
             {isSaving ? "Publishing..." : "Publish"}
           </Button>
         </DialogFooter>

@@ -28,6 +28,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -35,6 +45,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import useSWR, { mutate } from "swr"
+import { useToast } from "@/components/ui/toast"
 
 interface Event {
   id?: string
@@ -59,6 +70,7 @@ const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) =>
 export default function EventsPage() {
   const { data: eventData } = useSWR(`/api/event`, fetcher)
   const events: Event[] = eventData?.events || []
+  const { addToast } = useToast()
 
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
@@ -67,6 +79,8 @@ export default function EventsPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [editingEvent, setEditingEvent] = useState<Event | null>(null)
   const [modalMode, setModalMode] = useState<"create" | "edit">("create")
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [eventToDelete, setEventToDelete] = useState<Event | null>(null)
 
   const filteredEvents = events.filter((event) => {
     const matchesSearch =
@@ -142,29 +156,79 @@ export default function EventsPage() {
     setIsCreateModalOpen(true)
   }
 
-  const handleSaveEvent = (eventData: Event) => {
-    // TODO: Call API to save event, then revalidate SWR
-    console.log("Saving event:", eventData)
+  const handleSaveEvent = async (eventData: Event) => {
+    try {
+      console.log("Event saved successfully:", eventData)
+      
+      // Revalidate SWR cache to refresh the events list
+      mutate("/api/event")
+      
+      // Show success toast based on status
+      if (eventData.status === "published") {
+        addToast({
+          title: "Event Published Successfully!",
+          description: `"${eventData.title}" has been published and is now visible to residents.`,
+        })
+      } else {
+        addToast({
+          title: "Event Saved as Draft",
+          description: `"${eventData.title}" has been saved as a draft.`,
+        })
+      }
+    } catch (error) {
+      console.error("Error handling save:", error)
+      addToast({
+        title: "Error Saving Event",
+        description: "There was an error saving the event. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
-  const handleDeleteEvent = async (eventId?: string) => {
+  const handleDeleteEvent = (eventId?: string) => {
     if (!eventId) return
-
-    if (confirm("Are you sure you want to delete this event?")) {
-      try {
-        const res = await fetch(`/api/event?id=${eventId}`, {
-          method: "DELETE",
-        })
-
-        if (!res.ok) throw new Error("Failed to delete event")
-
-        // Revalidate SWR cache so UI updates
-        mutate("/api/event")
-      } catch (error) {
-        console.error("Error deleting event:", error)
-        alert("Failed to delete event")
-      }
+    const eventToDelete = events.find((event) => event.id === eventId)
+    if (eventToDelete) {
+      setEventToDelete(eventToDelete)
+      setIsDeleteDialogOpen(true)
     }
+  }
+
+  const confirmDeleteEvent = async () => {
+    if (!eventToDelete?.id) return
+
+    try {
+      const res = await fetch(`/api/event?id=${eventToDelete.id}`, {
+        method: "DELETE",
+      })
+
+      if (!res.ok) throw new Error("Failed to delete event")
+
+      // Revalidate SWR cache so UI updates
+      mutate("/api/event")
+      
+      // Show success toast
+      addToast({
+        title: "Event Deleted Successfully",
+        description: `"${eventToDelete.title}" has been permanently deleted.`,
+      })
+      
+      // Close dialog and reset state
+      setIsDeleteDialogOpen(false)
+      setEventToDelete(null)
+    } catch (error) {
+      console.error("Error deleting event:", error)
+      addToast({
+        title: "Error Deleting Event",
+        description: "There was an error deleting the event. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const cancelDeleteEvent = () => {
+    setIsDeleteDialogOpen(false)
+    setEventToDelete(null)
   }
 
   const handleToggleStatus = async (eventId?: string, currentStatus?: string) => {
@@ -479,6 +543,39 @@ export default function EventsPage() {
         event={editingEvent}
         mode={modalMode}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent className="bg-white max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-3 text-gray-900">
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-red-100">
+                <Trash2 className="h-5 w-5 text-red-600" />
+              </div>
+              Delete Event
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-600 leading-relaxed">
+              Are you sure you want to delete <strong>"{eventToDelete?.title}"</strong>? 
+              This action cannot be undone and will permanently remove the event from the system.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel
+              onClick={cancelDeleteEvent}
+              className="border-gray-200 hover:bg-gray-50 text-gray-700"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteEvent}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Delete Event
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

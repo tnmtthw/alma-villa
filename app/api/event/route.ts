@@ -23,11 +23,11 @@ export async function GET(request: Request) {
               where: { id },
           });
 
-          if (!document) {
-              return NextResponse.json({ message: 'Event request not found' }, { status: 404 });
+          if (!event) {
+              return NextResponse.json({ message: 'Event not found' }, { status: 404 });
           }
 
-          return NextResponse.json({ success: true, document });
+          return NextResponse.json({ success: true, event });
       }
 
       const events = await prisma.event.findMany({
@@ -81,17 +81,62 @@ export async function DELETE(request: Request) {
   }
 }
 
-export async function PATCH(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const id = searchParams.get('id') || undefined;
+export async function PUT(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
 
-  const body = await request.json();
-  const { ...rest } = body;
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: "Missing event ID" },
+        { status: 400 }
+      );
+    }
 
-  await prisma.event.update({
+    const body = await request.json();
+    const { ...rest } = body;
+
+    const updatedEvent = await prisma.event.update({
       where: { id },
       data: { ...rest },
-  });
+    });
 
-  return NextResponse.json(200);
+    return NextResponse.json({ success: true, event: updatedEvent });
+  } catch (error) {
+    console.error("Error updating event:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to update event" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: "Missing event ID" },
+        { status: 400 }
+      );
+    }
+
+    const body = await request.json();
+    const { ...rest } = body;
+
+    const updatedEvent = await prisma.event.update({
+      where: { id },
+      data: { ...rest },
+    });
+
+    return NextResponse.json({ success: true, event: updatedEvent });
+  } catch (error) {
+    console.error("Error updating event:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to update event" },
+      { status: 500 }
+    );
+  }
 }
