@@ -31,11 +31,11 @@ export default function DownloadableFormsPage() {
       category: "certificate",
       icon: FileText,
       fileSize: "245 KB",
-      pages: 2,
+      pages: 1,
       requirements: ["Valid ID", "Proof of Residency", "2x2 Photo"],
       downloadUrl: "/downloadableForms/Brgy Clearance.pdf",
       popular: true,
-      lastUpdated: "2024-01-15"
+      lastUpdated: "2025-09-15"
     },
     {
       id: "business-permit-form",
@@ -44,11 +44,11 @@ export default function DownloadableFormsPage() {
       category: "permit",
       icon: Building,
       fileSize: "456 KB",
-      pages: 4,
+      pages: 1,
       requirements: ["Valid ID", "Business Registration", "Location Map", "Tax Clearance"],
       downloadUrl: "/downloadableForms/Business Permit.pdf",
       popular: true,
-      lastUpdated: "2024-01-15"
+      lastUpdated: "2025-09-15"
     },
     {
       id: "good-moral-certificate-form",
@@ -57,10 +57,10 @@ export default function DownloadableFormsPage() {
       category: "certificate",
       icon: Users,
       fileSize: "312 KB",
-      pages: 3,
+      pages: 1,
       requirements: ["Valid ID", "Character References", "Community Endorsement"],
       downloadUrl: "/downloadableForms/Certificate of Good Moral Character.pdf",
-      lastUpdated: "2024-01-15"
+      lastUpdated: "2025-09-15"
     },
     {
       id: "indigency-certificate-form",
@@ -69,10 +69,10 @@ export default function DownloadableFormsPage() {
       category: "certificate",
       icon: Users,
       fileSize: "312 KB",
-      pages: 3,
+      pages: 1,
       requirements: ["Valid ID", "Income Statement", "Family Composition", "Proof of Residency"],
       downloadUrl: "/downloadableForms/Certificate of Indigency.pdf",
-      lastUpdated: "2024-01-15"
+      lastUpdated: "2025-09-15"
     },
     {
       id: "residency-certificate-form",
@@ -85,7 +85,7 @@ export default function DownloadableFormsPage() {
       requirements: ["Valid ID", "Utility Bills", "Lease Contract"],
       downloadUrl: "/downloadableForms/Certificate of Residency.pdf",
       popular: true,
-      lastUpdated: "2024-01-15"
+      lastUpdated: "2025-09-15"
     }
   ]
 

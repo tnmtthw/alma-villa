@@ -22,6 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Search, Trash2, Clock, CheckCircle, XCircle, Archive, Loader2, AlertCircle, AlertTriangle, X } from "lucide-react"
+import { useToast } from "@/components/ui/toast"
 
 // Import components
 import ResidentsHeader from "./residents/ResidentHeader"
@@ -47,6 +48,7 @@ const fetcher = async (url: string | URL | Request) => {
 
 
 export default function ResidentsTable() {
+  const { addToast } = useToast()
   const [allResidents, setAllResidents] = useState<Resident[]>([])
   const [activeTab, setActiveTab] = useState<"residents" | "pending" | "rejected">("residents")
   const [searchTerm, setSearchTerm] = useState("")
@@ -199,14 +201,24 @@ export default function ResidentsTable() {
       // Refresh data from API
       await fetchResidents()
 
-      alert(`${updatedResident.firstName} ${updatedResident.lastName} account updated`)
+      // Show success toast with role information
+      const roleDisplayName = updatedResident.role === "Admin" ? "Administrator" : "Regular Resident"
+      addToast({
+        title: "Account Updated Successfully!",
+        description: `${updatedResident.firstName} ${updatedResident.lastName}'s role has been changed to ${roleDisplayName}`,
+        variant: "default"
+      })
 
       // Close the view modal after update
       setIsResidentViewModalOpen(false)
       setSelectedResident(null)
     } catch (error) {
       console.error('Error updating resident:', error)
-      alert('Failed to update resident')
+      addToast({
+        title: "Update Failed",
+        description: error instanceof Error ? error.message : "Failed to update resident account. Please try again.",
+        variant: "destructive"
+      })
     }
   }
 
@@ -233,10 +245,18 @@ export default function ResidentsTable() {
       setIsResidentViewModalOpen(false)
       setSelectedResident(null)
 
-      alert(`${resident.firstName} ${resident.lastName} has been archived`)
+      addToast({
+        title: "Resident Archived",
+        description: `${resident.firstName} ${resident.lastName} has been moved to archived residents`,
+        variant: "default"
+      })
     } catch (error) {
       console.error('Error archiving resident:', error)
-      alert('Failed to archive resident')
+      addToast({
+        title: "Archive Failed",
+        description: error instanceof Error ? error.message : "Failed to archive resident. Please try again.",
+        variant: "destructive"
+      })
     }
   }
 
@@ -280,8 +300,12 @@ export default function ResidentsTable() {
         error: ""
       })
 
-      // Show success message (you can replace this with a proper toast notification)
-      alert(`${deleteModalState.resident.firstName} ${deleteModalState.resident.lastName} has been permanently deleted`)
+      // Show success toast
+      addToast({
+        title: "Resident Deleted",
+        description: `${deleteModalState.resident.firstName} ${deleteModalState.resident.lastName} has been permanently removed from the system`,
+        variant: "default"
+      })
     } catch (error) {
       console.error('Error deleting resident:', error)
       setDeleteModalState(prev => ({ 
@@ -339,7 +363,11 @@ export default function ResidentsTable() {
         error: ""
       })
 
-      alert(`${bulkDeleteModalState.residentCount} residents deleted successfully`)
+      addToast({
+        title: "Bulk Delete Successful",
+        description: `${bulkDeleteModalState.residentCount} residents have been permanently deleted from the system`,
+        variant: "default"
+      })
     } catch (error) {
       console.error('Error deleting residents:', error)
       setBulkDeleteModalState(prev => ({ 
@@ -371,10 +399,18 @@ export default function ResidentsTable() {
         // Refresh data from API
         await fetchResidents()
         setSelectedResidents([])
-        alert(`${selectedResidents.length} residents archived`)
+        addToast({
+          title: "Residents Archived",
+          description: `${selectedResidents.length} residents have been moved to archived residents`,
+          variant: "default"
+        })
       } catch (error) {
         console.error('Error archiving residents:', error)
-        alert('Failed to archive residents')
+        addToast({
+          title: "Archive Failed",
+          description: error instanceof Error ? error.message : "Failed to archive residents. Please try again.",
+          variant: "destructive"
+        })
       }
     }
   }
@@ -411,10 +447,18 @@ export default function ResidentsTable() {
       setIsReviewModalOpen(false)
       setSelectedPendingResident(null)
 
-      alert(`${resident.firstName} ${resident.lastName} has been approved and added as a resident`)
+      addToast({
+        title: "Registration Approved",
+        description: `${resident.firstName} ${resident.lastName} has been approved and added as a verified resident`,
+        variant: "default"
+      })
     } catch (error) {
       console.error('Error approving resident:', error)
-      alert('Failed to approve resident')
+      addToast({
+        title: "Approval Failed",
+        description: error instanceof Error ? error.message : "Failed to approve resident registration. Please try again.",
+        variant: "destructive"
+      })
     }
   }
 
@@ -444,10 +488,18 @@ export default function ResidentsTable() {
       setIsReviewModalOpen(false)
       setSelectedPendingResident(null)
 
-      alert(`${resident.firstName} ${resident.lastName} application has been rejected`)
+      addToast({
+        title: "Registration Rejected",
+        description: `${resident.firstName} ${resident.lastName}'s application has been rejected`,
+        variant: "default"
+      })
     } catch (error) {
       console.error('Error rejecting resident:', error)
-      alert('Failed to reject resident')
+      addToast({
+        title: "Rejection Failed",
+        description: error instanceof Error ? error.message : "Failed to reject resident registration. Please try again.",
+        variant: "destructive"
+      })
     }
   }
 
@@ -534,10 +586,18 @@ export default function ResidentsTable() {
 
       // Refresh data from API
       await fetchResidents()
-      alert(`${data.firstName} ${data.lastName} has been added successfully`)
+      addToast({
+        title: "Resident Added",
+        description: `${data.firstName} ${data.lastName} has been successfully added to the system`,
+        variant: "default"
+      })
     } catch (error) {
       console.error('Error adding resident:', error)
-      alert('Failed to add resident')
+      addToast({
+        title: "Add Failed",
+        description: error instanceof Error ? error.message : "Failed to add resident. Please try again.",
+        variant: "destructive"
+      })
     }
   }
 
@@ -554,12 +614,20 @@ export default function ResidentsTable() {
         throw new Error('Failed to import residents')
       }
 
-      alert(`File "${file.name}" uploaded successfully`)
+      addToast({
+        title: "Import Successful",
+        description: `File "${file.name}" has been uploaded and processed successfully`,
+        variant: "default"
+      })
       // Refresh data after import
       await fetchResidents()
     } catch (error) {
       console.error('Error importing residents:', error)
-      alert('Failed to import residents')
+      addToast({
+        title: "Import Failed",
+        description: error instanceof Error ? error.message : "Failed to import residents. Please check your file format.",
+        variant: "destructive"
+      })
     }
   }
 
@@ -854,7 +922,7 @@ export default function ResidentsTable() {
                     <SelectContent>
                       <SelectItem value="All">All Roles</SelectItem>
                       <SelectItem value="Admin">Admin</SelectItem>
-                      <SelectItem value="Verified">Verified</SelectItem>
+                      <SelectItem value="Verified">Regular Residents</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
@@ -928,10 +996,7 @@ export default function ResidentsTable() {
                         isSelected={selectedResidents.includes(resident.id)}
                         onSelect={handleSelectResident}
                         onView={(r) => handleViewResident((resident))}
-                        onEdit={(r) => handleEditResident((resident))}
                         onUpdate={handleUpdateResident}
-                        onArchive={(r) => handleArchiveResident((resident))}
-                        onDelete={(r) => handleDeleteResident((resident))}
                       />
                     ))}
                   </TableBody>
@@ -1032,9 +1097,6 @@ export default function ResidentsTable() {
           setSelectedResident(null)
         }}
         resident={selectedResident}
-        onEdit={handleEditResident}
-        onArchive={handleArchiveResident}
-        onDelete={handleDeleteResident}
         onUpdateRole={handleUpdateResidentRole}
       />
 

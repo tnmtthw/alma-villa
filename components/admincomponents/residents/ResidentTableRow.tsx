@@ -21,10 +21,7 @@ interface ResidentTableRowProps {
   isSelected: boolean
   onSelect: (id: string, checked: boolean) => void
   onView: (resident: Resident) => void
-  onEdit: (resident: Resident) => void
   onUpdate: (resident: Resident) => void
-  onArchive: (resident: Resident) => void
-  onDelete: (resident: Resident) => void
 }
 
 export default function ResidentTableRow({
@@ -32,17 +29,14 @@ export default function ResidentTableRow({
   isSelected,
   onSelect,
   onView,
-  onEdit,
-  onUpdate,
-  onArchive,
-  onDelete
+  onUpdate
 }: ResidentTableRowProps) {
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean
-    type: "deactivate" | "activate" | "role-admin" | "role-resident" | "archive" | "delete"
+    type: "role-admin" | "role-resident"
   }>({
     isOpen: false,
-    type: "deactivate"
+    type: "role-admin"
   })
 
   const getInitials = (firstName: string, lastName: string) => {
@@ -60,13 +54,6 @@ export default function ResidentTableRow({
   // For demo purposes, assuming residents are active
   const isActive = true
 
-  const handleToggleStatus = (resident: Resident, status: "Active" | "Inactive") => {
-    setConfirmModal({
-      isOpen: true,
-      type: status === "Active" ? "activate" : "deactivate"
-    })
-  }
-
   const handleSetRole = (resident: Resident, role: "Admin" | "Verified") => {
     setConfirmModal({
       isOpen: true,
@@ -74,41 +61,16 @@ export default function ResidentTableRow({
     })
   }
 
-  const handleArchive = (resident: Resident) => {
-    setConfirmModal({
-      isOpen: true,
-      type: "archive"
-    })
-  }
-
-  const handleDeleteConfirm = (resident: Resident) => {
-    setConfirmModal({
-      isOpen: true,
-      type: "delete"
-    })
-  }
-
   const handleConfirmAction = () => {
     switch (confirmModal.type) {
-      case "deactivate":
-      case "activate":
-        // Update resident status
-        onUpdate({ ...resident, status: confirmModal.type === "activate" ? "Active" : "Inactive" } as any)
-        break
       case "role-admin":
         onUpdate({ ...resident, role: "Admin" })
         break
       case "role-resident":
         onUpdate({ ...resident, role: "Verified" })
         break
-      case "archive":
-        onArchive(resident)
-        break
-      case "delete":
-        onDelete(resident)
-        break
     }
-    setConfirmModal({ isOpen: false, type: "deactivate" })
+    setConfirmModal({ isOpen: false, type: "role-admin" })
   }
 
   return (
@@ -252,13 +214,8 @@ export default function ResidentTableRow({
           <div className="opacity-0 group-hover:opacity-100 transition-opacity">
             <ResidentActionsDropdown
               resident={resident}
-              isActive={isActive}
               onView={onView}
-              onEdit={onEdit}
-              onToggleStatus={handleToggleStatus}
               onSetRole={handleSetRole}
-              onArchive={handleArchive}
-              onDelete={handleDeleteConfirm}
             />
           </div>
         </td>
@@ -267,7 +224,7 @@ export default function ResidentTableRow({
       {/* Confirmation Modal */}
       <ConfirmationModals
         isOpen={confirmModal.isOpen}
-        onClose={() => setConfirmModal({ isOpen: false, type: "deactivate" })}
+        onClose={() => setConfirmModal({ isOpen: false, type: "role-admin" })}
         onConfirm={handleConfirmAction}
         type={confirmModal.type}
         resident={resident}

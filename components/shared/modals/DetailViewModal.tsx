@@ -655,9 +655,6 @@ interface ResidentViewModalProps {
   isOpen: boolean
   onClose: () => void
   resident: any // Replace with your Resident type
-  onEdit?: (resident: any) => void
-  onArchive?: (resident: any) => void
-  onDelete?: (resident: any) => void
   onUpdateRole?: (resident: any, newRole: string) => void
 }
 
@@ -665,9 +662,6 @@ export function ResidentViewModal({
   isOpen,
   onClose,
   resident,
-  onEdit,
-  onArchive,
-  onDelete,
   onUpdateRole
 }: ResidentViewModalProps) {
   if (!resident) return null
@@ -733,16 +727,7 @@ export function ResidentViewModal({
 
   const actions = []
 
-  // Secondary actions (left side)
-  if (onEdit) {
-    actions.push({
-      label: "Edit Information",
-      onClick: () => onEdit(resident),
-      variant: 'outline' as const,
-      icon: <User className="h-4 w-4" />
-    })
-  }
-
+  // Only keep role management action
   if (onUpdateRole) {
     const newRole = resident.role === 'Admin' ? 'Resident' : 'Admin'
     actions.push({
@@ -750,33 +735,6 @@ export function ResidentViewModal({
       onClick: () => onUpdateRole(resident, newRole),
       variant: 'secondary' as const,
       icon: <Shield className="h-4 w-4" />
-    })
-  }
-
-  // Destructive actions (right side, but styled as outline)
-  if (onArchive) {
-    actions.push({
-      label: "Archive Account",
-      onClick: () => {
-        if (confirm(`Are you sure you want to archive ${resident.firstName} ${resident.lastName}? This account will be moved to archived residents.`)) {
-          onArchive(resident)
-        }
-      },
-      variant: 'destructive' as const,
-      icon: <Archive className="h-4 w-4" />
-    })
-  }
-
-  if (onDelete) {
-    actions.push({
-      label: "Delete Account",
-      onClick: () => {
-        if (confirm(`Are you sure you want to permanently delete ${resident.firstName} ${resident.lastName}? This action cannot be undone.`)) {
-          onDelete(resident)
-        }
-      },
-      variant: 'destructive' as const,
-      icon: <Trash2 className="h-4 w-4" />
     })
   }
 

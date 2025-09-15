@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { FileText, History, MessageSquare, Bell, Plus, ChevronRight, TrendingUp, Clock, CheckCircle, ArrowUpRight, Activity, Calendar, Users, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -11,54 +11,90 @@ import ScrollToTop from "@/components/ScrollToTop"
 import { useSession } from "next-auth/react"
 import useSWR from 'swr'
 
-const stats = [
-  {
-    title: "Pending Requests",
-    value: "2",
-    change: "+1 from last week",
-    description: "Active requests awaiting approval",
-    icon: MessageSquare,
-    color: "text-amber-600",
-    bgColor: "bg-amber-50",
-    borderColor: "border-amber-200",
-    trend: "up"
-  },
-  {
-    title: "Completed Forms",
-    value: "5",
-    change: "+2 this month",
-    description: "Successfully processed",
-    icon: CheckCircle,
-    color: "text-emerald-600",
-    bgColor: "bg-emerald-50",
-    borderColor: "border-emerald-200",
-    trend: "up"
-  },
-  {
-    title: "Total Requests",
-    value: "12",
-    change: "All time",
-    description: "Historical submissions",
-    icon: TrendingUp,
-    color: "text-blue-600",
-    bgColor: "bg-blue-50",
-    borderColor: "border-blue-200",
-    trend: "neutral"
-  },
-  {
-    title: "New Updates",
-    value: "3",
-    change: "This week",
-    description: "Notifications & announcements",
-    icon: Bell,
-    color: "text-purple-600",
-    bgColor: "bg-purple-50",
-    borderColor: "border-purple-200",
-    trend: "up"
-  },
-]
+const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) => fetch(...args).then((res) => res.json());
 
-const recentActivities = [
+// Type for activity items
+interface ActivityItem {
+  title: string;
+  description: string;
+  icon: any;
+  time: string;
+  status: string;
+  color: string;
+  bgColor: string;
+  statusColor: string;
+}
+
+// Static template for stats configuration
+const getStatsConfig = (documentsData: any[], eventsData: any[]) => {
+  // Calculate document counts
+  const pendingCount = documentsData.filter(doc => 
+    doc.status?.toLowerCase() === "pending"
+  ).length;
+  
+  const completedCount = documentsData.filter(doc => 
+    doc.status?.toLowerCase() === "completed" || doc.status?.toLowerCase() === "ready_to_claim"
+  ).length;
+  
+  const totalCount = documentsData.length;
+  
+  // Calculate recent events (last 7 days)
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+  
+  const recentEventsCount = eventsData.filter(event => 
+    event.status === "published" && new Date(event.createdAt) >= weekAgo
+  ).length;
+
+  return [
+    {
+      title: "Pending Requests",
+      value: pendingCount.toString(),
+      change: "+1 from last week",
+      description: "Active requests awaiting approval",
+      icon: MessageSquare,
+      color: "text-amber-600",
+      bgColor: "bg-amber-50",
+      borderColor: "border-amber-200",
+      trend: "up"
+    },
+    {
+      title: "Completed Forms",
+      value: completedCount.toString(),
+      change: "+2 this month",
+      description: "Successfully processed",
+      icon: CheckCircle,
+      color: "text-emerald-600",
+      bgColor: "bg-emerald-50",
+      borderColor: "border-emerald-200",
+      trend: "up"
+    },
+    {
+      title: "Total Requests",
+      value: totalCount.toString(),
+      change: "All time",
+      description: "Historical submissions",
+      icon: TrendingUp,
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
+      borderColor: "border-blue-200",
+      trend: "neutral"
+    },
+    {
+      title: "New Updates",
+      value: recentEventsCount.toString(),
+      change: "This week",
+      description: "Notifications & announcements",
+      icon: Bell,
+      color: "text-purple-600",
+      bgColor: "bg-purple-50",
+      borderColor: "border-purple-200",
+      trend: "up"
+    },
+  ];
+};
+
+const recentActivities: ActivityItem[] = [
   {
     title: "Barangay Clearance",
     description: "Application approved and ready for pickup",
@@ -142,15 +178,74 @@ const upcomingEvents = [
   },
 ]
 
-const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) => fetch(...args).then((res) => res.json());
-
 export default function DashboardPage() {
   const [isSupportOpen, setIsSupportOpen] = useState(false)
   const { data: session } = useSession()
 
+  // Fetch user profile data
   const { data } = useSWR(`/api/user?id=${session?.user.id}`, fetcher)
+  
+  // Fetch user documents for stats
+  const { data: documentsResponse } = useSWR(
+    session?.user?.id ? `/api/user/docs?userId=${session.user.id}` : null,
+    fetcher
+  )
+  
+  // Fetch events/news for updates count
+  const { data: eventsResponse } = useSWR('/api/event', fetcher)
 
   const userName = data?.firstName
+  
+  // Get documents and events data with fallbacks
+  const documentsData = documentsResponse?.documents || []
+  const eventsData = eventsResponse?.events || []
+  
+  // Calculate dynamic stats
+  const stats = useMemo(() => {
+    return getStatsConfig(documentsData, eventsData)
+  }, [documentsData, eventsData])
+  
+  // Generate dynamic recent activities from user's actual documents
+  const dynamicRecentActivities: ActivityItem[] = useMemo(() => {
+    return documentsData
+      .slice(0, 3) // Get latest 3 documents
+      .map((doc: any): ActivityItem => {
+        const createdDate = new Date(doc.createdAt)
+        const now = new Date()
+        const diffTime = Math.abs(now.getTime() - createdDate.getTime())
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+        
+        const timeAgo = diffDays === 1 ? '1 day ago' : 
+                      diffDays < 7 ? `${diffDays} days ago` : 
+                      diffDays < 30 ? `${Math.ceil(diffDays / 7)} weeks ago` : 
+                      `${Math.ceil(diffDays / 30)} months ago`
+        
+        const getStatusDisplay = (status: string) => {
+          switch (status?.toLowerCase()) {
+            case 'pending': return { status: 'pending', icon: Clock, color: 'text-amber-600', bgColor: 'bg-amber-50', statusColor: 'bg-amber-100 text-amber-800', description: 'Awaiting review by barangay office' }
+            case 'processing': return { status: 'processing', icon: FileText, color: 'text-blue-600', bgColor: 'bg-blue-50', statusColor: 'bg-blue-100 text-blue-800', description: 'Under review by barangay office' }
+            case 'approved': return { status: 'approved', icon: CheckCircle, color: 'text-purple-600', bgColor: 'bg-purple-50', statusColor: 'bg-purple-100 text-purple-800', description: 'Approved and processing payment' }
+            case 'ready_to_claim': return { status: 'ready', icon: CheckCircle, color: 'text-emerald-600', bgColor: 'bg-emerald-50', statusColor: 'bg-emerald-100 text-emerald-800', description: 'Ready for pickup' }
+            case 'completed': return { status: 'completed', icon: CheckCircle, color: 'text-emerald-600', bgColor: 'bg-emerald-50', statusColor: 'bg-emerald-100 text-emerald-800', description: 'Application completed successfully' }
+            case 'rejected': return { status: 'rejected', icon: History, color: 'text-red-600', bgColor: 'bg-red-50', statusColor: 'bg-red-100 text-red-800', description: 'Requires attention or resubmission' }
+            default: return { status: 'unknown', icon: Clock, color: 'text-gray-600', bgColor: 'bg-gray-50', statusColor: 'bg-gray-100 text-gray-800', description: 'Status pending update' }
+          }
+        }
+        
+        const statusInfo = getStatusDisplay(doc.status)
+        
+        return {
+          title: doc.type || 'Document Request',
+          description: statusInfo.description,
+          icon: statusInfo.icon,
+          time: timeAgo,
+          status: statusInfo.status,
+          color: statusInfo.color,
+          bgColor: statusInfo.bgColor,
+          statusColor: statusInfo.statusColor
+        }
+      })
+  }, [documentsData])
 
   return (
     <main>
@@ -284,7 +379,7 @@ export default function DashboardPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3 sm:space-y-4 px-4 sm:px-6 pb-4 sm:pb-6">
-                  {recentActivities.map((activity, index) => {
+                  {(dynamicRecentActivities.length > 0 ? dynamicRecentActivities : recentActivities).map((activity, index) => {
                     const Icon = activity.icon
                     return (
                       <div key={index} className="group flex items-start sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-gray-50/80 hover:bg-gray-100/80 transition-all duration-200 hover:shadow-md border border-gray-100">

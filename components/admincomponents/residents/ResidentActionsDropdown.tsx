@@ -15,13 +15,7 @@ import {
 import {
   MoreHorizontal,
   Eye,
-  Edit,
-  UserCheck,
-  UserX,
   Shield,
-  ShieldCheck,
-  Archive,
-  Trash2,
   User,
   Crown,
 } from "lucide-react"
@@ -29,24 +23,14 @@ import { Resident } from "./types"
 
 interface ResidentActionsDropdownProps {
   resident: Resident
-  isActive?: boolean
   onView: (resident: Resident) => void
-  onEdit: (resident: Resident) => void
-  onToggleStatus: (resident: Resident, status: "Active" | "Inactive") => void
   onSetRole: (resident: Resident, role: "Admin" | "Verified") => void
-  onArchive: (resident: Resident) => void
-  onDelete: (resident: Resident) => void
 }
 
 export default function ResidentActionsDropdown({
   resident,
-  isActive = true,
   onView,
-  onEdit,
-  onToggleStatus,
-  onSetRole,
-  onArchive,
-  onDelete
+  onSetRole
 }: ResidentActionsDropdownProps) {
   return (
     <DropdownMenu>
@@ -71,34 +55,7 @@ export default function ResidentActionsDropdown({
           <span className="text-gray-700">View Details</span>
         </DropdownMenuItem>
 
-        {/* Edit Action */}
-        <DropdownMenuItem
-          onClick={() => onEdit(resident)}
-          className="hover:bg-gray-50 cursor-pointer focus:bg-gray-50"
-        >
-          <Edit className="h-4 w-4 mr-3 text-green-500" />
-          <span className="text-gray-700">Edit Information</span>
-        </DropdownMenuItem>
-
         <DropdownMenuSeparator className="bg-gray-100" />
-
-        {/* Status Toggle */}
-        <DropdownMenuItem
-          onClick={() => onToggleStatus(resident, isActive ? "Inactive" : "Active")}
-          className="hover:bg-gray-50 cursor-pointer focus:bg-gray-50"
-        >
-          {isActive ? (
-            <>
-              <UserX className="h-4 w-4 mr-3 text-orange-500" />
-              <span className="text-gray-700">Deactivate Account</span>
-            </>
-          ) : (
-            <>
-              <UserCheck className="h-4 w-4 mr-3 text-green-500" />
-              <span className="text-gray-700">Activate Account</span>
-            </>
-          )}
-        </DropdownMenuItem>
 
         {/* Role Management Sub-menu */}
         <DropdownMenuSub>
@@ -136,26 +93,6 @@ export default function ResidentActionsDropdown({
             </DropdownMenuItem>
           </DropdownMenuSubContent>
         </DropdownMenuSub>
-
-        <DropdownMenuSeparator className="bg-gray-100" />
-
-        {/* Archive Action */}
-        <DropdownMenuItem
-          onClick={() => onArchive(resident)}
-          className="hover:bg-yellow-50 cursor-pointer focus:bg-yellow-50"
-        >
-          <Archive className="h-4 w-4 mr-3 text-yellow-600" />
-          <span className="text-gray-700">Archive Resident</span>
-        </DropdownMenuItem>
-
-        {/* Delete Action */}
-        <DropdownMenuItem
-          onClick={() => onDelete(resident)}
-          className="hover:bg-red-50 cursor-pointer focus:bg-red-50 text-red-600"
-        >
-          <Trash2 className="h-4 w-4 mr-3 text-red-500" />
-          <span className="text-red-600">Delete Permanently</span>
-        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )
