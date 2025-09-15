@@ -3,7 +3,6 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('Fetching navigation counts...')
     
     // Fetch pending requests count
     const pendingRequests = await prisma.document.count({
@@ -29,7 +28,6 @@ export async function GET(request: NextRequest) {
       upcomingEvents
     }
 
-    console.log('Navigation counts:', counts)
     
     return NextResponse.json({ 
       success: true, 

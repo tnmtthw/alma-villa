@@ -3,7 +3,6 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('Fetching dashboard stats...')
     
     // Get counts for different statistics
     const [
@@ -39,7 +38,6 @@ export async function GET(request: NextRequest) {
       })
     ])
 
-    console.log('Raw counts:', { totalResidents, totalRequests, totalPending, totalCompleted })
 
     // Calculate week-over-week changes
     const weekAgo = new Date()
@@ -152,7 +150,6 @@ export async function GET(request: NextRequest) {
       }
     ]
 
-    console.log('Final stats:', stats)
     return NextResponse.json({ success: true, stats })
   } catch (error) {
     console.error('Error fetching dashboard stats:', error)

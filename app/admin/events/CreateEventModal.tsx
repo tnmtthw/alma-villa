@@ -185,21 +185,30 @@ export default function CreateEventModal({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(eventToSave),
         })
-        if (!res.ok) throw new Error("Failed to create event")
-        savedEvent = await res.json()
+        if (!res.ok) {
+          const errorText = await res.text()
+          throw new Error(`Failed to create event: ${errorText}`)
+        }
+        const response = await res.json()
+        savedEvent = response.event
       } else {
-        const res = await fetch(`/api/event/${event?.id}`, {
+        const res = await fetch(`/api/event?id=${event?.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(eventToSave),
         })
-        if (!res.ok) throw new Error("Failed to update event")
-        savedEvent = await res.json()
+        if (!res.ok) {
+          const errorText = await res.text()
+          throw new Error(`Failed to update event: ${errorText}`)
+        }
+        const response = await res.json()
+        savedEvent = response.event
       }
       onSave(savedEvent)
       onClose()
     } catch (error) {
       console.error("Error saving event:", error)
+      alert(`Error saving event: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setIsSaving(false)
     }

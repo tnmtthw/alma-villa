@@ -3,7 +3,6 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('Fetching requests stats...')
     
     // Get counts for different request statuses
     const [
@@ -63,15 +62,6 @@ export async function GET(request: NextRequest) {
       })
     ])
 
-    console.log('Raw request counts:', { 
-      totalRequests, 
-      pendingRequests, 
-      approvedRequests, 
-      processingRequests, 
-      paymentRequests, 
-      readyForClaimRequests, 
-      completedRequests 
-    })
 
     // Calculate week-over-week changes
     const weekAgo = new Date()
@@ -214,7 +204,6 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    console.log('Final request stats:', stats)
     return NextResponse.json({ success: true, stats })
   } catch (error) {
     console.error('Error fetching request stats:', error)

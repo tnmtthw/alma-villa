@@ -158,8 +158,6 @@ export default function EventsPage() {
 
   const handleSaveEvent = async (eventData: Event) => {
     try {
-      console.log("Event saved successfully:", eventData)
-      
       // Revalidate SWR cache to refresh the events list
       mutate("/api/event")
       
