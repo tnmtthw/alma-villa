@@ -163,7 +163,7 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
     purpose: doc.purpose,
     fee: "₱50.00", // Example: replace with real fee field if available
     progress: doc.status === "pending" ? 25
-      : doc.status === "under_review" ? 60
+      : doc.status === "approved" ? 60
         : doc.status === "processing" ? 40
           : doc.status === "ready_for_claim" ? 100
             : doc.status === "completed" ? 100

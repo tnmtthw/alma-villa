@@ -153,13 +153,13 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
   return (
     <Card className="bg-white border-0 shadow-lg">
       <CardHeader className="border-b">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <CardTitle className="text-xl">Certificate of Residency Application Form</CardTitle>
           <Button
             type="button"
             onClick={fillSampleData}
             variant="outline"
-            className="text-sm border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10"
+            className="text-sm border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10 w-full sm:w-auto"
           >
             Fill Sample Data
           </Button>
@@ -169,13 +169,13 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
         </p>
       </CardHeader>
 
-      <CardContent className="p-6">
+      <CardContent className="p-4 sm:p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Personal Information Section */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium border-b pb-2">Personal Information</h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
               <div className="md:col-span-2">
                 <Label htmlFor="fullName">Full Name *</Label>
                 <Input
@@ -292,18 +292,19 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
         </div> */}
 
           {/* Submit Button */}
-          <div className="flex justify-end gap-4">
+          <div className="flex flex-col sm:flex-row sm:justify-end gap-2 sm:gap-4">
             <Button
               type="button"
               onClick={onBackAction}
               variant="outline"
+              className="w-full sm:w-auto"
             >
               Back
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="bg-[#23479A] hover:bg-[#23479A]/90 text-white px-8"
+              className="bg-[#23479A] hover:bg-[#23479A]/90 text-white px-6 sm:px-8 w-full sm:w-auto"
             >
               {isSubmitting ? (
                 <>

@@ -9,13 +9,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { ArrowLeft, Upload, X, FileText, Building, User } from "lucide-react"
+import { ArrowLeft, Upload, X, FileText, Building, User, Eye } from "lucide-react"
 import { useToast } from "@/components/ui/toast"
 import { useSession } from "next-auth/react"
 
 interface BusinessPermitFormProps {
   onBackAction: () => void
   onSubmit: (formData: any) => void
+}
+
+interface AttachmentFile extends File {
+  preview?: string
 }
 
 interface FormData {
@@ -25,7 +29,7 @@ interface FormData {
   operatorAddress: string
   amountPaid: string
   orNumbers: string
-  attachments: File[]
+  attachments: AttachmentFile[]
 }
 
 const sampleData: FormData = {
@@ -50,6 +54,7 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
   })
   const { addToast } = useToast()
   const { data: session } = useSession()
+  const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null)
 
   const handleInputChange = (field: keyof FormData, value: any) => {
     setFormData(prev => ({
@@ -61,9 +66,23 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (files) {
+      const newFiles: AttachmentFile[] = Array.from(files).map((file) => {
+        const f = file as AttachmentFile
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader()
+          reader.onload = (ev) => {
+            f.preview = ev.target?.result as string
+            // force re-render to reflect late preview read
+            setFormData(prev => ({ ...prev }))
+          }
+          reader.readAsDataURL(file)
+        }
+        return f
+      })
+
       setFormData(prev => ({
         ...prev,
-        attachments: [...prev.attachments, ...Array.from(files)]
+        attachments: [...prev.attachments, ...newFiles]
       }))
     }
   }
@@ -74,6 +93,9 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
       attachments: prev.attachments.filter((_, i) => i !== index)
     }))
   }
+
+  const openImagePreview = (src: string) => setSelectedImagePreview(src)
+  const closeImagePreview = () => setSelectedImagePreview(null)
 
   const fillWithSampleData = () => {
     setFormData(sampleData)
@@ -156,11 +178,11 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6 space-y-6">
       {/* Header Card */}
       <Card>
         <CardHeader>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
             <Button
               type="button"
               onClick={onBackAction}
@@ -180,7 +202,7 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-4 pt-4">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 pt-4">
             <Badge variant="outline" className="text-[#23479A] border-[#23479A]">
               Fee: ₱200
             </Badge>
@@ -284,7 +306,7 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               <div className="space-y-2">
                 <Label htmlFor="amountPaid">Amount Paid (PHP) *</Label>
                 <Input
@@ -321,7 +343,7 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors">
+              <div className="flex justify-center px-4 sm:px-6 pt-5 pb-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 transition-colors">
                 <div className="space-y-2 text-center">
                   <Upload className="mx-auto h-12 w-12 text-gray-400" />
                   <div className="text-sm text-gray-600">
@@ -353,20 +375,31 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
                     {formData.attachments.map((file, index) => (
                       <div
                         key={index}
-                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border"
+                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-gray-50 rounded-lg border"
                       >
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-gray-500" />
-                          <span className="text-sm text-gray-700">{file.name}</span>
-                          <Badge variant="outline" className="text-xs">
-                            {(file.size / 1024 / 1024).toFixed(2)} MB
-                          </Badge>
+                        <div className="flex items-center gap-3">
+                          {file.type.startsWith('image/') && (file as AttachmentFile).preview ? (
+                            <img
+                              src={(file as AttachmentFile).preview as string}
+                              alt="Preview"
+                              className="h-10 w-10 rounded object-cover border cursor-pointer"
+                              onClick={() => openImagePreview((file as AttachmentFile).preview as string)}
+                            />
+                          ) : (
+                            <FileText className="h-5 w-5 text-gray-500" />
+                          )}
+                          <div className="min-w-0">
+                            <span className="text-sm text-gray-700 break-all">{file.name}</span>
+                            <Badge variant="outline" className="text-xs ml-2">
+                              {(file.size / 1024 / 1024).toFixed(2)} MB
+                            </Badge>
+                          </div>
                         </div>
                         <Button
                           type="button"
                           onClick={() => removeFile(index)}
                           variant="outline"
-                          className="h-8 w-8 p-0"
+                          className="h-8 w-8 p-0 self-end sm:self-auto"
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -379,24 +412,60 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
           </CardContent>
         </Card>
 
+        {/* Image Preview Modal */}
+        {selectedImagePreview && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex min-h-screen items-center justify-center p-4 text-center">
+              <div
+                className="fixed inset-0 bg-gray-500 bg-opacity-25 backdrop-blur-sm transition-opacity"
+                onClick={closeImagePreview}
+              />
+
+              <div className="relative transform overflow-hidden rounded-lg bg-white/95 backdrop-blur-sm text-left shadow-xl transition-all sm:my-8 w-full sm:max-w-3xl">
+                <div className="flex flex-col items-center justify-center p-4">
+                  <div className="mb-4 w-full flex justify-between items-center">
+                    <h3 className="text-lg font-semibold text-gray-900">Image Preview</h3>
+                    <Button
+                      onClick={closeImagePreview}
+                      variant="ghost"
+                      className="h-8 w-8 p-0 hover:bg-gray-100"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  <div className="max-w-full max-h-[70vh] overflow-auto bg-gray-50 rounded-lg p-4">
+                    <img
+                      src={selectedImagePreview}
+                      alt="Document preview"
+                      className="max-w-full h-auto rounded shadow-lg"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Submit Actions */}
         <Card>
           <CardContent className="pt-6">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
               <p className="text-sm text-gray-600">
                 * Required fields must be completed before submission
               </p>
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
                 <Button
                   type="button"
                   onClick={onBackAction}
                   variant="outline"
+                  className="w-full sm:w-auto"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
-                  className="bg-[#23479A] hover:bg-[#23479A]/90"
+                  className="bg-[#23479A] hover:bg-[#23479A]/90 w-full sm:w-auto"
                 >
                   Submit Application
                 </Button>

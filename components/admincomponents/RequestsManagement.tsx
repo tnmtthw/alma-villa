@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useMemo } from "react"
+import React, { useState, useMemo, useEffect } from "react"
 import useSWR from "swr"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -17,7 +17,6 @@ import {
   Eye,
   CheckCircle,
   XCircle,
-  Download,
   RefreshCw,
   CreditCard,
   ArrowUpDown,
@@ -122,6 +121,10 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
   const [userIdFilter, setUserIdFilter] = useState("")
 
+  // API Stats state
+  const [apiStats, setApiStats] = useState<any>(null)
+  const [statsLoading, setStatsLoading] = useState(true)
+
   // Modal states
   const [selectedRequest, setSelectedRequest] = useState<DocumentRequest | null>(null)
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
@@ -134,6 +137,28 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
   })
 
   const effectiveUserId = userId || userIdFilter || null
+
+  // Fetch request statistics from API
+  useEffect(() => {
+    const fetchRequestStats = async () => {
+      try {
+        setStatsLoading(true)
+        const response = await fetch('/api/admin/requests/stats')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success) {
+            setApiStats(data.stats)
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching request stats:', error)
+      } finally {
+        setStatsLoading(false)
+      }
+    }
+
+    fetchRequestStats()
+  }, [])
 
   // Fetch documents using custom hook - choose between all documents or user-specific
   const { documents: allDocuments, pagination: allPagination, error: allError, isLoading: allIsLoading, mutate: allMutate } = useDocumentRequests()
@@ -151,12 +176,27 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
     return documents.map(transformDocumentToRequest)
   }, [documents])
 
-  // Calculate statistics
+  // Calculate statistics - use API data when available, fallback to local calculation
   const stats: RequestStats = useMemo(() => {
+    if (apiStats) {
+      return {
+        total: apiStats.total?.count || 0,
+        pending: apiStats.pending?.count || 0,
+        approved: apiStats.approved?.count || 0,
+        processing: apiStats.processing?.count || 0,
+        paymentPending: apiStats.payment?.count || 0,
+        readyForClaim: apiStats.readyForClaim?.count || 0,
+        completed: apiStats.completed?.count || 0,
+        rejected: requests.filter(r => r.status?.toLowerCase() === "rejected").length,
+        urgent: requests.filter(r => r.urgentRequest).length
+      }
+    }
+    
+    // Fallback to local calculation
     return {
       total: requests.length,
       pending: requests.filter(r => r.status?.toLowerCase() === "pending").length,
-      underReview: requests.filter(r => r.status?.toLowerCase() === "under_review").length,
+      approved: requests.filter(r => r.status?.toLowerCase() === "approved").length,
       processing: requests.filter(r => r.status?.toLowerCase() === "processing").length,
       paymentPending: requests.filter(r => r.status?.toLowerCase() === "payment_pending").length,
       readyForClaim: requests.filter(r => r.status?.toLowerCase() === "ready_for_claim").length,
@@ -164,7 +204,7 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
       rejected: requests.filter(r => r.status?.toLowerCase() === "rejected").length,
       urgent: requests.filter(r => r.urgentRequest).length
     }
-  }, [requests])
+  }, [apiStats, requests])
 
   // Filter and sort requests
   const filteredRequests = useMemo(() => {
@@ -378,11 +418,10 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
   const statsConfig = [
     { title: "Total", value: stats.total, icon: FileText, color: "text-blue-600" },
     { title: "Pending", value: stats.pending, icon: Clock, color: "text-orange-600" },
-    { title: "Review", value: stats.underReview, icon: Eye, color: "text-blue-600" },
+    { title: "Approved", value: stats.approved, icon: CheckCircle, color: "text-blue-600" },
     { title: "Processing", value: stats.processing, icon: RefreshCw, color: "text-purple-600" },
     { title: "Payment", value: stats.paymentPending, icon: CreditCard, color: "text-yellow-600" },
-    { title: "Ready", value: stats.readyForClaim, icon: CheckCircle, color: "text-green-600" },
-    { title: "Completed", value: stats.completed, icon: CheckCircle, color: "text-gray-600" },
+    { title: "Ready for Claim", value: stats.readyForClaim, icon: CheckCircle, color: "text-green-600" },
   ]
 
   // Loading state
@@ -447,31 +486,57 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
           <Button
             variant="outline"
             className="flex items-center justify-center gap-2 w-full sm:w-auto"
-            onClick={() => mutate()}
-            disabled={isLoading}
+            onClick={async () => {
+              mutate()
+              // Also refresh stats
+              try {
+                setStatsLoading(true)
+                const response = await fetch('/api/admin/requests/stats')
+                if (response.ok) {
+                  const data = await response.json()
+                  if (data.success) {
+                    setApiStats(data.stats)
+                  }
+                }
+              } catch (error) {
+                console.error('Error refreshing stats:', error)
+              } finally {
+                setStatsLoading(false)
+              }
+            }}
+            disabled={isLoading || statsLoading}
           >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${isLoading || statsLoading ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">Refresh</span>
-          </Button>
-          <Button variant="outline" className="flex items-center justify-center gap-2 w-full sm:w-auto">
-            <Download className="h-4 w-4" />
-            <span className="hidden sm:inline">Export</span>
           </Button>
           {/** Manual Request button temporarily disabled **/}
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 md:gap-4">
-        {statsConfig.map((stat, index) => (
-          <StatsCard
-            key={index}
-            title={stat.title}
-            value={stat.value}
-            icon={stat.icon}
-            color={stat.color}
-          />
-        ))}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 md:gap-4">
+        {statsLoading ? (
+          // Loading skeletons for stats
+          Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="bg-white border border-gray-200 rounded-lg p-4 animate-pulse">
+              <div className="flex items-center justify-between mb-2">
+                <div className="h-4 w-16 bg-gray-200 rounded"></div>
+                <div className="h-4 w-4 bg-gray-200 rounded"></div>
+              </div>
+              <div className="h-8 w-12 bg-gray-200 rounded mb-1"></div>
+            </div>
+          ))
+        ) : (
+          statsConfig.map((stat, index) => (
+            <StatsCard
+              key={index}
+              title={stat.title}
+              value={stat.value}
+              icon={stat.icon}
+              color={stat.color}
+            />
+          ))
+        )}
       </div>
 
       {/* Filters */}

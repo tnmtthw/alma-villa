@@ -704,7 +704,7 @@ export default function UserProfile() {
   return (
     <>
       <div className="min-h-screen bg-gray-50 pt-16">
-        <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8">
           {/* Header Section */}
           <div className="mb-8">
             <Card className="bg-white border-0 shadow-sm">
@@ -746,11 +746,11 @@ export default function UserProfile() {
                           </Badge>
                         </div>
                       </div>
-                      <div className="flex flex-col sm:flex-row gap-2">
+                      <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto mt-4 sm:mt-0">
                         <Button
                           onClick={() => setIsEditing(!isEditing)}
                           variant={isEditing ? "outline" : "default"}
-                          className={`w-full sm:w-auto ${isEditing ? "border-gray-300" : "bg-[#23479A] hover:bg-[#23479A]/90"}`}
+                          className={`w-full sm:w-auto justify-center whitespace-nowrap h-9 sm:h-10 text-xs sm:text-sm px-3 sm:px-4 ${isEditing ? "border-gray-300" : "bg-[#23479A] hover:bg-[#23479A]/90"}`}
                         >
                           {isEditing ? (
                             <>
@@ -774,15 +774,15 @@ export default function UserProfile() {
 
           {/* Tab Navigation - Mobile Responsive */}
           <div className="mb-6">
-            <div className="border-b border-gray-200">
-              <nav className="flex space-x-4 sm:space-x-8 overflow-x-auto scrollbar-hide">
+            <div className="border-b border-gray-200 bg-white">
+              <nav className="flex space-x-2 sm:space-x-6 overflow-x-auto no-scrollbar">
                 {tabs.map((tab) => {
                   const Icon = tab.icon
                   return (
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors duration-200 ${activeTab === tab.id
+                      className={`flex items-center gap-2 py-3 sm:py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors duration-200 ${activeTab === tab.id
                         ? 'border-[#23479A] text-[#23479A]'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                         }`}

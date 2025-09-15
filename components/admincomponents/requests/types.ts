@@ -23,7 +23,7 @@ export interface DocumentRequest {
 export interface RequestStats {
   total: number
   pending: number
-  underReview: number
+  approved: number
   processing: number
   paymentPending: number
   readyForClaim: number

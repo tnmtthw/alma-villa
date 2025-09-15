@@ -300,7 +300,7 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6 bg-white rounded-lg shadow-lg">
       <div className="mb-6">
         <div className="flex items-center mb-4">
           <Button
@@ -320,7 +320,7 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
         type="button"
         onClick={fillWithSampleData}
         variant="outline"
-        className="mb-6 border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10"
+        className="mb-6 w-full sm:w-auto border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10"
       >
         Fill with Sample Data
       </Button>
@@ -330,7 +330,7 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
         <div className="space-y-6">
           <h2 className="text-xl font-semibold text-gray-900 border-b pb-2">Personal Information</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <Label htmlFor="fullName">Full Name</Label>
               <Input
@@ -415,7 +415,7 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
         <div className="space-y-6">
           <h2 className="text-xl font-semibold text-gray-900 border-b pb-2">Address Information</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <Label htmlFor="purok">Sitio</Label>
               <Input
@@ -447,7 +447,7 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
         <div className="space-y-6">
           <h2 className="text-xl font-semibold text-gray-900 border-b pb-2">Purpose</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <Label htmlFor="purpose">Purpose of Clearance *</Label>
               <Select
@@ -549,7 +549,7 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
         </div> */}
 
         {/* Declaration */}
-        <div className="space-y-4 bg-gray-50 p-4 rounded-lg">
+        <div className="space-y-4 bg-gray-50 p-3 sm:p-4 rounded-lg">
           <h3 className="font-semibold text-gray-900">Declaration</h3>
           <p className="text-sm text-gray-700">
             I hereby certify that the information provided above is true and correct to the best of my knowledge.
@@ -564,11 +564,11 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
         </div>
 
         {/* Submit Button */}
-        <div className="flex justify-end gap-4">
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-4">
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="bg-[#23479A] hover:bg-[#23479A]/90 text-white px-8 py-3 text-base"
+            className="bg-[#23479A] hover:bg-[#23479A]/90 text-white px-6 sm:px-8 py-3 text-base w-full sm:w-auto"
           >
             {isSubmitting ? (
               <>

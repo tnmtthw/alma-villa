@@ -69,7 +69,7 @@ export default function RequestsFilters({
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="under_review">Under Review</SelectItem>
+                <SelectItem value="approved">Approved</SelectItem>
                 <SelectItem value="processing">Processing</SelectItem>
                 <SelectItem value="payment_pending">Payment Pending</SelectItem>
                 <SelectItem value="ready_for_claim">Ready for Claim</SelectItem>

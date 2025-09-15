@@ -154,7 +154,7 @@ function RequestFormContent() {
             <CardHeader>
               <CardTitle className="text-2xl text-[#23479A]">{document.title}</CardTitle>
               <CardDescription className="text-lg">{document.description}</CardDescription>
-              <div className="flex items-center gap-6 text-sm mt-4 pt-4 border-t">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-sm mt-4 pt-4 border-t">
                 <span><strong>Fee:</strong> {document.fee}</span>
                 <span><strong>Processing Time:</strong> {document.processingTime}</span>
               </div>
