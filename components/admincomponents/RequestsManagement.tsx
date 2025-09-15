@@ -24,6 +24,7 @@ import {
   Plus,
   Loader2
 } from "lucide-react"
+import { useToast } from "@/components/ui/toast"
 
 // Import our reusable components
 import StatsCard from "./requests/StatsCard"
@@ -113,6 +114,7 @@ interface RequestsManagementProps {
 }
 
 export default function RequestsManagement({ userId }: RequestsManagementProps) {
+  const { addToast } = useToast()
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [documentTypeFilter, setDocumentTypeFilter] = useState("all")
@@ -198,6 +200,7 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
     const normalizedStatus = status?.toLowerCase()
 
     const configs: Record<string, { label: string; color: string; icon: any }> = {
+      pending: { label: "Pending", color: "bg-orange-100 text-orange-800", icon: Clock },
       processing: { label: "Processing", color: "bg-blue-100 text-blue-800", icon: Eye },
       approved: { label: "Approved", color: "bg-purple-100 text-purple-800", icon: RefreshCw },
       payment_sent: { label: "Payment Sent", color: "bg-yellow-100 text-yellow-800", icon: CreditCard },
@@ -207,7 +210,7 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
     }
 
     // Return the config for the normalized status, or default to pending if not found
-    return configs[normalizedStatus] || configs.pending
+    return configs[normalizedStatus] || { label: "Unknown", color: "bg-gray-100 text-gray-800", icon: FileText }
   }
 
   // Format date
@@ -269,12 +272,23 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
         await mutate()
         setIsStatusUpdateModalOpen(false)
         setSelectedRequest(null)
+        
+        // Show success toast
+        addToast({
+          title: "Status Updated Successfully!",
+          description: `Request status has been changed to ${getStatusConfig(updateStatusData.newStatus as DocumentRequest["status"]).label}`,
+          variant: "default"
+        })
       } else {
         throw new Error(result.error || 'Status update failed')
       }
     } catch (error) {
       console.error('Error updating status:', error)
-      // You might want to show a toast notification here
+      addToast({
+        title: "Status Update Failed",
+        description: error instanceof Error ? error.message : "Failed to update request status. Please try again.",
+        variant: "destructive"
+      })
     }
   }
 
@@ -299,12 +313,23 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
       if (result.success) {
         // Trigger a revalidation of the SWR data
         await mutate()
+        
+        // Show success toast
+        addToast({
+          title: "Payment Approved Successfully!",
+          description: `Request #${request.id} is now ready to claim`,
+          variant: "default"
+        })
       } else {
         throw new Error(result.error || 'Payment approval failed')
       }
     } catch (error) {
       console.error('Error approving payment:', error)
-      // You might want to show a toast notification here
+      addToast({
+        title: "Payment Approval Failed",
+        description: error instanceof Error ? error.message : "Failed to approve payment. Please try again.",
+        variant: "destructive"
+      })
     }
   }
 
@@ -329,12 +354,23 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
       if (result.success) {
         // Trigger a revalidation of the SWR data
         await mutate()
+        
+        // Show success toast
+        addToast({
+          title: "Payment Rejected",
+          description: `Request #${request.id} has been rejected`,
+          variant: "destructive"
+        })
       } else {
         throw new Error(result.error || 'Payment rejection failed')
       }
     } catch (error) {
       console.error('Error rejecting payment:', error)
-      // You might want to show a toast notification here
+      addToast({
+        title: "Payment Rejection Failed",
+        description: error instanceof Error ? error.message : "Failed to reject payment. Please try again.",
+        variant: "destructive"
+      })
     }
   }
 
@@ -527,7 +563,6 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
         isOpen={isDetailsModalOpen}
         onClose={() => setIsDetailsModalOpen(false)}
         request={selectedRequest}
-        onUpdateStatus={handleUpdateStatus}
         getStatusConfig={getStatusConfig}
       />
 

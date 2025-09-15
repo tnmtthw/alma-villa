@@ -62,9 +62,11 @@ export default function StatusUpdateModal({
                 <SelectValue placeholder="Select new status" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="processing">Processing</SelectItem>
                 <SelectItem value="approved">Approved</SelectItem>
                 <SelectItem value="payment_sent">Payment Sent</SelectItem>
+                <SelectItem value="ready_to_claim">Ready to Claim</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
                 <SelectItem value="rejected">Rejected</SelectItem>
               </SelectContent>

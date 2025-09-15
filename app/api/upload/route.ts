@@ -21,9 +21,10 @@ export async function POST(request: Request): Promise<NextResponse> {
       return NextResponse.json({ error: 'Invalid or missing file' }, { status: 400 });
     }
 
-    // Use file object directly for upload
+    // Use file object directly for upload with random suffix to avoid conflicts
     const blob = await put(filename, file, {
       access: 'public',
+      addRandomSuffix: true,
     });
 
     return NextResponse.json(blob);

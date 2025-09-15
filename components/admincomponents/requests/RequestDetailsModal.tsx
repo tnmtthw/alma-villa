@@ -20,7 +20,7 @@ interface DocumentRequest {
   userPhone: string
   documentType: string
   purpose: string
-  status: "processing" | "approved" | "payment_sent" | "ready_to_claim" | "completed" | "rejected"
+  status: "pending" | "processing" | "approved" | "payment_sent" | "ready_to_claim" | "completed" | "rejected"
   requestDate: string
   estimatedCompletion: string
   lastUpdated: string
@@ -39,7 +39,7 @@ interface RequestDetailsModalProps {
   isOpen: boolean
   onClose: () => void
   request: DocumentRequest | null
-  onUpdateStatus: (request: DocumentRequest) => void
+  onUpdateStatus?: (request: DocumentRequest) => void
   getStatusConfig: (status: DocumentRequest["status"]) => {
     label: string
     color: string
@@ -56,6 +56,48 @@ export default function RequestDetailsModal({
 }: RequestDetailsModalProps) {
   if (!request) return null
 
+  // Function to format form data into readable text
+  const formatFormData = (formData: any) => {
+    if (!formData) return [{ label: "Form Data", value: "No form data available" }]
+    
+    const formatKey = (key: string) => {
+      // Handle specific field names for better readability
+      const fieldMap: { [key: string]: string } = {
+        'fullName': 'Full Name',
+        'birthDate': 'Date of Birth',
+        'placeOfBirth': 'Place of Birth',
+        'civilStatus': 'Civil Status',
+        'houseNumber': 'House Number',
+        'businessName': 'Business Name',
+        'businessLocation': 'Business Location',
+        'operatorName': 'Operator Name',
+        'operatorAddress': 'Operator Address'
+      }
+      
+      if (fieldMap[key]) return fieldMap[key]
+      
+      return key
+        .replace(/([A-Z])/g, ' $1')
+        .replace(/^./, str => str.toUpperCase())
+        .replace(/_/g, ' ')
+    }
+
+    const formatValue = (value: any) => {
+      if (value === null || value === undefined) return "Not provided"
+      if (typeof value === 'boolean') return value ? "Yes" : "No"
+      if (typeof value === 'string' && value.trim() === '') return "Not provided"
+      if (typeof value === 'number') return value.toString()
+      return String(value)
+    }
+
+    return Object.entries(formData)
+      .filter(([key, value]) => key !== 'additionalInfo') // Skip technical fields
+      .map(([key, value]) => ({
+        label: formatKey(key),
+        value: formatValue(value)
+      }))
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="bg-white max-w-4xl max-h-[80vh] overflow-y-auto">
@@ -65,7 +107,7 @@ export default function RequestDetailsModal({
             Request Details - {request.id}
           </DialogTitle>
           <DialogDescription>
-            Complete information about this document request
+            View complete information about this document request
           </DialogDescription>
         </DialogHeader>
 
@@ -139,10 +181,17 @@ export default function RequestDetailsModal({
               <CardTitle className="text-lg">Form Data</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <pre className="text-sm whitespace-pre-wrap">
-                  {JSON.stringify(request.formData, null, 2)}
-                </pre>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {formatFormData(request.formData).map((item, index) => (
+                  <div key={index} className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                    <label className="text-xs font-medium text-gray-500 block mb-1 uppercase tracking-wide">
+                      {item.label}
+                    </label>
+                    <p className="text-sm text-gray-900 font-medium">
+                      {item.value}
+                    </p>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
@@ -212,12 +261,6 @@ export default function RequestDetailsModal({
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
             Close
-          </Button>
-          <Button
-            onClick={() => onUpdateStatus(request)}
-            className="bg-[#23479A] hover:bg-[#23479A]/90"
-          >
-            Update Status
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -12,6 +12,7 @@ import {
     DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/toast";
 
 interface PaymentProps {
     request: {
@@ -31,9 +32,11 @@ interface PaymentProps {
 }
 
 const PaymentPage: React.FC<PaymentProps> = ({ request }) => {
+    const { addToast } = useToast();
     const [uploading, setUploading] = useState(false);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const [formData, setFormData] = useState<{ image?: string }>({});
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleImageUpload = async (file: File) => {
         setUploading(true);
@@ -53,8 +56,20 @@ const PaymentPage: React.FC<PaymentProps> = ({ request }) => {
 
             setFormData(prev => ({ ...prev, image: data.url }));
             setPreviewImage(data.url);
+            
+            // Show success toast
+            addToast({
+                title: "Image Uploaded Successfully!",
+                description: "Your payment proof has been uploaded and is ready to submit.",
+                variant: "default"
+            });
         } catch (error) {
             console.error("Upload error:", error);
+            addToast({
+                title: "Upload Failed",
+                description: error instanceof Error ? error.message : "Failed to upload payment proof. Please try again.",
+                variant: "destructive"
+            });
         } finally {
             setUploading(false);
         }
@@ -63,28 +78,54 @@ const PaymentPage: React.FC<PaymentProps> = ({ request }) => {
     const handleProceedToPayment = async () => {
         try {
             if (!formData.image) {
-                alert("Please upload proof of payment first.");
+                addToast({
+                    title: "Missing Payment Proof",
+                    description: "Please upload proof of payment first.",
+                    variant: "destructive"
+                });
                 return;
             }
-            await Promise.all([
-                fetch(`/api/document/set-status?id=${request.id}`, {
-                    method: "PATCH",
-                    body: JSON.stringify({ status: "payment_sent", proofOfPayment: formData.image }),
-                    headers: { "Content-Type": "application/json" },
-                }),
-            ]);
+            
+            const response = await fetch(`/api/document/set-status?id=${request.id}`, {
+                method: "PATCH",
+                body: JSON.stringify({ status: "payment_sent", proofOfPayment: formData.image }),
+                headers: { "Content-Type": "application/json" },
+            });
 
-            alert("Payment confirmed and status updated!");
+            if (!response.ok) {
+                throw new Error('Failed to update payment status');
+            }
+
+            const result = await response.json();
+
+            if (result.success) {
+                addToast({
+                    title: "Payment Confirmed Successfully!",
+                    description: "Your payment proof has been submitted and your request status has been updated.",
+                    variant: "default"
+                });
+                
+                // Auto-close modal after 3 seconds
+                setTimeout(() => {
+                    setIsModalOpen(false);
+                }, 3000);
+            } else {
+                throw new Error(result.error || 'Payment confirmation failed');
+            }
         } catch (error) {
             console.error("Payment error:", error);
-            alert("Something went wrong while processing payment.");
+            addToast({
+                title: "Payment Confirmation Failed",
+                description: error instanceof Error ? error.message : "Something went wrong while processing payment. Please try again.",
+                variant: "destructive"
+            });
         }
     };
 
     return (
-        <Dialog>
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger asChild>
-                <Button>Payment</Button>
+                <Button onClick={() => setIsModalOpen(true)}>Payment</Button>
             </DialogTrigger>
             <DialogContent className="bg-white">
                 <DialogHeader>

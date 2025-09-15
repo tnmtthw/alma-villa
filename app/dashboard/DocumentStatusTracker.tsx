@@ -1,16 +1,17 @@
 "use client"
 
 
-import { Eye, Clock, CheckCircle, AlertCircle, FileText, Calendar } from "lucide-react"
+import { Eye, Clock, CheckCircle, AlertCircle, FileText, Calendar, Filter } from "lucide-react"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
 import useSWR from 'swr'
-
+import { useState, useMemo } from "react"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 import ClaimClearanceButton from '../../components/admincomponents/pdfgenerator/ClaimClearance'
 import ClaimResidencyButton from '../../components/admincomponents/pdfgenerator/ClaimResidency'
@@ -35,7 +36,7 @@ interface DocumentRequest {
   purok: string
   type: string
   requestDate: string
-  status: "processing" | "approved" | "payment_sent" | "ready_to_claim" | "completed" | "rejected"
+  status: "pending" | "processing" | "approved" | "payment_sent" | "ready_to_claim" | "completed" | "rejected"
   estimatedCompletion?: string
   purpose: string
   fee?: string
@@ -52,6 +53,14 @@ interface DocumentRequest {
 
 const getStatusConfig = (status: DocumentRequest["status"]) => {
   const configs = {
+    pending: {
+      label: "Pending",
+      color: "text-orange-600",
+      bgColor: "bg-orange-50",
+      borderColor: "border-orange-200",
+      icon: Clock,
+      description: "Request is pending review"
+    },
     processing: {
       label: "Processing",
       color: "text-purple-600",
@@ -111,15 +120,20 @@ const getStatusConfig = (status: DocumentRequest["status"]) => {
   }
 }
 
-const DocumentStatusTracker = () => {
+interface DocumentStatusTrackerProps {
+  showViewAllButton?: boolean
+}
+
+const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrackerProps) => {
   const { data: session } = useSession()
+  const [statusFilter, setStatusFilter] = useState("all")
 
   const { data, error, isLoading } = useSWR(
     session?.user?.id ? `/api/user/docs?userId=${session.user.id}` : null,
     fetcher
   )
 
-  const documents: DocumentRequest[] = data?.documents?.map((doc: any) => ({
+  const allDocuments: DocumentRequest[] = data?.documents?.map((doc: any) => ({
     id: doc.id,
     fullName: doc.fullName,
     age: doc.age,
@@ -156,6 +170,20 @@ const DocumentStatusTracker = () => {
               : 0
   })) || []
 
+  // Filter documents based on selected status
+  const documents = useMemo(() => {
+    if (statusFilter === "all") {
+      return allDocuments
+    }
+    return allDocuments.filter(doc => doc.status?.toLowerCase() === statusFilter.toLowerCase())
+  }, [allDocuments, statusFilter])
+
+  // Get available statuses for filter options
+  const availableStatuses = useMemo(() => {
+    const statuses = new Set(allDocuments.map(doc => doc.status).filter(Boolean))
+    return Array.from(statuses)
+  }, [allDocuments])
+
   return (
     <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-lg">
       <CardHeader className="pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
@@ -169,20 +197,105 @@ const DocumentStatusTracker = () => {
               Track the status of your document requests
             </CardDescription>
           </div>
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className="text-gray-500 hover:text-[#23479A] border-gray-200 hover:border-[#23479A]/20 hover:bg-[#23479A]/5 w-full sm:w-auto"
-          >
-            <Link href="/dashboard/track">View All Requests</Link>
-          </Button>
+          {showViewAllButton && (
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="text-gray-500 hover:text-[#23479A] border-gray-200 hover:border-[#23479A]/20 hover:bg-[#23479A]/5 w-full sm:w-auto"
+            >
+              <Link href="/dashboard/track">View All Requests</Link>
+            </Button>
+          )}
         </div>
       </CardHeader>
+      
+      {/* Filter Section */}
+      <div className="px-4 sm:px-6 pb-4">
+        <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-gray-500" />
+            <span className="text-sm font-medium text-gray-700">Filter by status:</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue placeholder="All Statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses ({allDocuments.length})</SelectItem>
+                {availableStatuses.map((statusValue) => {
+                  const count = allDocuments.filter(doc => doc.status === statusValue).length
+                  const statusConfig = getStatusConfig(statusValue)
+                  return (
+                    <SelectItem key={statusValue} value={statusValue}>
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${
+                          statusValue === 'pending' ? 'bg-orange-500' :
+                          statusValue === 'approved' ? 'bg-purple-500' :
+                          statusValue === 'processing' ? 'bg-blue-500' :
+                          statusValue === 'payment_sent' ? 'bg-yellow-500' :
+                          statusValue === 'ready_to_claim' ? 'bg-green-500' :
+                          statusValue === 'completed' ? 'bg-gray-500' :
+                          statusValue === 'rejected' ? 'bg-red-500' :
+                          'bg-gray-400'
+                        }`} />
+                        {statusConfig.label} ({count})
+                      </div>
+                    </SelectItem>
+                  )
+                })}
+              </SelectContent>
+            </Select>
+            {statusFilter !== "all" && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setStatusFilter("all")}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                Clear Filter
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+      
       <CardContent className="space-y-4 px-4 sm:px-6 pb-4 sm:pb-6">
 
         {isLoading && <p className="text-sm text-gray-500">Loading...</p>}
         {error && <p className="text-sm text-red-500">Failed to load document requests.</p>}
+
+        {!isLoading && !error && documents.length === 0 && allDocuments.length > 0 && (
+          <div className="text-center py-8">
+            <div className="text-gray-400 mb-2">
+              <Filter className="h-12 w-12 mx-auto" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No requests found</h3>
+            <p className="text-gray-500 mb-4">
+              No document requests match the selected filter "{statusFilter}".
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => setStatusFilter("all")}
+              className="text-[#23479A] border-[#23479A] hover:bg-[#23479A]/5"
+            >
+              Show All Requests
+            </Button>
+          </div>
+        )}
+
+        {!isLoading && !error && allDocuments.length === 0 && (
+          <div className="text-center py-8">
+            <div className="text-gray-400 mb-2">
+              <FileText className="h-12 w-12 mx-auto" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No document requests yet</h3>
+            <p className="text-gray-500">
+              You haven't submitted any document requests yet.
+            </p>
+          </div>
+        )}
 
         {documents.map((request) => {
           const statusConfig = getStatusConfig(request.status)

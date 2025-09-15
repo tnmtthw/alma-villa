@@ -28,10 +28,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     const newToast = { ...toast, id }
     setToasts((prev) => [...prev, newToast])
 
-    // Auto remove after 5 seconds
+    // Auto remove after 3 seconds
     setTimeout(() => {
       removeToast(id)
-    }, 5000)
+    }, 3000)
   }
 
   const removeToast = (id: string) => {
@@ -50,7 +50,7 @@ function ToastContainer() {
   const { toasts, removeToast } = useToast()
 
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-2">
+    <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-[9999] space-y-2">
       {toasts.map((toast) => (
         <Toast key={toast.id} toast={toast} onRemove={removeToast} />
       ))}
@@ -62,23 +62,28 @@ function Toast({ toast, onRemove }: { toast: Toast; onRemove: (id: string) => vo
   return (
     <div
       className={cn(
-        "flex items-center justify-between p-4 rounded-lg shadow-lg min-w-[300px] max-w-[400px]",
+        "flex items-center justify-between p-6 rounded-xl shadow-2xl border-2 min-w-[400px] max-w-[500px] backdrop-blur-sm animate-in slide-in-from-top-2 duration-300",
         toast.variant === "destructive"
-          ? "bg-red-50 border border-red-200 text-red-800"
-          : "bg-green-50 border border-green-200 text-green-800"
+          ? "bg-red-50/95 border-red-300 text-red-900 shadow-red-100/50"
+          : "bg-green-50/95 border-green-300 text-green-900 shadow-green-100/50"
       )}
     >
       <div className="flex-1">
-        <h4 className="font-semibold">{toast.title}</h4>
+        <h4 className="font-bold text-lg">{toast.title}</h4>
         {toast.description && (
-          <p className="text-sm mt-1 opacity-90">{toast.description}</p>
+          <p className="text-sm mt-2 opacity-90 leading-relaxed">{toast.description}</p>
         )}
       </div>
       <button
         onClick={() => onRemove(toast.id)}
-        className="ml-4 p-1 rounded-full hover:bg-black/10 transition-colors"
+        className={cn(
+          "ml-6 p-2 rounded-full transition-colors",
+          toast.variant === "destructive"
+            ? "hover:bg-red-200/50 text-red-700"
+            : "hover:bg-green-200/50 text-green-700"
+        )}
       >
-        <X className="h-4 w-4" />
+        <X className="h-5 w-5" />
       </button>
     </div>
   )
