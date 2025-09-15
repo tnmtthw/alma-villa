@@ -26,7 +26,8 @@ import { signOut } from "next-auth/react"
 import { useSession } from "next-auth/react"
 import useSWR, { mutate } from 'swr'
 
-const navigationItems = [
+// Navigation items will be dynamically generated with real counts
+const getNavigationItems = (pendingRequests: number, upcomingEvents: number) => [
   {
     icon: LayoutDashboard,
     label: "Dashboard",
@@ -37,7 +38,7 @@ const navigationItems = [
     icon: FileText,
     label: "Requests",
     href: "/admin/requests",
-    badge: 12,
+    badge: pendingRequests > 0 ? pendingRequests : null,
   },
   {
     icon: Users,
@@ -49,7 +50,7 @@ const navigationItems = [
     icon: Calendar,
     label: "Events",
     href: "/admin/events",
-    badge: 3,
+    badge: upcomingEvents > 0 ? upcomingEvents : null,
   },
   {
     icon: Settings,
@@ -72,6 +73,19 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession()
 
   const { data } = useSWR(`/api/user?id=${session?.user.id}`, fetcher)
+  
+  // Fetch navigation counts
+  const { data: navCounts, error: navError } = useSWR('/api/admin/navigation/counts', fetcher, {
+    refreshInterval: 30000, // Refresh every 30 seconds
+    revalidateOnFocus: true,
+    revalidateOnReconnect: true
+  })
+
+  // Get navigation items with real counts
+  const navigationItems = getNavigationItems(
+    navCounts?.counts?.pendingRequests || 0,
+    navCounts?.counts?.upcomingEvents || 0
+  )
 
   const profileDropdownRef = useRef<HTMLDivElement>(null)
 
