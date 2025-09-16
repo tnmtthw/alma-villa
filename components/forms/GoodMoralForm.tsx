@@ -246,7 +246,7 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
                   value={formData.civilStatus}
                   onValueChange={(value) => handleInputChange("civilStatus", value)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full mt-1">
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>

@@ -396,15 +396,15 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
                 value={formData.civilStatus}
                 onValueChange={(value) => handleInputChange('civilStatus', value)}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
+                <SelectTrigger className="w-full mt-1">
+                  <SelectValue placeholder="select gender" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="single">Single</SelectItem>
-                  <SelectItem value="married">Married</SelectItem>
-                  <SelectItem value="widowed">Widowed</SelectItem>
-                  <SelectItem value="separated">Separated</SelectItem>
-                  <SelectItem value="divorced">Divorced</SelectItem>
+                  <SelectItem value="Single">Single</SelectItem>
+                  <SelectItem value="Married">Married</SelectItem>
+                  <SelectItem value="Widowed">Widowed</SelectItem>
+                  <SelectItem value="Separated">Separated</SelectItem>
+                  <SelectItem value="Divorced">Divorced</SelectItem>
                 </SelectContent>
               </Select>
             </div>
