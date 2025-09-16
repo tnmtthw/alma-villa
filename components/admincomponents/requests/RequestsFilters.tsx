@@ -61,7 +61,7 @@ export default function RequestsFilters({
           </div>
 
           {/* Filters */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-3">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Status" />
@@ -92,7 +92,7 @@ export default function RequestsFilters({
               </SelectContent>
             </Select>
 
-            <Select value={urgentFilter} onValueChange={setUrgentFilter}>
+            {/* <Select value={urgentFilter} onValueChange={setUrgentFilter}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Priority" />
               </SelectTrigger>
@@ -101,7 +101,7 @@ export default function RequestsFilters({
                 <SelectItem value="urgent">Urgent</SelectItem>
                 <SelectItem value="normal">Normal</SelectItem>
               </SelectContent>
-            </Select>
+            </Select> */}
 
             <Button variant="outline" className="flex items-center justify-center gap-2 w-full">
               <Filter className="h-4 w-4" />
