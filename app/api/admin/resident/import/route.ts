@@ -16,10 +16,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
-    // Load workbook from uploaded buffer
-    const buffer = Buffer.from(await file.arrayBuffer())
+    // Load workbook from uploaded ArrayBuffer using Uint8Array to satisfy types
+    const arrayBuffer = await file.arrayBuffer()
+    const buffer = Buffer.from(arrayBuffer)
     const workbook = new ExcelJS.Workbook()
-    await workbook.xlsx.load(buffer)
+    await workbook.xlsx.load(buffer as any)
     const worksheet = workbook.worksheets[0]
     if (!worksheet) {
       return NextResponse.json({ error: 'No worksheet found' }, { status: 400 })
