@@ -70,6 +70,7 @@ export async function POST(req: Request) {
         frontId: '',
         backId: '',
         capturedPhoto: '',
+        role: 'Verified',
       }
       rowsToCreate.push(toCreate)
     })
