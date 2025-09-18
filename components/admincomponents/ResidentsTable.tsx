@@ -605,7 +605,7 @@ export default function ResidentsTable() {
     try {
       const formData = new FormData()
       formData.append('file', file)
-      const response = await fetch('/api/admin/resident', {
+      const response = await fetch('/api/admin/resident/import', {
         method: 'POST',
         body: formData
       })
