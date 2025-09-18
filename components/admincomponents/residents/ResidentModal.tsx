@@ -42,11 +42,11 @@ export function AddResidentModal({ isOpen, onClose, onSubmit }: AddResidentModal
     emergencyNumber: "",
     houseNumber: "",
     street: "",
-    purok: "",
+    purok: "Purok 1",
     barangay: "Alma Villa",
     city: "Gloria",
     province: "Oriental Mindoro",
-    zipCode: "",
+    zipCode: "5209",
     residencyLength: "",
     role: "Verified"
   })
@@ -294,7 +294,7 @@ export function AddResidentModal({ isOpen, onClose, onSubmit }: AddResidentModal
             Address Information
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label htmlFor="houseNumber" className="text-sm font-medium text-gray-700">
                 House Number *
               </Label>
@@ -317,10 +317,10 @@ export function AddResidentModal({ isOpen, onClose, onSubmit }: AddResidentModal
                 required
                 className="w-full"
               />
-            </div>
+            </div> */}
             <div className="space-y-2">
               <Label htmlFor="purok" className="text-sm font-medium text-gray-700">
-                Purok *
+                Sitio *
               </Label>
               <Input
                 id="purok"
@@ -376,6 +376,7 @@ export function AddResidentModal({ isOpen, onClose, onSubmit }: AddResidentModal
                 onChange={(e) => handleInputChange("zipCode", e.target.value)}
                 required
                 className="w-full"
+                readOnly
               />
             </div>
             <div className="space-y-2">
@@ -396,16 +397,16 @@ export function AddResidentModal({ isOpen, onClose, onSubmit }: AddResidentModal
 
         {/* Submit Buttons */}
         <div className="flex justify-end items-center gap-4 pt-6 border-t border-gray-200">
-          <Button 
-            type="button" 
-            variant="outline" 
+          <Button
+            type="button"
+            variant="outline"
             onClick={onClose}
             className="px-6 py-2"
           >
             Cancel
           </Button>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             className="bg-[#23479A] hover:bg-[#1e3a82] px-6 py-2 flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
@@ -530,11 +531,10 @@ export function MassImportModal({ isOpen, onClose, onImport }: MassImportModalPr
         {/* File Upload Area */}
         <div className="relative">
           <div
-            className={`border-2 border-dashed rounded-lg p-12 text-center transition-all duration-200 ${
-              dragOver
-                ? "border-[#23479A] bg-blue-50 scale-105"
-                : "border-gray-300 hover:border-gray-400"
-            }`}
+            className={`border-2 border-dashed rounded-lg p-12 text-center transition-all duration-200 ${dragOver
+              ? "border-[#23479A] bg-blue-50 scale-105"
+              : "border-gray-300 hover:border-gray-400"
+              }`}
             onDrop={handleDrop}
             onDragOver={(e) => {
               e.preventDefault()
@@ -576,7 +576,7 @@ export function MassImportModal({ isOpen, onClose, onImport }: MassImportModalPr
                 </div>
               </div>
             )}
-            
+
             <input
               type="file"
               accept=".csv,.xlsx,.xls"
@@ -588,8 +588,8 @@ export function MassImportModal({ isOpen, onClose, onImport }: MassImportModalPr
 
         {/* Action Buttons */}
         <div className="flex justify-end items-center gap-4 pt-6 border-t border-gray-200">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={onClose}
             className="px-6 py-2"
           >
