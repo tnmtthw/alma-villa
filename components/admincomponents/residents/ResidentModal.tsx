@@ -457,32 +457,6 @@ export function MassImportModal({ isOpen, onClose, onImport }: MassImportModalPr
     }
   }
 
-  const downloadTemplate = () => {
-    // Create sample CSV template
-    const headers = [
-      "firstName", "lastName", "middleName", "suffix", "birthDate", "age", "gender",
-      "civilStatus", "nationality", "religion", "email", "mobileNumber",
-      "emergencyContact", "emergencyNumber", "houseNumber", "street", "purok",
-      "barangay", "city", "province", "zipCode", "residencyLength"
-    ]
-
-    const sampleData = [
-      "Juan", "Dela Cruz", "Santos", "", "1990-01-15", "33", "male",
-      "single", "Filipino", "Catholic", "juan@email.com", "09123456789",
-      "Maria Dela Cruz", "09187654321", "123", "Maharlika St", "Purok 1",
-      "Alma Villa", "Gloria", "Oriental Mindoro", "5201", "5"
-    ]
-
-    const csvContent = [headers.join(","), sampleData.join(",")].join("\n")
-    const blob = new Blob([csvContent], { type: "text/csv" })
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = "residents_template.csv"
-    a.click()
-    window.URL.revokeObjectURL(url)
-  }
-
   return (
     <BaseModal isOpen={isOpen} onClose={onClose} title="Mass Import Residents" size="md">
       <div className="space-y-8">
@@ -514,18 +488,6 @@ export function MassImportModal({ isOpen, onClose, onImport }: MassImportModalPr
               </ul>
             </div>
           </div>
-        </div>
-
-        {/* Download Template */}
-        <div className="flex justify-center">
-          <Button
-            variant="outline"
-            onClick={downloadTemplate}
-            className="border-green-300 text-green-700 hover:bg-green-50 px-6 py-3 flex items-center gap-3"
-          >
-            <Download className="h-5 w-5" />
-            Download CSV Template
-          </Button>
         </div>
 
         {/* File Upload Area */}

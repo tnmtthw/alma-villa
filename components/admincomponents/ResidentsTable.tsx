@@ -65,7 +65,7 @@ export default function ResidentsTable() {
   const [isResidentViewModalOpen, setIsResidentViewModalOpen] = useState(false)
   const [isAddResidentModalOpen, setIsAddResidentModalOpen] = useState(false)
   const [isMassImportModalOpen, setIsMassImportModalOpen] = useState(false)
-  
+
   // Enhanced Delete Modal State
   const [deleteModalState, setDeleteModalState] = useState({
     isOpen: false,
@@ -308,10 +308,10 @@ export default function ResidentsTable() {
       })
     } catch (error) {
       console.error('Error deleting resident:', error)
-      setDeleteModalState(prev => ({ 
-        ...prev, 
-        isDeleting: false, 
-        error: 'Failed to delete resident. Please try again.' 
+      setDeleteModalState(prev => ({
+        ...prev,
+        isDeleting: false,
+        error: 'Failed to delete resident. Please try again.'
       }))
     }
   }
@@ -353,7 +353,7 @@ export default function ResidentsTable() {
       // Refresh data from API
       await fetchResidents()
       setSelectedResidents([])
-      
+
       // Close modal and reset state
       setBulkDeleteModalState({
         isOpen: false,
@@ -370,10 +370,10 @@ export default function ResidentsTable() {
       })
     } catch (error) {
       console.error('Error deleting residents:', error)
-      setBulkDeleteModalState(prev => ({ 
-        ...prev, 
-        isDeleting: false, 
-        error: 'Failed to delete residents. Please try again.' 
+      setBulkDeleteModalState(prev => ({
+        ...prev,
+        isDeleting: false,
+        error: 'Failed to delete residents. Please try again.'
       }))
     }
   }
@@ -605,7 +605,7 @@ export default function ResidentsTable() {
     try {
       const formData = new FormData()
       formData.append('file', file)
-      const response = await fetch('http://localhost:3000/api/user/import', {
+      const response = await fetch('/api/admin/resident', {
         method: 'POST',
         body: formData
       })
@@ -1225,9 +1225,9 @@ export default function ResidentsTable() {
                 </Button>
               </div>
             </div>
-                     </div>
-         </div>
-       )}
+          </div>
+        </div>
+      )}
 
       {/* Enhanced Bulk Delete Confirmation Modal */}
       {bulkDeleteModalState.isOpen && (
