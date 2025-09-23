@@ -16,6 +16,7 @@ const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) => fet
 
 interface BarangayClearanceFormProps {
   onBackAction: () => void
+  onSubmit: (payload: any) => void
 }
 
 interface DocumentFile extends File {
@@ -59,7 +60,7 @@ const sampleData: FormData = {
   emailAddress: ""
 }
 
-export default function BarangayClearanceForm({ onBackAction }: BarangayClearanceFormProps) {
+export default function BarangayClearanceForm({ onBackAction, onSubmit }: BarangayClearanceFormProps) {
   const { addToast } = useToast()
   const { data: session } = useSession()
   const { data } = useSWR(`/api/user?id=${session?.user.id}`, fetcher)
@@ -268,6 +269,13 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
           variant: "default",
         })
 
+        // Notify parent so it can handle navigation back to the request page
+        await onSubmit({
+          documentType: "barangay-clearance",
+          formData,
+          submittedAt: new Date().toISOString()
+        })
+
         // Reset form
         setFormData({
           fullName: "",
@@ -303,14 +311,14 @@ export default function BarangayClearanceForm({ onBackAction }: BarangayClearanc
     <div className="max-w-4xl mx-auto p-4 sm:p-6 bg-white rounded-lg shadow-lg">
       <div className="mb-6">
         <div className="flex items-center mb-4">
-          <Button
+          {/* <Button
             onClick={onBackAction}
             variant="ghost"
             className="text-[#23479A] hover:bg-[#23479A]/10 p-2"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Services
-          </Button>
+          </Button> */}
         </div>
         <h1 className="text-2xl font-bold text-gray-900">Barangay Clearance Application</h1>
         <p className="text-sm text-gray-600">Complete the form to apply for a barangay clearance certificate</p>

@@ -94,17 +94,8 @@ function RequestFormContent() {
     router.push("/dashboard/request")
   }
 
-  const handleFormSubmit = (formData: any) => {
-    // Handle form submission - generate PDF and save to database
-    console.log("Form submitted:", { documentType, formData })
-    
-    // Here you would typically:
-    // 1. Save to database
-    // 2. Generate PDF
-    // 3. Send notifications
-    // 4. Redirect to success page
-    
-    alert("Request submitted successfully!")
+  const handleFormSubmit = (_formData: any) => {
+    // Child forms already show success toasts. Simply navigate back.
     router.push("/dashboard/request")
   }
 
