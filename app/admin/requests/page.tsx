@@ -1,6 +1,6 @@
 "use client"
 
-import RequestsManagement from "@/components/admincomponents/RequestsManagement"
+import RequestsManagement from "@/app/admin/requests/RequestsManagement"
 
 export default function RequestsPage() {
   return (

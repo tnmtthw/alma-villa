@@ -26,14 +26,15 @@ import {
 import { useToast } from "@/components/ui/toast"
 
 // Import our reusable components
-import StatsCard from "./requests/StatsCard"
-import RequestsFilters from "./requests/RequestsFilters"
-import RequestTableRow from "./requests/RequestTableRow"
-import RequestDetailsModal from "./requests/RequestDetailsModal"
-import StatusUpdateModal from "./requests/StatusUpdateModal"
-import PaymentReviewModal from "./requests/PaymentReviewModal"
+import StatsCard from "../../../components/admincomponents/requests/StatsCard"
+import RequestsFilters from "../../../components/admincomponents/requests/RequestsFilters"
+import RequestTableRow from "../../../components/admincomponents/requests/RequestTableRow"
+import RequestDetailsModal from "../../../components/admincomponents/requests/RequestDetailsModal"
+import StatusUpdateModal from "../../../components/admincomponents/requests/StatusUpdateModal"
+import PaymentReviewModal from "../../../components/admincomponents/requests/PaymentReviewModal"
 
-import { DocumentRequest, RequestStats } from "./requests/types"
+import { DocumentRequest, RequestStats } from "../../../components/admincomponents/requests/types"
+import Link from 'next/link'
 
 // SWR fetcher function
 const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) => fetch(...args).then((res) => res.json());
@@ -191,7 +192,7 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
         urgent: requests.filter(r => r.urgentRequest).length
       }
     }
-    
+
     // Fallback to local calculation
     return {
       total: requests.length,
@@ -312,7 +313,7 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
         await mutate()
         setIsStatusUpdateModalOpen(false)
         setSelectedRequest(null)
-        
+
         // Show success toast
         addToast({
           title: "Status Updated Successfully!",
@@ -353,7 +354,7 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
       if (result.success) {
         // Trigger a revalidation of the SWR data
         await mutate()
-        
+
         // Show success toast
         addToast({
           title: "Payment Approved Successfully!",
@@ -394,7 +395,7 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
       if (result.success) {
         // Trigger a revalidation of the SWR data
         await mutate()
-        
+
         // Show success toast
         addToast({
           title: "Payment Rejected",
@@ -483,6 +484,12 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <Link href="/admin/requests/report" passHref>
+            <Button >
+              <Plus className="h-4 w-4 mr-2" />
+              More
+            </Button>
+          </Link>
           <Button
             variant="outline"
             className="flex items-center justify-center gap-2 w-full sm:w-auto"

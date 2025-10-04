@@ -45,9 +45,9 @@ export default function StatusUpdateModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="bg-white">
         <DialogHeader>
-          <DialogTitle>Update Request Status</DialogTitle>
+          <DialogTitle>Update Status</DialogTitle>
           <DialogDescription>
-            Change the status and add notes for request {request?.id}
+            Change the status and add notes for request <b>{request?.id}</b>
           </DialogDescription>
         </DialogHeader>
 
@@ -58,7 +58,7 @@ export default function StatusUpdateModal({
               value={updateStatusData.newStatus}
               onValueChange={(value) => setUpdateStatusData({ ...updateStatusData, newStatus: value })}
             >
-              <SelectTrigger className="mt-1">
+              <SelectTrigger className="mt-1 w-full">
                 <SelectValue placeholder="Select new status" />
               </SelectTrigger>
               <SelectContent>
