@@ -27,6 +27,7 @@ interface ClaimClearanceButtonProps {
 const ClaimClearanceButton: React.FC<ClaimClearanceButtonProps> = ({ request }) => {
     const date = new Date(request.requestDate);
     const month = date.toLocaleString("en-US", { month: "short" });
+    const monthLong = date.toLocaleString("en-US", { month: "long" });
     const day = date.getDate();
     const birthDate = new Date(request.birthDate);
     const formattedBirthDate = birthDate.toLocaleDateString("en-US", {
@@ -46,8 +47,8 @@ const ClaimClearanceButton: React.FC<ClaimClearanceButtonProps> = ({ request }) 
         "month": month,
         "day": day,
         "Residence Certificate": request.id,
-        "Issued at": request.fullName,
-        issued: "",
+        "Issued at": "Barangay Alma Villa, Gloria, Oriental Mindoro",
+        issued: monthLong + " " + day + ", 2025",
         Purpose: request.purpose
     };
 

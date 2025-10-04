@@ -209,7 +209,7 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
           )}
         </div>
       </CardHeader>
-      
+
       {/* Filter Section */}
       <div className="px-4 sm:px-6 pb-4">
         <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
@@ -230,16 +230,15 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
                   return (
                     <SelectItem key={statusValue} value={statusValue}>
                       <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${
-                          statusValue === 'pending' ? 'bg-orange-500' :
-                          statusValue === 'approved' ? 'bg-purple-500' :
-                          statusValue === 'processing' ? 'bg-blue-500' :
-                          statusValue === 'payment_sent' ? 'bg-yellow-500' :
-                          statusValue === 'ready_to_claim' ? 'bg-green-500' :
-                          statusValue === 'completed' ? 'bg-gray-500' :
-                          statusValue === 'rejected' ? 'bg-red-500' :
-                          'bg-gray-400'
-                        }`} />
+                        <div className={`w-2 h-2 rounded-full ${statusValue === 'pending' ? 'bg-orange-500' :
+                            statusValue === 'approved' ? 'bg-purple-500' :
+                              statusValue === 'processing' ? 'bg-blue-500' :
+                                statusValue === 'payment_sent' ? 'bg-yellow-500' :
+                                  statusValue === 'ready_to_claim' ? 'bg-green-500' :
+                                    statusValue === 'completed' ? 'bg-gray-500' :
+                                      statusValue === 'rejected' ? 'bg-red-500' :
+                                        'bg-gray-400'
+                          }`} />
                         {statusConfig.label} ({count})
                       </div>
                     </SelectItem>
@@ -260,7 +259,7 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
           </div>
         </div>
       </div>
-      
+
       <CardContent className="space-y-4 px-4 sm:px-6 pb-4 sm:pb-6">
 
         {isLoading && <p className="text-sm text-gray-500">Loading...</p>}
