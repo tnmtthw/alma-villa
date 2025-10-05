@@ -21,7 +21,7 @@ export async function PATCH(request: Request) {
         select: { email: true, role: true }
     });
 
-    if (!user || !user.email) {
+    if (!user || !user.email || !id) {
         return NextResponse.json({ error: 'User not found or email missing' }, { status: 404 });
     }
 
