@@ -13,6 +13,10 @@ export async function PATCH(request: Request) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id') || undefined;
 
+    if (!id) {
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+    }
+
     const body = await request.json();
     const { role, email } = body;
 
