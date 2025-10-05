@@ -3,6 +3,7 @@ import nodemailer from 'nodemailer';
 import { render } from '@react-email/render';
 
 import { prisma } from '@/lib/prisma';
+import { AuditLogger, getClientIP, getUserAgent } from '@/lib/audit';
 import AccountVerifiedEmail from "@/emails/resident-verified-email";
 
 export const dynamic = 'force-dynamic';
@@ -40,6 +41,16 @@ export async function PATCH(request: Request) {
     });
 
     await transporter.sendMail(mailOptions);
+
+    // Log user verification
+    const adminUser = 'System Admin'; // You might want to get this from session
+    await AuditLogger.logUserVerification(
+        id,
+        email,
+        adminUser,
+        getClientIP(request),
+        getUserAgent(request)
+    );
 
     return NextResponse.json({ message: 'User verified succesfully, email notification sent' }, { status: 201 });
   } catch (error) {

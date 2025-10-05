@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import nodemailer from 'nodemailer';
 import { render } from '@react-email/render';
+import { AuditLogger, getClientIP, getUserAgent } from '@/lib/audit';
 
 import AccountRejectedEmail from "@/emails/resident-rejected-email";
 
@@ -14,21 +15,34 @@ export async function PATCH(request: Request) {
     const body = await request.json();
     const { role } = body;
 
-    // Get user data first to access email
+    // Get user data first to access email and current role
     const user = await prisma.user.findUnique({
         where: { id },
-        select: { email: true }
+        select: { email: true, role: true }
     });
 
     if (!user || !user.email) {
         return NextResponse.json({ error: 'User not found or email missing' }, { status: 404 });
     }
 
+    const oldRole = user.role;
+    const adminUser = 'System Admin'; // You might want to get this from session
+
     // Update user role
     await prisma.user.update({
         where: { id },
         data: { role },
     });
+
+    // Log role change
+    await AuditLogger.logRoleChange(
+        id,
+        oldRole,
+        role,
+        adminUser,
+        getClientIP(request),
+        getUserAgent(request)
+    );
 
     // Send rejection email if role is "Reject"
     if (role === "Rejected") {

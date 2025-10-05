@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { prisma } from '@/lib/prisma';
+import { AuditLogger, getClientIP, getUserAgent } from '@/lib/audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,7 +36,42 @@ export async function PATCH(request: Request) {
         const updatedDocument = await prisma.document.update({
             where: { id },
             data: updateData,
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        email: true,
+                        firstName: true,
+                        lastName: true
+                    }
+                }
+            }
         });
+
+        // Log document status change
+        if (status && updatedDocument.user) {
+            const adminUser = 'System Admin'; // You might want to get this from session
+            if (status === 'ready_to_claim') {
+                await AuditLogger.logDocumentApproval(
+                    updatedDocument.user.id,
+                    id,
+                    updatedDocument.type || 'Unknown',
+                    adminUser,
+                    getClientIP(request),
+                    getUserAgent(request)
+                );
+            } else if (status === 'rejected') {
+                await AuditLogger.logDocumentRejection(
+                    updatedDocument.user.id,
+                    id,
+                    updatedDocument.type || 'Unknown',
+                    adminUser,
+                    'Status changed to rejected',
+                    getClientIP(request),
+                    getUserAgent(request)
+                );
+            }
+        }
 
         return NextResponse.json(
             { success: true, document: updatedDocument },

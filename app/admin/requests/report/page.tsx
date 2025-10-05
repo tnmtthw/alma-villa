@@ -155,7 +155,7 @@ export default function ReportPage() {
         })
     }
 
-    const exportToCSV = () => {
+    const exportToCSV = async () => {
         const headers = [
             'ID', 'Full Name', 'Email', 'Mobile Number', 'Type', 'Status',
             'Purpose', 'Created Date', 'Updated Date', 'Purok', 'Age', 'Civil Status'
@@ -186,6 +186,20 @@ export default function ReportPage() {
         a.download = `document-report-${new Date().toISOString().split('T')[0]}.csv`
         a.click()
         window.URL.revokeObjectURL(url)
+
+        // Log data export
+        try {
+            await fetch('/api/admin/audit/log', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'DATA_EXPORT',
+                    details: `Exported document report: ${documents.length} records`,
+                })
+            })
+        } catch (error) {
+            console.error('Failed to log export activity:', error)
+        }
     }
 
     const getStatusColor = (status: string) => {

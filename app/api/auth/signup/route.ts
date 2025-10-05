@@ -4,6 +4,7 @@ import nodemailer from 'nodemailer';
 import { render } from '@react-email/render';
 
 import { prisma } from '@/lib/prisma';
+import { AuditLogger, getClientIP, getUserAgent } from '@/lib/audit';
 import SignupConfirmationEmail from "@/emails/signup-confirmation-email";
 
 export async function POST(req: Request) {
@@ -39,6 +40,14 @@ export async function POST(req: Request) {
     })
 
     await transporter.sendMail(mailOptions);
+
+    // Log user registration
+    await AuditLogger.logUserRegistration(
+      user.id,
+      email,
+      getClientIP(req),
+      getUserAgent(req)
+    );
 
     return NextResponse.json({ message: 'User created successfully, email notification sent', userId: user.id }, { status: 201 });
     

@@ -24,6 +24,7 @@ import {
   Loader2
 } from "lucide-react"
 import { useToast } from "@/components/ui/toast"
+import { useSession } from "next-auth/react"
 
 // Import our reusable components
 import StatsCard from "../../../components/admincomponents/requests/StatsCard"
@@ -115,6 +116,7 @@ interface RequestsManagementProps {
 
 export default function RequestsManagement({ userId }: RequestsManagementProps) {
   const { addToast } = useToast()
+  const { data: session } = useSession()
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [documentTypeFilter, setDocumentTypeFilter] = useState("all")
@@ -309,6 +311,36 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
       const result = await response.json()
 
       if (result.success) {
+        // Log the status change to audit trail
+        try {
+          const adminName = session?.user?.name || session?.user?.email || 'Unknown Admin'
+          const oldStatus = selectedRequest.status
+          const newStatus = updateStatusData.newStatus
+          const documentType = selectedRequest.documentType
+          const userId = selectedRequest.userId
+          
+          // Create detailed audit log entry
+          const auditDetails = `Document status changed from "${oldStatus}" to "${newStatus}" for ${documentType} (ID: ${selectedRequest.id})`
+          const additionalInfo = updateStatusData.rejectionReason 
+            ? `Rejection reason: ${updateStatusData.rejectionReason}`
+            : updateStatusData.adminNotes 
+            ? `Admin notes: ${updateStatusData.adminNotes}`
+            : ''
+
+          await fetch('/api/admin/audit/log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: session?.user?.id,
+              action: 'DOCUMENT_STATUS_CHANGE',
+              details: `${auditDetails}${additionalInfo ? ` | ${additionalInfo}` : ''}`,
+            })
+          })
+        } catch (auditError) {
+          console.error('Failed to log status change:', auditError)
+          // Don't fail the main operation if audit logging fails
+        }
+
         // Trigger a revalidation of the SWR data
         await mutate()
         setIsStatusUpdateModalOpen(false)

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { compare } from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { LOGIN_SECURITY, loginSecurityUtils } from '@/lib/utils';
+import { AuditLogger, getClientIP, getUserAgent } from '@/lib/audit';
 
 export async function POST(req: Request) {
   try {
@@ -106,6 +107,14 @@ export async function POST(req: Request) {
       });
       console.log(`Login successful - Security counters reset for: ${email}`);
     }
+
+    // Log successful login
+    await AuditLogger.logUserLogin(
+      user.id,
+      email,
+      getClientIP(req),
+      getUserAgent(req)
+    );
 
     console.log(`Successful login: ${email}`);
     return NextResponse.json({ 

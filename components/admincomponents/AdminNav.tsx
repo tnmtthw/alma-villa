@@ -21,6 +21,7 @@ import {
   ChevronLeft,
   ChevronRight,
   RefreshCw,
+  Shield,
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { useSession } from "next-auth/react"
@@ -51,6 +52,12 @@ const getNavigationItems = (pendingRequests: number, upcomingEvents: number) => 
     label: "Events",
     href: "/admin/events",
     badge: upcomingEvents > 0 ? upcomingEvents : null,
+  },
+  {
+    icon: Shield,
+    label: "Audit Trail",
+    href: "/admin/audit",
+    badge: null,
   },
   {
     icon: Settings,
@@ -134,6 +141,24 @@ export function AdminNav({ children }: { children: React.ReactNode }) {
   const handleSignOut = async () => {
     setIsProfileOpen(false)
     try {
+      // Log logout before signing out
+      if (session?.user?.id) {
+        try {
+          await fetch('/api/admin/audit/log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId: session.user.id,
+              action: 'USER_LOGOUT',
+              details: `User logged out: ${session.user.email}`,
+            })
+          })
+        } catch (auditError) {
+          console.error('Failed to log logout:', auditError)
+          // Don't fail logout if audit logging fails
+        }
+      }
+      
       await signOut()
       // The signOut function should handle the redirect, but you can add a fallback
       // router.push("/login")

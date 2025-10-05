@@ -1,14 +1,26 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma';
+import { AuditLogger, getClientIP, getUserAgent } from '@/lib/audit';
 
 export async function POST(req: Request) {
-  const { ...rest } = await req.json()
+  const { userId, type, ...rest } = await req.json()
 
   const document = await prisma.document.create({
     data: {
       ...rest
     },
   })
+
+  // Log document submission
+  if (userId && type) {
+    await AuditLogger.logDocumentSubmission(
+      userId,
+      document.id,
+      type,
+      getClientIP(req),
+      getUserAgent(req)
+    );
+  }
 
   return NextResponse.json({ success: true, document })
 }
