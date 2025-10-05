@@ -90,7 +90,7 @@ export async function GET(req: Request) {
     ])
 
     // Get user details for top users
-    const userIds = userStats.map(stat => stat.userId).filter(Boolean)
+    const userIds = userStats.map(stat => stat.userId).filter((id): id is string => id !== null)
     const users = await prisma.user.findMany({
       where: {
         id: { in: userIds },
