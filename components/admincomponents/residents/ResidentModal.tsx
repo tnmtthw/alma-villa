@@ -39,7 +39,7 @@ export function AddResidentModal({ isOpen, onClose, onSubmit }: AddResidentModal
     email: "",
     mobileNumber: "+63",
     emergencyContact: "",
-    emergencyNumber: "",
+    emergencyNumber: "+63",
     houseNumber: "",
     street: "",
     purok: "Purok 1",
@@ -98,6 +98,32 @@ export function AddResidentModal({ isOpen, onClose, onSubmit }: AddResidentModal
         newData.mobileNumber = cleanValue
       }
       
+      // Ensure emergency number always starts with +63 and only accepts numbers
+      if (field === "emergencyNumber") {
+        // Remove any non-numeric characters except + at the beginning
+        let cleanValue = value.replace(/[^0-9+]/g, '')
+        
+        // Ensure it starts with +63
+        if (!cleanValue.startsWith("+63")) {
+          if (cleanValue.startsWith("63")) {
+            cleanValue = "+" + cleanValue
+          } else if (cleanValue.startsWith("0")) {
+            cleanValue = "+63" + cleanValue.substring(1)
+          } else if (cleanValue.length > 0 && !cleanValue.startsWith("+")) {
+            cleanValue = "+63" + cleanValue
+          } else if (cleanValue.length === 0) {
+            cleanValue = "+63"
+          }
+        }
+        
+        // Limit to 11 digits total (+63 + 9 digits)
+        if (cleanValue.startsWith("+63") && cleanValue.length > 14) {
+          cleanValue = cleanValue.substring(0, 14) // +63 + 9 digits = 14 chars
+        }
+        
+        newData.emergencyNumber = cleanValue
+      }
+      
       return newData
     })
   }
@@ -125,7 +151,7 @@ export function AddResidentModal({ isOpen, onClose, onSubmit }: AddResidentModal
       email: "",
       mobileNumber: "+63",
       emergencyContact: "",
-      emergencyNumber: "",
+      emergencyNumber: "+63",
       houseNumber: "",
       street: "",
       purok: "",
@@ -311,7 +337,7 @@ export function AddResidentModal({ isOpen, onClose, onSubmit }: AddResidentModal
             </div>
             <div className="space-y-2">
               <Label htmlFor="emergencyContact" className="text-sm font-medium text-gray-700">
-                Emergency Contact *
+                Emergency Contact Person *
               </Label>
               <Input
                 id="emergencyContact"
@@ -329,6 +355,7 @@ export function AddResidentModal({ isOpen, onClose, onSubmit }: AddResidentModal
                 id="emergencyNumber"
                 value={formData.emergencyNumber}
                 onChange={(e) => handleInputChange("emergencyNumber", e.target.value)}
+                placeholder="+63 9XX XXX XXXX (11 digits total)"
                 required
                 className="w-full"
               />
