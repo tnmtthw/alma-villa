@@ -37,7 +37,7 @@ export function AddResidentModal({ isOpen, onClose, onSubmit }: AddResidentModal
     nationality: "Filipino",
     religion: "",
     email: "",
-    mobileNumber: "",
+    mobileNumber: "+63",
     emergencyContact: "",
     emergencyNumber: "",
     houseNumber: "",
@@ -51,8 +51,55 @@ export function AddResidentModal({ isOpen, onClose, onSubmit }: AddResidentModal
     role: "Verified"
   })
 
+  const calculateAge = (birthDate: string) => {
+    if (!birthDate) return ""
+    const today = new Date()
+    const birth = new Date(birthDate)
+    let age = today.getFullYear() - birth.getFullYear()
+    const monthDiff = today.getMonth() - birth.getMonth()
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--
+    }
+    return age.toString()
+  }
+
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    setFormData(prev => {
+      const newData = { ...prev, [field]: value }
+      
+      // Auto-calculate age when birth date changes
+      if (field === "birthDate" && value) {
+        newData.age = calculateAge(value)
+      }
+      
+      // Ensure mobile number always starts with +63 and only accepts numbers
+      if (field === "mobileNumber") {
+        // Remove any non-numeric characters except + at the beginning
+        let cleanValue = value.replace(/[^0-9+]/g, '')
+        
+        // Ensure it starts with +63
+        if (!cleanValue.startsWith("+63")) {
+          if (cleanValue.startsWith("63")) {
+            cleanValue = "+" + cleanValue
+          } else if (cleanValue.startsWith("0")) {
+            cleanValue = "+63" + cleanValue.substring(1)
+          } else if (cleanValue.length > 0 && !cleanValue.startsWith("+")) {
+            cleanValue = "+63" + cleanValue
+          } else if (cleanValue.length === 0) {
+            cleanValue = "+63"
+          }
+        }
+        
+        // Limit to 11 digits total (+63 + 9 digits)
+        if (cleanValue.startsWith("+63") && cleanValue.length > 14) {
+          cleanValue = cleanValue.substring(0, 14) // +63 + 9 digits = 14 chars
+        }
+        
+        newData.mobileNumber = cleanValue
+      }
+      
+      return newData
+    })
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -76,7 +123,7 @@ export function AddResidentModal({ isOpen, onClose, onSubmit }: AddResidentModal
       nationality: "Filipino",
       religion: "",
       email: "",
-      mobileNumber: "",
+      mobileNumber: "+63",
       emergencyContact: "",
       emergencyNumber: "",
       houseNumber: "",
@@ -163,7 +210,7 @@ export function AddResidentModal({ isOpen, onClose, onSubmit }: AddResidentModal
             </div>
             <div className="space-y-2">
               <Label htmlFor="age" className="text-sm font-medium text-gray-700">
-                Age *
+                Age * (Auto-calculated)
               </Label>
               <Input
                 id="age"
@@ -171,7 +218,8 @@ export function AddResidentModal({ isOpen, onClose, onSubmit }: AddResidentModal
                 value={formData.age}
                 onChange={(e) => handleInputChange("age", e.target.value)}
                 required
-                className="w-full"
+                className="w-full bg-gray-50"
+                readOnly
               />
             </div>
             <div className="space-y-2">
@@ -257,7 +305,7 @@ export function AddResidentModal({ isOpen, onClose, onSubmit }: AddResidentModal
                 id="mobileNumber"
                 value={formData.mobileNumber}
                 onChange={(e) => handleInputChange("mobileNumber", e.target.value)}
-                placeholder="09XXXXXXXXX"
+                placeholder="+63 9XX XXX XXXX (11 digits total)"
                 className="w-full"
               />
             </div>

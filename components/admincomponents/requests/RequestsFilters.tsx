@@ -86,9 +86,9 @@ export default function RequestsFilters({
                 <SelectItem value="all">All Documents</SelectItem>
                 <SelectItem value="Barangay Clearance">Barangay Clearance</SelectItem>
                 <SelectItem value="Certificate of Residency">Certificate of Residency</SelectItem>
-                <SelectItem value="Business Permit">Business Permit</SelectItem>
                 <SelectItem value="Certificate of Indigency">Certificate of Indigency</SelectItem>
-                <SelectItem value="Cedula">Cedula</SelectItem>
+                <SelectItem value="Certificate of Good Moral Character">Certificate of Good Moral Character</SelectItem>
+                <SelectItem value="Business Permit">Business Permit</SelectItem>
               </SelectContent>
             </Select>
 
