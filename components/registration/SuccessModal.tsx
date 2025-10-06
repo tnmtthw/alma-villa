@@ -62,7 +62,7 @@ export default function SuccessModal({ isOpen, onClose }: SuccessModalProps) {
             Registration Received
           </h2>
           <p className="text-black mb-6">
-            Your registration has been received. Please wait for 2-3 working days to verify your registration. 
+            Your registration has been received. Please wait for 2-3 Days to verify your registration. 
             An email will be sent to you once your account is verified along with your credentials.
           </p>
           

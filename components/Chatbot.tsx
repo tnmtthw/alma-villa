@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react'
 import { MessageCircle, X, Send, Bot, User, Clock, FileText, Phone, MapPin } from 'lucide-react'
 
@@ -39,31 +38,31 @@ const ChatBot = () => {
     },
     {
       question: "How can I request a barangay certificate?",
-      answer: "Hi! To request documents like barangay certificates or clearances:\n\n1️⃣ Click 'Request Now' on our homepage\n2️⃣ Fill out your personal information\n3️⃣ Select the document type you need\n4️⃣ Submit your request\n\nProcessing takes 2-3 working days and you'll get an email confirmation once submitted! 📄",
+      answer: "Hi! To request documents like barangay certificates or clearances:\n\n1️⃣ Click 'Request Now' on our homepage\n2️⃣ Fill out your personal information\n3️⃣ Select the document type you need\n4️⃣ Submit your request\n\nProcessing takes 2-3 Days and you'll get an email confirmation once submitted! 📄",
       keywords: ["certificate", "request", "document", "barangay", "clearance", "doc", "docs", "how", "get", "apply"],
       category: "services"
     },
     {
       question: "What documents can I request?",
-      answer: "We offer various documents and services:\n\n📋 **Certificates:**\n• Barangay Clearance\n• Certificate of Residency\n• Certificate of Indigency\n• First Time Job Seeker Certificate\n• Solo Parent ID\n• Community Tax Certificate (Cedula)\n\n📋 **Permits:**\n• Barangay Business Permit\n\n📋 **Reports:**\n• Complaint/Blotter Report\n\nAll processing takes 2-3 working days! 🚀",
+      answer: "We offer the following documents:\n\n📋 **Available Documents:**\n• Barangay Clearance\n• Certificate of Residency\n• Certificate of Indigency\n• Certificate of Good Moral Character\n• Business Permit\n\nAll processing takes 2-3 Days! 🚀",
       keywords: ["documents", "what", "available", "services", "list", "types", "kind", "which"],
       category: "services"
     },
     {
       question: "How do I create an account?",
-      answer: "Creating an account is easy! Here's how:\n\n1️⃣ Click 'Sign Up' on our website\n2️⃣ Fill out your personal information\n3️⃣ Upload your valid ID (front and back)\n4️⃣ Complete face verification\n5️⃣ Set up your login credentials\n\nAccount verification takes 2-3 working days, and we'll email you once it's approved! 🎉",
+      answer: "Creating an account is easy! Here's how:\n\n1️⃣ Click 'Sign Up' on our website\n2️⃣ Fill out your personal information\n3️⃣ Upload your valid ID (front and back)\n4️⃣ Complete face verification\n5️⃣ Set up your login credentials\n\nAccount verification takes 2-3 Days, and we'll email you once it's approved! 🎉",
       keywords: ["create", "account", "signup", "register", "registration", "sign up", "new account", "how to register"],
       category: "registration"
     },
     {
       question: "What documents do I need for registration?",
-      answer: "For resident registration, you'll need:\n\n✅ **Required Documents:**\n• Valid government ID (front and back)\n• Proof of residency (utility bills, lease contract)\n• Birth certificate\n• Recent photo (or face verification)\n\n✅ **Personal Information:**\n• Complete name and address\n• Contact details\n• Emergency contact information\n\nRegistration verification takes 2-3 working days! 😄",
+      answer: "For resident registration, you'll need:\n\n✅ **Required Documents:**\n• Valid government ID (front and back)\n• Proof of residency (utility bills, lease contract)\n• Birth certificate\n• Recent photo (or face verification)\n\n✅ **Personal Information:**\n• Complete name and address\n• Contact details\n• Emergency contact information\n\nRegistration verification takes 2-3 Days! 😄",
       keywords: ["registration", "documents", "requirements", "ID", "proof", "need", "register", "signup", "what need"],
       category: "registration"
     },
     {
       question: "How long does it take to process documents?",
-      answer: "All our services have a standard processing time:\n\n⏰ **Processing Time: 2-3 working days**\n\nThis applies to:\n• All certificate requests\n• Business permit applications\n• Account registration verification\n• Document renewals\n\nWe'll email you updates throughout the process! 📧",
+      answer: "All our services have a standard processing time:\n\n⏰ **Processing Time: 2-3 Days**\n\nThis applies to:\n• All certificate requests\n• Business permit applications\n• Account registration verification\n• Document renewals\n\nWe'll email you updates throughout the process! 📧",
       keywords: ["processing", "time", "how long", "days", "wait", "take", "process", "duration"],
       category: "services"
     },
@@ -75,19 +74,19 @@ const ChatBot = () => {
     },
     {
       question: "How do I apply for a business permit?",
-      answer: "To apply for a business permit:\n\n1️⃣ Go to Services → Business Permit\n2️⃣ Fill out your business information\n3️⃣ Upload required documents\n4️⃣ Submit application\n\nProcessing takes 2-3 working days. We'll keep you updated via email. Good luck with your business! 🏪",
+      answer: "To apply for a business permit:\n\n1️⃣ Go to Services → Business Permit\n2️⃣ Fill out your business information\n3️⃣ Upload required documents\n4️⃣ Submit application\n\nProcessing takes 2-3 Days. We'll keep you updated via email. Good luck with your business! 🏪",
       keywords: ["business", "permit", "apply", "license", "shop", "store"],
       category: "business"
     },
     {
       question: "Can I track my application status?",
-      answer: "Yes! You can track your application by:\n\n✅ Logging into your account\n✅ Going to the History page\n✅ Checking email notifications\n\nRemember, all applications are processed within 2-3 working days. We keep you updated every step of the way! 📱",
+      answer: "Yes! You can track your application by:\n\n✅ Logging into your account\n✅ Going to the History page\n✅ Checking email notifications\n\nRemember, all applications are processed within 2-3 Days. We keep you updated every step of the way! 📱",
       keywords: ["track", "status", "application", "history", "progress", "check"],
       category: "services"
     },
     {
       question: "What forms are available for download?",
-      answer: "We have various forms available on our Forms page:\n\n📋 **Available Forms:**\n• Barangay Clearance Application\n• Certificate of Residency Application\n• Certificate of Indigency Application\n• Business Permit Application\n• Community Tax Certificate Form\n• First Time Job Seeker Certificate\n• Solo Parent ID Application\n• Complaint/Blotter Report\n\nAll forms are in PDF format for easy printing! 🖨️",
+      answer: "We have various forms available on our Forms page:\n\n📋 **Available Forms:**\n• Barangay Clearance Application\n• Certificate of Residency Application\n• Certificate of Indigency Application\n• Certificate of Good Moral Character Application\n• Business Permit Application\n\nAll forms are in PDF format for easy printing! 🖨️",
       keywords: ["forms", "download", "PDF", "application", "form", "printable"],
       category: "forms"
     }
@@ -105,7 +104,7 @@ const ChatBot = () => {
   useEffect(() => {
     if (isOpen && messages.length === 0) {
       addBotMessage(
-        "Hi there! 👋 I'm your Alma Villa assistant! \n\nI'm here to help you with:\n\n• 📋 Document requests & services\n• 🏢 Office information & location\n• 👤 Account registration help\n• 🏪 Business permits\n• ⏰ Processing times\n• 📞 Contact details\n\nAll our services are processed within 2-3 working days!\n\nWhat can I help you with today? 😊",
+        "Hi there! 👋 I'm your Alma Villa assistant! \n\nI'm here to help you with:\n\n• 📋 Document requests & services\n• 🏢 Office information & location\n• 👤 Account registration help\n• 🏪 Business permits\n• ⏰ Processing times\n• 📞 Contact details\n\nAll our services are processed within 2-3 Days!\n\nWhat can I help you with today? 😊",
         quickSuggestions
       )
     }
@@ -150,7 +149,7 @@ const ChatBot = () => {
     if (isGreeting && input.length < 20) {
       return {
         question: "greeting",
-        answer: "Hello there! 👋 Welcome to Barangay Alma Villa! \n\nI'm here to help you with our services, which are all processed within 2-3 working days. How can I assist you today?",
+        answer: "Hello there! 👋 Welcome to Barangay Alma Villa! \n\nI'm here to help you with our services, which are all processed within 2-3 Days. How can I assist you today?",
         keywords: [],
         category: "greeting"
       }
@@ -240,7 +239,7 @@ const ChatBot = () => {
         addBotMessage(match.answer, suggestions)
       } else {
         addBotMessage(
-          "I'm sorry, I don't have specific information about that right now. 😅\n\nBut don't worry! Here's how you can get help:\n\n📧 **Email us:** almavilla.gloria@gmail.com\n📍 **Visit us:** Barangay Alma Villa, Gloria, Oriental Mindoro\n🏢 **Office Hours:** Mon-Fri 8AM-5PM, Sat 8AM-12PM\n\n💡 **You can also ask about:**\n• Document requests & services\n• Account registration\n• Processing times (2-3 working days)\n• Office location & hours\n\nIs there anything else I can help you with? 😊",
+          "I'm sorry, I don't have specific information about that right now. 😅\n\nBut don't worry! Here's how you can get help:\n\n📧 **Email us:** almavilla.gloria@gmail.com\n📍 **Visit us:** Barangay Alma Villa, Gloria, Oriental Mindoro\n🏢 **Office Hours:** Mon-Fri 8AM-5PM, Sat 8AM-12PM\n\n💡 **You can also ask about:**\n• Document requests & services\n• Account registration\n• Processing times (2-3 Days)\n• Office location & hours\n\nIs there anything else I can help you with? 😊",
           quickSuggestions
         )
       }
@@ -291,7 +290,7 @@ const ChatBot = () => {
           </div>
           <div>
             <h3 className="font-semibold text-base">Alma Villa Assistant</h3>
-            <p className="text-xs text-blue-100">Online • 2-3 days processing</p>
+            <p className="text-xs text-blue-100">Online • 2-3 Days processing</p>
           </div>
         </div>
         <button

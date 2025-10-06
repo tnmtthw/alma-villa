@@ -21,28 +21,28 @@ const documentTypes = {
     title: "Barangay Clearance",
     description: "Certificate of good moral character and residence",
     fee: "₱50",
-    processingTime: "1-2 days",
+    processingTime: "2-3 Working Days",
     component: BarangayClearanceForm
   },
   "certificate-of-residency": {
     title: "Certificate of Residency", 
     description: "Official document proving your residence in the barangay",
     fee: "₱30",
-    processingTime: "1 day",
+    processingTime: "2-3 Working Days",
     component: ResidencyForm
   },
   "certificate-of-indigency": {
     title: "Certificate of Indigency",
     description: "Document certifying low-income status for assistance programs", 
     fee: "Free",
-    processingTime: "2-3 days",
+    processingTime: "2-3 Working Days",
     component: IndigencyForm
   },
   "business-permit": {
     title: "Barangay Business Permit",
     description: "Permit to operate a business within the barangay",
     fee: "₱200", 
-    processingTime: "3-5 days",
+    processingTime: "2-3 Working Days",
     component: BusinessPermitForm
   },
 
@@ -50,7 +50,7 @@ const documentTypes = {
     title: "Certificate of Good Moral Character",
     description: "Certificate verifying good moral character and integrity",
     fee: "₱50",
-    processingTime: "1-2 days",
+    processingTime: "2-3 Working Days",
     component: GoodMoralForm
   }
 } as const

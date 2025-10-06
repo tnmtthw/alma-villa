@@ -3,20 +3,45 @@ import { prisma } from '@/lib/prisma';
 import { AuditLogger, getClientIP, getUserAgent } from '@/lib/audit';
 
 export async function POST(req: Request) {
-  const { userId, type, ...rest } = await req.json()
+  const body = await req.json()
+  const { userId } = body
+
+  if (!userId) {
+    return NextResponse.json({ success: false, error: 'userId is required' }, { status: 400 })
+  }
+
+  // Whitelist allowed fields according to Prisma Document model
+  const data = {
+    userId,
+    fullName: body.fullName ?? null,
+    suffix: body.suffix ?? null,
+    birthDate: body.birthDate ?? null,
+    placeOfBirth: body.placeOfBirth ?? undefined,
+    age: body.age ?? null,
+    civilStatus: body.civilStatus ?? undefined,
+    purok: body.purok ?? null,
+    residencyLength: body.residencyLength ?? null,
+    purpose: body.purpose ?? undefined,
+    additionalInfo: body.additionalInfo ?? undefined,
+    type: body.type ?? undefined,
+    businessName: body.businessName ?? undefined,
+    businessLocation: body.businessLocation ?? undefined,
+    operatorName: body.operatorName ?? undefined,
+    operatorAddress: body.operatorAddress ?? undefined,
+    citizenship: body.citizenship ?? undefined,
+    proofOfPayment: body.proofOfPayment ?? undefined,
+  }
 
   const document = await prisma.document.create({
-    data: {
-      ...rest
-    },
+    data,
   })
 
   // Log document submission
-  if (userId && type) {
+  if (userId && data.type) {
     await AuditLogger.logDocumentSubmission(
       userId,
       document.id,
-      type,
+      data.type as string,
       getClientIP(req),
       getUserAgent(req)
     );

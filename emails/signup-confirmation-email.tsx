@@ -73,7 +73,7 @@ export const ImprovedVerificationEmail = ({
                         <Section style={statusBox}>
                             <Text style={statusTitle}>What happens next?</Text>
                             <Text style={statusItem}>• Document review by barangay administrators</Text>
-                            <Text style={statusItem}>• Verification takes 2-3 working days</Text>
+                            <Text style={statusItem}>• Verification takes 2-3 Days</Text>
                             <Text style={statusItem}>• Email notification once approved</Text>
                             <Text style={statusItem}>• Full access to barangay services</Text>
                         </Section>

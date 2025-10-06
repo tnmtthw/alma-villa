@@ -292,9 +292,9 @@ export default function AuditLogPage() {
             </div>
 
             <div>
-              <label className="text-sm font-medium mb-2 block">Action</label>
+              <label className="text-sm font-medium mb-2 mt-[2px] block">Action</label>
               <Select value={filters.action} onValueChange={(value) => handleFilterChange('action', value)}>
-                <SelectTrigger>
+                <SelectTrigger className="h-10">
                   <SelectValue placeholder="All Actions" />
                 </SelectTrigger>
                 <SelectContent>

@@ -30,7 +30,7 @@ export default function DocumentRequestPage() {
       category: "certificate",
       icon: FileText,
       fee: "₱50",
-      processingTime: "1-2 days",
+      processingTime: "2-3 Working Days",
       requirements: ["Valid ID", "Proof of Residency"],
       popular: true
     },
@@ -41,7 +41,7 @@ export default function DocumentRequestPage() {
       category: "certificate",
       icon: Home,
       fee: "₱30",
-      processingTime: "1 day",
+      processingTime: "2-3 Working Days",
       requirements: ["Valid ID", "Utility Bills"],
       popular: true
     },
@@ -52,7 +52,7 @@ export default function DocumentRequestPage() {
       category: "certificate",
       icon: Users,
       fee: "Free",
-      processingTime: "2-3 days",
+      processingTime: "2-3 Working Days",
       requirements: ["Valid ID", "Income Statement", "Family Composition"]
     },
     {
@@ -62,7 +62,7 @@ export default function DocumentRequestPage() {
       category: "permit",
       icon: Building,
       fee: "₱200",
-      processingTime: "3-5 days",
+      processingTime: "2-3 Working Days",
       requirements: ["Valid ID", "Business Registration", "Location Map"]
     },
 
@@ -73,7 +73,7 @@ export default function DocumentRequestPage() {
       category: "certificate",
       icon: FileText,
       fee: "₱50",
-      processingTime: "1-2 days",
+      processingTime: "2-3 Working Days",
       requirements: ["Valid ID", "Birth Certificate"],
       popular: true
     }
