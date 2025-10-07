@@ -1,21 +1,21 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertTriangle } from "lucide-react"
+} from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 
 interface ResidentInfoProps {
-  onNextAction: () => void
+  onNextAction: () => void;
 }
 
 interface FormData {
@@ -67,8 +67,8 @@ const initialFormData: FormData = {
   city: "Gloria", // Auto-filled municipality
   province: "Oriental Mindoro", // Auto-filled province
   zipCode: "5209", // Auto-filled ZIP code
-  residencyLength: ""
-}
+  residencyLength: "",
+};
 
 const sampleData: FormData = {
   lastName: "Dela Cruz",
@@ -93,33 +93,33 @@ const sampleData: FormData = {
   city: "Gloria", // Auto-filled municipality
   province: "Oriental Mindoro", // Auto-filled province
   zipCode: "5209", // Auto-filled ZIP code
-  residencyLength: "5"
-}
+  residencyLength: "5",
+};
 
 export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
-  const [formData, setFormData] = useState<FormData>(initialFormData)
-  const [isClient, setIsClient] = useState(false)
-  const [isMinor, setIsMinor] = useState(false)
-  const [isFutureDate, setIsFutureDate] = useState(false)
+  const [formData, setFormData] = useState<FormData>(initialFormData);
+  const [isClient, setIsClient] = useState(false);
+  const [isMinor, setIsMinor] = useState(false);
+  const [isFutureDate, setIsFutureDate] = useState(false);
 
   // Get today's date in YYYY-MM-DD format for max date validation
   const getTodaysDate = (): string => {
-    const today = new Date()
-    const year = today.getFullYear()
-    const month = String(today.getMonth() + 1).padStart(2, '0')
-    const day = String(today.getDate()).padStart(2, '0')
-    return `${year}-${month}-${day}`
-  }
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
 
   // Set isClient to true after component mounts (client-side only)
   useEffect(() => {
-    setIsClient(true)
+    setIsClient(true);
 
     // Load saved data from localStorage only on client-side
-    const savedData = localStorage.getItem('residentInfoData')
+    const savedData = localStorage.getItem("residentInfoData");
     if (savedData) {
       try {
-        const parsedData = JSON.parse(savedData)
+        const parsedData = JSON.parse(savedData);
         // Ensure auto-filled fields maintain their values
         const updatedData = {
           ...parsedData,
@@ -128,20 +128,20 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
           province: "Oriental Mindoro",
           zipCode: "5209",
           houseNumber: parsedData.houseNumber || "N/A",
-          street: parsedData.street || "N/A"
-        }
-        setFormData(updatedData)
+          street: parsedData.street || "N/A",
+        };
+        setFormData(updatedData);
 
         // Check if the loaded data shows a minor or future date
         if (updatedData.birthDate) {
           // AUTO-DETECT on page load for saved data
-          validateBirthDate(updatedData.birthDate)
+          validateBirthDate(updatedData.birthDate);
         }
       } catch (error) {
-        console.error('Error parsing saved resident data:', error)
+        console.error("Error parsing saved resident data:", error);
       }
     }
-  }, [])
+  }, []);
 
   // Save to localStorage whenever form data changes (only on client-side)
   useEffect(() => {
@@ -154,172 +154,181 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
         barangay: "Alma Villa", // Always enforce correct barangay
         city: "Gloria", // Always enforce correct municipality
         province: "Oriental Mindoro", // Always enforce correct province
-        zipCode: "5209" // Always enforce correct ZIP
-      }
-      localStorage.setItem('residentInfoData', JSON.stringify(dataToSave))
+        zipCode: "5209", // Always enforce correct ZIP
+      };
+      localStorage.setItem("residentInfoData", JSON.stringify(dataToSave));
     }
-  }, [formData, isClient])
+  }, [formData, isClient]);
 
   // Calculate age automatically when birthDate changes
   const calculateAge = (birthDate: string): string => {
-    if (!birthDate) return ""
+    if (!birthDate) return "";
 
-    const today = new Date()
-    const birth = new Date(birthDate)
-    let age = today.getFullYear() - birth.getFullYear()
-    const monthDiff = today.getMonth() - birth.getMonth()
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
 
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birth.getDate())
+    ) {
+      age--;
     }
 
-    return age.toString()
-  }
+    return age.toString();
+  };
 
   // Validate if the date is in the future
   const isBirthDateInFuture = (birthDate: string): boolean => {
-    if (!birthDate) return false
+    if (!birthDate) return false;
 
-    const birthDateObj = new Date(birthDate)
-    const today = new Date()
+    const birthDateObj = new Date(birthDate);
+    const today = new Date();
 
     // Set time to 00:00:00 for accurate date comparison
-    today.setHours(0, 0, 0, 0)
-    birthDateObj.setHours(0, 0, 0, 0)
+    today.setHours(0, 0, 0, 0);
+    birthDateObj.setHours(0, 0, 0, 0);
 
-    return birthDateObj > today
-  }
+    return birthDateObj > today;
+  };
 
   // Enhanced validation function for immediate detection
   const validateBirthDate = (birthDate: string) => {
     if (!birthDate) {
-      setIsFutureDate(false)
-      setIsMinor(false)
-      return
+      setIsFutureDate(false);
+      setIsMinor(false);
+      return;
     }
 
     // INSTANT FUTURE DATE DETECTION
-    const isDateInFuture = isBirthDateInFuture(birthDate)
-    setIsFutureDate(isDateInFuture)
+    const isDateInFuture = isBirthDateInFuture(birthDate);
+    setIsFutureDate(isDateInFuture);
 
     if (!isDateInFuture) {
       // INSTANT LEGAL AGE DETECTION
-      const calculatedAge = calculateAge(birthDate)
-      const ageNumber = parseInt(calculatedAge)
-      const isPersonMinor = ageNumber < 18 && ageNumber >= 0
+      const calculatedAge = calculateAge(birthDate);
+      const ageNumber = parseInt(calculatedAge);
+      const isPersonMinor = ageNumber < 18 && ageNumber >= 0;
 
-      setIsMinor(isPersonMinor)
+      setIsMinor(isPersonMinor);
 
       // Auto-update age in form
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        age: calculatedAge
-      }))
+        age: calculatedAge,
+      }));
 
       // Immediate feedback logs
       if (isPersonMinor) {
-        console.log(`🚫 Auto-detected: Minor (Age ${calculatedAge}) - Registration blocked`)
+        console.log(
+          `🚫 Auto-detected: Minor (Age ${calculatedAge}) - Registration blocked`
+        );
       } else {
-        console.log(`✅ Auto-detected: Legal age (Age ${calculatedAge}) - Can proceed`)
+        console.log(
+          `✅ Auto-detected: Legal age (Age ${calculatedAge}) - Can proceed`
+        );
       }
     } else {
-      setIsMinor(false)
-      console.log('🚫 Auto-detected: Future birth date - Invalid selection')
+      setIsMinor(false);
+      console.log("🚫 Auto-detected: Future birth date - Invalid selection");
 
       // Clear age for future dates
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        age: ""
-      }))
+        age: "",
+      }));
     }
-  }
+  };
 
   // Format mobile number with +63 and numbers only
   const formatMobileNumber = (value: string): string => {
     // Remove all non-digit characters
-    const digits = value.replace(/\D/g, '')
+    const digits = value.replace(/\D/g, "");
 
     // If it starts with 63, keep it as is
-    if (digits.startsWith('63')) {
-      const withoutCountryCode = digits.slice(2)
+    if (digits.startsWith("63")) {
+      const withoutCountryCode = digits.slice(2);
       // Limit to 10 digits after country code (total 12: +63 + 10)
-      const limited = withoutCountryCode.slice(0, 10)
-      return `+63${limited}`
+      const limited = withoutCountryCode.slice(0, 10);
+      return `+63${limited}`;
     }
 
     // If it starts with 0, replace with +63
-    if (digits.startsWith('0')) {
-      const withoutZero = digits.slice(1)
+    if (digits.startsWith("0")) {
+      const withoutZero = digits.slice(1);
       // Limit to 10 digits after removing 0 (total 11: +63 + 10)
-      const limited = withoutZero.slice(0, 10)
-      return `+63${limited}`
+      const limited = withoutZero.slice(0, 10);
+      return `+63${limited}`;
     }
 
     // If it's just digits, add +63
     // Limit to 10 digits (total 11: +63 + 10)
-    const limited = digits.slice(0, 10)
-    return limited ? `+63${limited}` : ""
-  }
+    const limited = digits.slice(0, 10);
+    return limited ? `+63${limited}` : "";
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target
+    const { id, value } = e.target;
 
-    if (id === 'birthDate') {
+    if (id === "birthDate") {
       // Always update the form data first
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [id]: value
-      }))
+        [id]: value,
+      }));
 
       // INSTANT AUTO-DETECTION when user selects a birthdate
-      validateBirthDate(value)
-    } else if (id === 'mobileNumber' || id === 'emergencyNumber') {
-      const formatted = formatMobileNumber(value)
-      setFormData(prev => ({
+      validateBirthDate(value);
+    } else if (id === "mobileNumber" || id === "emergencyNumber") {
+      const formatted = formatMobileNumber(value);
+      setFormData((prev) => ({
         ...prev,
-        [id]: formatted
-      }))
+        [id]: formatted,
+      }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [id]: value
-      }))
+        [id]: value,
+      }));
     }
-  }
+  };
 
   const handleSelectChange = (value: string, id: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [id]: value
-    }))
-  }
+      [id]: value,
+    }));
+  };
 
   const isFormValid = () => {
     const requiredFields = [
-      'lastName',
-      'firstName',
+      "lastName",
+      "firstName",
       // middleName is optional
-      'birthDate',
-      'age',
-      'placeOfBirth',
-      'gender',
-      'civilStatus',
-      'nationality',
-      'religion',
-      'email',
-      'emergencyContact',
-      'emergencyNumber',
+      "birthDate",
+      "age",
+      "placeOfBirth",
+      "gender",
+      "civilStatus",
+      "nationality",
+      "religion",
+      "email",
+      "emergencyContact",
+      "emergencyNumber",
       // houseNumber and street are auto-filled, don't validate user input
-      'purok', // Keep as purok for backend compatibility
+      "purok", // Keep as purok for backend compatibility
       // barangay, city, province, zipCode are auto-filled, don't validate user input
-      'residencyLength'
-    ]
+      "residencyLength",
+    ];
 
     // Validate user-inputted fields only
-    const userFieldsValid = requiredFields.every(field => {
-      const value = formData[field as keyof typeof formData]
-      return value !== undefined && value !== null && value.toString().trim() !== ''
-    })
+    const userFieldsValid = requiredFields.every((field) => {
+      const value = formData[field as keyof typeof formData];
+      return (
+        value !== undefined && value !== null && value.toString().trim() !== ""
+      );
+    });
 
     // Ensure auto-filled fields are present (they should always be)
     const autoFieldsPresent =
@@ -328,18 +337,18 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
       formData.province === "Oriental Mindoro" &&
       formData.zipCode === "5209" &&
       (formData.houseNumber === "N/A" || formData.houseNumber !== "") &&
-      (formData.street === "N/A" || formData.street !== "")
+      (formData.street === "N/A" || formData.street !== "");
 
     // Don't allow proceed if user is a minor or has a future birth date
-    return userFieldsValid && autoFieldsPresent && !isMinor && !isFutureDate
-  }
+    return userFieldsValid && autoFieldsPresent && !isMinor && !isFutureDate;
+  };
 
   const handleNext = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     // Double-check if user is minor or has future date before proceeding
     if (isMinor || isFutureDate) {
-      return // Prevent form submission
+      return; // Prevent form submission
     }
 
     // Ensure all required backend fields are properly set before proceeding
@@ -349,33 +358,40 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
       houseNumber: formData.houseNumber || "N/A", // Default for hidden field
       street: formData.street || "N/A", // Default for hidden field
       barangay: "Alma Villa", // Fixed barangay
-      city: "Gloria", // Fixed municipality  
+      city: "Gloria", // Fixed municipality
       province: "Oriental Mindoro", // Fixed province
-      zipCode: "5209" // Fixed ZIP code
-    }
+      zipCode: "5209", // Fixed ZIP code
+    };
 
     // Update the stored data with complete information
     if (isClient) {
-      localStorage.setItem('residentInfoData', JSON.stringify(completeFormData))
+      localStorage.setItem(
+        "residentInfoData",
+        JSON.stringify(completeFormData)
+      );
     }
 
     // Log for verification during development (remove in production)
-    console.log('Registration Data Being Collected:', completeFormData)
+    console.log("Registration Data Being Collected:", completeFormData);
 
-    onNextAction()
-  }
+    onNextAction();
+  };
 
   const fillWithSampleData = () => {
-    setFormData(sampleData)
+    setFormData(sampleData);
     // AUTO-DETECT for sample data
-    validateBirthDate(sampleData.birthDate)
-  }
+    validateBirthDate(sampleData.birthDate);
+  };
 
   return (
     <div className="bg-white/95 backdrop-blur-sm rounded-[2px] shadow-lg p-6 max-w-[1100px] mx-auto">
       <div className="border-b border-gray-200/50 pb-4 mb-6">
-        <h2 className="text-2xl font-semibold text-gray-900">Personal Information</h2>
-        <p className="text-sm text-gray-500 mt-1">Please fill in all required information accurately.</p>
+        <h2 className="text-2xl font-semibold text-gray-900">
+          Personal Information
+        </h2>
+        <p className="text-sm text-gray-500 mt-1">
+          Please fill in all required information accurately.
+        </p>
         <Button
           type="button"
           onClick={fillWithSampleData}
@@ -392,7 +408,8 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
           <Alert className="border-red-200 bg-red-50">
             <AlertTriangle className="h-4 w-4 text-red-600" />
             <AlertDescription className="text-red-800">
-              <strong>Invalid birth date.</strong> Birth date cannot be in the future. Please select a valid birth date.
+              <strong>Invalid birth date.</strong> Birth date cannot be in the
+              future. Please select a valid birth date.
             </AlertDescription>
           </Alert>
         </div>
@@ -404,8 +421,10 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
           <Alert className="border-red-200 bg-red-50">
             <AlertTriangle className="h-4 w-4 text-red-600" />
             <AlertDescription className="text-red-800">
-              <strong>You are not of legal age.</strong> Registration is only available for individuals who are 18 years old or above.
-              Please contact the barangay office directly for assistance if you need services as a minor.
+              <strong>You are not of legal age.</strong> Registration is only
+              available for individuals who are 18 years old or above. Please
+              contact the barangay office directly for assistance if you need
+              services as a minor.
             </AlertDescription>
           </Alert>
         </div>
@@ -417,7 +436,9 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
           <div className="col-span-12 lg:col-span-5 space-y-4">
             <div className="bg-white/80 backdrop-blur-sm p-5 rounded-[2px] shadow-sm">
               <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                <span className="bg-[#23479A] text-white w-6 h-6 rounded-full text-sm flex items-center justify-center mr-2">1</span>
+                <span className="bg-[#23479A] text-white w-6 h-6 rounded-full text-sm flex items-center justify-center mr-2">
+                  1
+                </span>
                 Personal Details
               </h3>
 
@@ -469,10 +490,15 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                   <Input
                     id="birthDate"
                     type="date"
-                    className={`mt-1 transition-all duration-200 ${isFutureDate ? 'border-red-400 focus:border-red-500 bg-red-50' :
-                      isMinor ? 'border-orange-400 focus:border-orange-500 bg-orange-50' :
-                        formData.birthDate && !isFutureDate && !isMinor ? 'border-green-400 focus:border-green-500 bg-green-50' : ''
-                      }`}
+                    className={`mt-1 transition-all duration-200 ${
+                      isFutureDate
+                        ? "border-red-400 focus:border-red-500 bg-red-50"
+                        : isMinor
+                          ? "border-orange-400 focus:border-orange-500 bg-orange-50"
+                          : formData.birthDate && !isFutureDate && !isMinor
+                            ? "border-green-400 focus:border-green-500 bg-green-50"
+                            : ""
+                    }`}
                     required
                     value={formData.birthDate}
                     onChange={handleInputChange}
@@ -500,16 +526,24 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                   <Input
                     id="age"
                     type="number"
-                    className={`mt-1 bg-gray-100 transition-all duration-200 ${isFutureDate ? 'border-red-400 bg-red-50' :
-                      isMinor ? 'border-orange-400 bg-orange-50' :
-                        formData.age && !isMinor ? 'border-green-400 bg-green-50' : ''
-                      }`}
+                    className={`mt-1 bg-gray-100 transition-all duration-200 ${
+                      isFutureDate
+                        ? "border-red-400 bg-red-50"
+                        : isMinor
+                          ? "border-orange-400 bg-orange-50"
+                          : formData.age && !isMinor
+                            ? "border-green-400 bg-green-50"
+                            : ""
+                    }`}
                     required
                     value={formData.age}
                     readOnly
                     placeholder={
-                      isFutureDate ? "⚠️ Invalid date" :
-                        formData.birthDate ? "🎂 Auto-calculated" : "Select birth date first"
+                      isFutureDate
+                        ? "⚠️ Invalid date"
+                        : formData.birthDate
+                          ? "🎂 Auto-calculated"
+                          : "Select birth date first"
                     }
                   />
                 </div>
@@ -517,7 +551,7 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                   <Label htmlFor="nationality">Place of Birth</Label>
                   <Input
                     id="placeOfBirth"
-                    placeholder="Enter place of birth"
+                    placeholder="City/Municipality, Province"
                     className="mt-1"
                     required
                     value={formData.placeOfBirth}
@@ -528,7 +562,9 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                   <Label htmlFor="gender">Gender</Label>
                   <Select
                     value={formData.gender}
-                    onValueChange={(value) => handleSelectChange(value, 'gender')}
+                    onValueChange={(value) =>
+                      handleSelectChange(value, "gender")
+                    }
                   >
                     <SelectTrigger className="mt-1">
                       <SelectValue placeholder="Select gender" />
@@ -543,7 +579,9 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                   <Label htmlFor="civilStatus">Civil Status</Label>
                   <Select
                     value={formData.civilStatus}
-                    onValueChange={(value) => handleSelectChange(value, 'civilStatus')}
+                    onValueChange={(value) =>
+                      handleSelectChange(value, "civilStatus")
+                    }
                   >
                     <SelectTrigger className="mt-1">
                       <SelectValue placeholder="Select status" />
@@ -587,7 +625,9 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
             {/* Contact Information */}
             <div className="bg-white/80 backdrop-blur-sm p-5 rounded-[2px] shadow-sm">
               <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                <span className="bg-[#23479A] text-white w-6 h-6 rounded-full text-sm flex items-center justify-center mr-2">2</span>
+                <span className="bg-[#23479A] text-white w-6 h-6 rounded-full text-sm flex items-center justify-center mr-2">
+                  2
+                </span>
                 Contact Information
               </h3>
 
@@ -614,10 +654,14 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                     onChange={handleInputChange}
                     maxLength={13} // +63 + 10 digits
                   />
-                  <p className="text-xs text-gray-500 mt-1">Format: +63 followed by 10 digits</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Format: +63 followed by 10 digits
+                  </p>
                 </div>
                 <div>
-                  <Label htmlFor="emergencyContact">Emergency Contact Person</Label>
+                  <Label htmlFor="emergencyContact">
+                    Emergency Contact Person
+                  </Label>
                   <Input
                     id="emergencyContact"
                     placeholder="Enter full name"
@@ -628,7 +672,9 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="emergencyNumber">Emergency Contact Number</Label>
+                  <Label htmlFor="emergencyNumber">
+                    Emergency Contact Number
+                  </Label>
                   <Input
                     id="emergencyNumber"
                     placeholder="+639123456789 (11 digits)"
@@ -638,7 +684,9 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                     onChange={handleInputChange}
                     maxLength={13} // +63 + 10 digits
                   />
-                  <p className="text-xs text-gray-500 mt-1">Format: +63 followed by 10 digits</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Format: +63 followed by 10 digits
+                  </p>
                 </div>
               </div>
             </div>
@@ -646,7 +694,9 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
             {/* Address Information */}
             <div className="bg-white/80 backdrop-blur-sm p-5 rounded-[2px] shadow-sm">
               <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                <span className="bg-[#23479A] text-white w-6 h-6 rounded-full text-sm flex items-center justify-center mr-2">3</span>
+                <span className="bg-[#23479A] text-white w-6 h-6 rounded-full text-sm flex items-center justify-center mr-2">
+                  3
+                </span>
                 Address Information
               </h3>
 
@@ -672,7 +722,9 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                     readOnly
                     placeholder="Alma Villa"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Default barangay name</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Default barangay name
+                  </p>
                 </div>
                 <div>
                   <Label htmlFor="city">Municipality</Label>
@@ -684,7 +736,9 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                     readOnly
                     placeholder="Gloria"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Default municipality name</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Default municipality name
+                  </p>
                 </div>
                 <div>
                   <Label htmlFor="province">Province</Label>
@@ -696,7 +750,9 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                     readOnly
                     placeholder="Oriental Mindoro"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Default province name</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Default province name
+                  </p>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -709,10 +765,14 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                       readOnly
                       placeholder="5209"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Default ZIP code</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Default ZIP code
+                    </p>
                   </div>
                   <div>
-                    <Label htmlFor="residencyLength">Length of Residency (years)</Label>
+                    <Label htmlFor="residencyLength">
+                      Length of Residency (years)
+                    </Label>
                     <Input
                       id="residencyLength"
                       type="number"
@@ -734,13 +794,17 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
             type="submit"
             onClick={handleNext}
             disabled={!isFormValid()}
-            className={`rounded-[2px] px-8 ${isMinor || isFutureDate
-              ? "bg-gray-400 hover:bg-gray-400 cursor-not-allowed"
-              : "bg-[#23479A] hover:bg-[#23479A]/90"
-              } text-white disabled:opacity-50 disabled:cursor-not-allowed`}
+            className={`rounded-[2px] px-8 ${
+              isMinor || isFutureDate
+                ? "bg-gray-400 hover:bg-gray-400 cursor-not-allowed"
+                : "bg-[#23479A] hover:bg-[#23479A]/90"
+            } text-white disabled:opacity-50 disabled:cursor-not-allowed`}
             title={
-              isFutureDate ? "Birth date cannot be in the future" :
-                isMinor ? "You must be 18 or older to proceed" : ""
+              isFutureDate
+                ? "Birth date cannot be in the future"
+                : isMinor
+                  ? "You must be 18 or older to proceed"
+                  : ""
             }
           >
             Next Step
@@ -748,5 +812,5 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
         </div>
       </form>
     </div>
-  )
+  );
 }

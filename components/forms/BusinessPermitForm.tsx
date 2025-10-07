@@ -55,6 +55,7 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
   const { addToast } = useToast()
   const { data: session } = useSession()
   const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null)
+  const [filePreview, setFilePreview] = useState<{ url: string; type: string; name: string } | null>(null)
 
   const handleInputChange = (field: keyof FormData, value: any) => {
     setFormData(prev => ({
@@ -96,6 +97,20 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
 
   const openImagePreview = (src: string) => setSelectedImagePreview(src)
   const closeImagePreview = () => setSelectedImagePreview(null)
+
+  const openFilePreview = (file: File) => {
+    try {
+      const url = URL.createObjectURL(file)
+      setFilePreview({ url, type: file.type, name: file.name })
+    } catch (_e) {
+      // fallback handled by lack of preview
+    }
+  }
+
+  const closeFilePreview = () => {
+    if (filePreview?.url) URL.revokeObjectURL(filePreview.url)
+    setFilePreview(null)
+  }
 
   const fillWithSampleData = () => {
     setFormData(sampleData)
@@ -395,14 +410,25 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
                             </Badge>
                           </div>
                         </div>
-                        <Button
-                          type="button"
-                          onClick={() => removeFile(index)}
-                          variant="outline"
-                          className="h-8 w-8 p-0 self-end sm:self-auto"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center gap-2 self-end sm:self-auto">
+                          <Button
+                            type="button"
+                            onClick={() => file.type.startsWith('image/') && (file as AttachmentFile).preview ? openImagePreview((file as AttachmentFile).preview as string) : openFilePreview(file)}
+                            variant="outline"
+                            className="h-8 px-2"
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            Preview
+                          </Button>
+                          <Button
+                            type="button"
+                            onClick={() => removeFile(index)}
+                            variant="outline"
+                            className="h-8 w-8 p-0"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -441,6 +467,59 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
                       className="max-w-full h-auto rounded shadow-lg"
                     />
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* File Preview Modal (PDF and others) */}
+        {filePreview && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex min-h-screen items-center justify-center p-4 text-center">
+              <div
+                className="fixed inset-0 bg-gray-500 bg-opacity-25 backdrop-blur-sm transition-opacity"
+                onClick={closeFilePreview}
+              />
+
+              <div className="relative transform overflow-hidden rounded-lg bg-white/95 backdrop-blur-sm text-left shadow-xl transition-all sm:my-8 w-full sm:max-w-4xl">
+                <div className="flex flex-col p-4">
+                  <div className="mb-4 w-full flex justify-between items-center">
+                    <div className="min-w-0">
+                      <h3 className="text-lg font-semibold text-gray-900 truncate">{filePreview.name}</h3>
+                      <p className="text-xs text-gray-500">{filePreview.type || 'Unknown type'}</p>
+                    </div>
+                    <Button
+                      onClick={closeFilePreview}
+                      variant="ghost"
+                      className="h-8 w-8 p-0 hover:bg-gray-100"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {filePreview.type === 'application/pdf' ? (
+                    <div className="w-full h-[70vh] bg-gray-50 rounded-lg overflow-hidden">
+                      <iframe src={filePreview.url} className="w-full h-full" title="PDF Preview" />
+                    </div>
+                  ) : filePreview.type.startsWith('image/') ? (
+                    <div className="max-w-full max-h-[70vh] overflow-auto bg-gray-50 rounded-lg p-4">
+                      <img src={filePreview.url} alt="Preview" className="max-w-full h-auto rounded shadow-lg" />
+                    </div>
+                  ) : (
+                    <div className="p-6 text-center text-sm text-gray-600">
+                      Preview not available for this file type. You can download it below.
+                      <div className="mt-4">
+                        <a
+                          href={filePreview.url}
+                          download={filePreview.name}
+                          className="inline-flex items-center px-3 py-2 rounded border text-[#23479A] border-[#23479A] hover:bg-[#23479A]/5"
+                        >
+                          Download File
+                        </a>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
