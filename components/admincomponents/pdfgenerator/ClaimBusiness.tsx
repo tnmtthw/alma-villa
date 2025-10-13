@@ -63,7 +63,6 @@ const ClaimBusinessButton: React.FC<ClaimBusinessButtonProps> = ({ request }) =>
 
     // Embed QR in top-right
     try {
-        // @ts-ignore - types provided via ambient module until package is installed
         const { default: QRCode } = await import('qrcode')
         const dataUrl = await QRCode.toDataURL(verifyUrl, { width: 256, margin: 0 })
         const pngBytes = await fetch(dataUrl).then(r => r.arrayBuffer())

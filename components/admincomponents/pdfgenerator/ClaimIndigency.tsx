@@ -43,7 +43,6 @@ const ClaimIndigencyButton: React.FC<ClaimIndigencyButtonProps> = ({ request }) 
         try {
             const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : '')
             const verifyUrl = `${baseUrl}/verify/${encodeURIComponent(request.id)}`
-            // @ts-ignore types provided via ambient module until package installed
             const { default: QRCode } = await import('qrcode')
             const dataUrl = await QRCode.toDataURL(verifyUrl, { width: 256, margin: 0 })
             const pngBytes = await fetch(dataUrl).then(r => r.arrayBuffer())

@@ -73,7 +73,7 @@ const ClaimResidencyButton: React.FC<ClaimResidencyButtonProps> = ({ request }) 
         form.flatten();
 
         const pdfBytes = await pdfDoc.save();
-        const arrayBuffer = pdfBytes.buffer.slice(pdfBytes.byteOffset, pdfBytes.byteOffset + pdfBytes.byteLength)
+        const arrayBuffer = pdfBytes.slice().buffer as ArrayBuffer
         const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
