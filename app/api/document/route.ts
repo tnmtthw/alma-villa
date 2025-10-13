@@ -56,6 +56,11 @@ export async function GET(request: Request) {
 
   try {
       if (id) {
+          // Validate UUID format before querying Prisma to avoid P2023
+          const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(id)
+          if (!isUuid) {
+              return NextResponse.json({ success: false, error: 'Invalid document id format' }, { status: 400 })
+          }
           const document = await prisma.document.findUnique({
               where: { id },
               include: {

@@ -19,6 +19,7 @@ import ClaimIndigencyButton from '../../components/admincomponents/pdfgenerator/
 import ClaimGoodMoralButton from '../../components/admincomponents/pdfgenerator/ClaimGoodMoral'
 import ClaimBusinessButton from '../../components/admincomponents/pdfgenerator/ClaimBusiness'
 import PaymentPage from './Payment'
+import QRVerification from '@/components/admincomponents/pdfgenerator/QRVerification'
 
 const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) =>
   fetch(...args).then((res) => res.json())
@@ -231,13 +232,13 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
                     <SelectItem key={statusValue} value={statusValue}>
                       <div className="flex items-center gap-2">
                         <div className={`w-2 h-2 rounded-full ${statusValue === 'pending' ? 'bg-orange-500' :
-                            statusValue === 'approved' ? 'bg-purple-500' :
-                              statusValue === 'processing' ? 'bg-blue-500' :
-                                statusValue === 'payment_sent' ? 'bg-yellow-500' :
-                                  statusValue === 'ready_to_claim' ? 'bg-green-500' :
-                                    statusValue === 'completed' ? 'bg-gray-500' :
-                                      statusValue === 'rejected' ? 'bg-red-500' :
-                                        'bg-gray-400'
+                          statusValue === 'approved' ? 'bg-purple-500' :
+                            statusValue === 'processing' ? 'bg-blue-500' :
+                              statusValue === 'payment_sent' ? 'bg-yellow-500' :
+                                statusValue === 'ready_to_claim' ? 'bg-green-500' :
+                                  statusValue === 'completed' ? 'bg-gray-500' :
+                                    statusValue === 'rejected' ? 'bg-red-500' :
+                                      'bg-gray-400'
                           }`} />
                         {statusConfig.label} ({count})
                       </div>
@@ -339,30 +340,46 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
                   )}
                   {/* CLAIM BUTTON */}
                   {request.status === "ready_to_claim" && request.type === "Barangay Clearance" && (
-                    <ClaimClearanceButton request={request} />
+                    <>
+                      {/* <QRVerification documentId={request.id} /> */}
+                      <ClaimClearanceButton request={request} />
+                    </>
+
                   )}
                   {request.status === "ready_to_claim" && request.type === "Certificate of Residency" && (
-                    <ClaimResidencyButton request={request} />
+                    <>
+                      {/* <QRVerification documentId={request.id} /> */}
+                      <ClaimResidencyButton request={request} />
+                    </>
                   )}
                   {request.status === "ready_to_claim" && request.type === "Certificate of Indigency" && (
-                    <ClaimIndigencyButton request={request} />
+                    <>
+                      {/* <QRVerification documentId={request.id} /> */}
+                      <ClaimIndigencyButton request={request} />
+                    </>
                   )}
                   {request.status === "ready_to_claim" && request.type === "Certificate of Good Moral Character" && (
-                    <ClaimGoodMoralButton request={request} />
+                    <>
+                      {/* <QRVerification documentId={request.id} /> */}
+                      <ClaimGoodMoralButton request={request} />
+                    </>
                   )}
                   {request.status === "ready_to_claim" && request.type === "Business Permit" && (
-                    <ClaimBusinessButton
-                      request={{
-                        id: request.id,
-                        businessName: request.businessName!,
-                        businessLocation: request.businessLocation!,
-                        operatorName: request.operatorName!,
-                        operatorAddress: request.operatorAddress!,
-                        updatedAt: request.updatedAt!,
-                        requestDate: request.requestDate,
-                        fee: request.fee,
-                      }}
-                    />
+                    <>
+                      {/* <QRVerification documentId={request.id} /> */}
+                      <ClaimBusinessButton
+                        request={{
+                          id: request.id,
+                          businessName: request.businessName!,
+                          businessLocation: request.businessLocation!,
+                          operatorName: request.operatorName!,
+                          operatorAddress: request.operatorAddress!,
+                          updatedAt: request.updatedAt!,
+                          requestDate: request.requestDate,
+                          fee: request.fee,
+                        }}
+                      />
+                    </>
                   )}
                   {/* <Button variant="outline" size="sm" className="text-gray-600 hover:text-[#23479A]">
                     <Eye className="h-3 w-3 mr-1" />

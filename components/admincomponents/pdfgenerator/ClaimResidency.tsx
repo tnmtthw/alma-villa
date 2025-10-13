@@ -45,11 +45,36 @@ const ClaimResidencyButton: React.FC<ClaimResidencyButtonProps> = ({ request }) 
             }
         });
 
+        // Embed QR in top-right
+        try {
+            const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : '')
+            const verifyUrl = `${baseUrl}/verify/${encodeURIComponent(request.id)}`
+            const { default: QRCode } = await import('qrcode')
+            const dataUrl = await QRCode.toDataURL(verifyUrl, { width: 256, margin: 0 })
+            const pngBytes = await fetch(dataUrl).then(r => r.arrayBuffer())
+            const qrImage = await pdfDoc.embedPng(pngBytes)
+            const pages = pdfDoc.getPages()
+            const firstPage = pages[0]
+            const { width: pageWidth, height: pageHeight } = firstPage.getSize()
+            const qrRenderWidth = 45
+            const qrRenderHeight = 45
+            const margin = 16
+            firstPage.drawImage(qrImage, {
+                x: margin,
+                y: margin,
+                width: qrRenderWidth,
+                height: qrRenderHeight,
+            })
+        } catch (e) {
+            console.warn('Failed to embed QR code into PDF:', e)
+        }
+
         // 🔒 Make PDF non-editable
         form.flatten();
 
         const pdfBytes = await pdfDoc.save();
-        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const arrayBuffer = pdfBytes.buffer.slice(pdfBytes.byteOffset, pdfBytes.byteOffset + pdfBytes.byteLength)
+        const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
         link.download = `CERTIFICATE_RESIDENCY_${request.id}.pdf`;
