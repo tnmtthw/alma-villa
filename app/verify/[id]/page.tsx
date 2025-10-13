@@ -36,10 +36,11 @@ export default async function VerifyPage({ params }: VerifyPageProps) {
     : 'N/A'
 
   const lastUpdated = document.updatedAt
-    ? new Date(document.updatedAt).toLocaleString()
+    ? new Date(document.updatedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
     : 'N/A'
 
   const documentType = document.type || 'N/A'
+  const purpose = document.purpose || 'N/A'
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-gray-50">
@@ -50,24 +51,24 @@ export default async function VerifyPage({ params }: VerifyPageProps) {
         </div>
         <div className="mt-4 border-t pt-4 space-y-3 text-sm">
           <div className="flex justify-between">
-            <span className="text-gray-600">Name</span>
-            <span className="font-medium">{fullName}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Document Type</span>
+            <span className="text-gray-600">Document Title / Type</span>
             <span className="font-medium">{documentType}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-600">ID</span>
+            <span className="text-gray-600">Document Control No.</span>
             <span className="font-medium">{document.id}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-600">Request Date</span>
-            <span className="font-medium">{requestDate}</span>
+            <span className="text-gray-600">Date Issued</span>
+            <span className="font-medium">{lastUpdated}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-600">Date of Update</span>
-            <span className="font-medium">{lastUpdated}</span>
+            <span className="text-gray-600">Issued To</span>
+            <span className="font-medium">{fullName}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-600">Purpose / Remarks</span>
+            <span className="font-medium">{purpose}</span>
           </div>
         </div>
       </div>
