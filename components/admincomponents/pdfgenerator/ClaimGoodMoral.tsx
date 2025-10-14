@@ -56,7 +56,6 @@ const ClaimGoodMoralButton: React.FC<ClaimGoodMoralButtonProps> = ({ request }) 
             }
         });
 
-        // Embed QR in top-right
         try {
             const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : '')
             const verifyUrl = `${baseUrl}/verify/${encodeURIComponent(request.id)}`
@@ -68,10 +67,9 @@ const ClaimGoodMoralButton: React.FC<ClaimGoodMoralButtonProps> = ({ request }) 
             const { width: pageWidth, height: pageHeight } = firstPage.getSize()
             const qrRenderWidth = 45
             const qrRenderHeight = 45
-            const margin = 16
             firstPage.drawImage(qrImage, {
-                x: margin,
-                y: margin,
+                x: 64,
+                y: 30,
                 width: qrRenderWidth,
                 height: qrRenderHeight,
             })

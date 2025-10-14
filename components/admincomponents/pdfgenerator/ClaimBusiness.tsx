@@ -48,63 +48,61 @@ const ClaimBusinessButton: React.FC<ClaimBusinessButtonProps> = ({ request }) =>
 
 
     const fillPDF = async () => {
-    const existingPdfBytes = await fetch('/businesspermit.pdf').then(res => res.arrayBuffer());
-    const pdfDoc = await PDFDocument.load(existingPdfBytes);
-    const form = pdfDoc.getForm();
+        const existingPdfBytes = await fetch('/businesspermit.pdf').then(res => res.arrayBuffer());
+        const pdfDoc = await PDFDocument.load(existingPdfBytes);
+        const form = pdfDoc.getForm();
 
-    Object.entries(formData).forEach(([key, value]) => {
+        Object.entries(formData).forEach(([key, value]) => {
+            try {
+                const field = form.getTextField(key);
+                field.setText(String(value));
+            } catch (e) {
+                console.warn(`Field "${key}" not found in PDF.`);
+            }
+        });
+
         try {
-            const field = form.getTextField(key);
-            field.setText(String(value));
+            const { default: QRCode } = await import('qrcode')
+            const dataUrl = await QRCode.toDataURL(verifyUrl, { width: 256, margin: 0 })
+            const pngBytes = await fetch(dataUrl).then(r => r.arrayBuffer())
+            const qrImage = await pdfDoc.embedPng(pngBytes)
+            const pages = pdfDoc.getPages()
+            const firstPage = pages[0]
+            const { width: pageWidth, height: pageHeight } = firstPage.getSize()
+            const qrRenderWidth = 45
+            const qrRenderHeight = 45
+            firstPage.drawImage(qrImage, {
+                x: 64,
+                y: 30,
+                width: qrRenderWidth,
+                height: qrRenderHeight,
+            })
         } catch (e) {
-            console.warn(`Field "${key}" not found in PDF.`);
+            console.warn('Failed to embed QR code into PDF:', e)
         }
-    });
 
-    // Embed QR in top-right
-    try {
-        const { default: QRCode } = await import('qrcode')
-        const dataUrl = await QRCode.toDataURL(verifyUrl, { width: 256, margin: 0 })
-        const pngBytes = await fetch(dataUrl).then(r => r.arrayBuffer())
-        const qrImage = await pdfDoc.embedPng(pngBytes)
-        const pages = pdfDoc.getPages()
-        const firstPage = pages[0]
-        const { width: pageWidth, height: pageHeight } = firstPage.getSize()
-        const qrRenderWidth = 45
-        const qrRenderHeight = 45
-        const margin = 16
-        firstPage.drawImage(qrImage, {
-            x: margin,
-            y: margin,
-            width: qrRenderWidth,
-            height: qrRenderHeight,
-        })
-    } catch (e) {
-        console.warn('Failed to embed QR code into PDF:', e)
-    }
+        // 🔒 Make PDF non-editable
+        form.flatten();
 
-    // 🔒 Make PDF non-editable
-    form.flatten();
+        const pdfBytes = await pdfDoc.save();
+        const arrayBuffer = pdfBytes.slice().buffer as ArrayBuffer
+        const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `BUSINESS_PERMIT_${request.id}.pdf`;
+        link.click();
+    };
 
-    const pdfBytes = await pdfDoc.save();
-    const arrayBuffer = pdfBytes.slice().buffer as ArrayBuffer
-    const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `BUSINESS_PERMIT_${request.id}.pdf`;
-    link.click();
-};
-
-return (
-    <Button
-        size="sm"
-        className="bg-[#23479A] hover:bg-[#23479A]/90 text-white"
-        onClick={fillPDF}
-    >
-        <Download className="h-3 w-3 mr-1" />
-        Claim
-    </Button>
-);
+    return (
+        <Button
+            size="sm"
+            className="bg-[#23479A] hover:bg-[#23479A]/90 text-white"
+            onClick={fillPDF}
+        >
+            <Download className="h-3 w-3 mr-1" />
+            Claim
+        </Button>
+    );
 };
 
 export default ClaimBusinessButton;
