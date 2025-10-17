@@ -43,7 +43,7 @@ export default async function VerifyPage({ params }: VerifyPageProps) {
   const purpose = document.purpose || 'N/A'
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-gray-50">
+    <div className="min-h-screen flex items-start justify-center p-6 pt-20 bg-gray-50">
       <div className="w-full max-w-xl bg-white shadow rounded-lg p-6">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-semibold">Document Verified</h1>
