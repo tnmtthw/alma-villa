@@ -93,6 +93,19 @@ export default function UserProfile() {
     return apiData?.email || session?.user?.email || "No email provided";
   }
 
+  // Helper functions to normalize gender and civil status values
+  const normalizeGender = (value: string): string => {
+    if (!value) return "";
+    const lower = value.toLowerCase();
+    return lower === 'male' || lower === 'female' ? lower : "";
+  }
+
+  const normalizeCivilStatus = (value: string): string => {
+    if (!value) return "";
+    const lower = value.toLowerCase();
+    return ['single', 'married', 'widowed', 'separated'].includes(lower) ? lower : "";
+  }
+
   // Set isClient to true after component mounts
   useEffect(() => {
     setIsClient(true)
@@ -397,7 +410,7 @@ export default function UserProfile() {
                 <div className="space-y-2">
                   <Label htmlFor="gender">Gender</Label>
                   <Select
-                    value={formData.gender || ""}
+                    value={normalizeGender(formData.gender || "")}
                     onValueChange={(value) => handleInputChange('gender', value)}
                     disabled={!isEditing}
                   >
@@ -413,7 +426,7 @@ export default function UserProfile() {
                 <div className="space-y-2">
                   <Label htmlFor="civilStatus">Civil Status</Label>
                   <Select
-                    value={formData.civilStatus || ""}
+                    value={normalizeCivilStatus(formData.civilStatus || "")}
                     onValueChange={(value) => handleInputChange('civilStatus', value)}
                     disabled={!isEditing}
                   >
