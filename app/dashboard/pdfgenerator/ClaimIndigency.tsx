@@ -5,45 +5,29 @@ import { PDFDocument } from 'pdf-lib';
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 
-interface ClaimGoodMoralButtonProps {
+interface ClaimIndigencyButtonProps {
     request: {
         id: string;
         fullName: string
-        birthDate: string
-        placeOfBirth: string
-        civilStatus: string
-        age: string
-        purok: string
         requestDate: string;
+        status: string
     };
 }
 
 
-const ClaimGoodMoralButton: React.FC<ClaimGoodMoralButtonProps> = ({ request }) => {
+const ClaimIndigencyButton: React.FC<ClaimIndigencyButtonProps> = ({ request }) => {
     const date = new Date(request.requestDate);
     const month = date.toLocaleString("en-US", { month: "short" });
-    const day = date.getDate();
-    const birthDate = new Date(request.birthDate);
-    const formattedBirthDate = birthDate.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-    }).replace(/([A-Za-z]+)\s/, "$1. ");
-
+    const day = date.getDate(); // e.g., 10
 
     const formData = {
         fullName: request.fullName,
-        birthDate: formattedBirthDate,
-        placeOfBirth: request.placeOfBirth,
-        civilStatus: request.civilStatus,
-        age: request.age,
-        purok: request.purok,
         month: month,
         day: day,
     };
 
     const fillPDF = async () => {
-        const existingPdfBytes = await fetch('/goodmoral.pdf').then(res => res.arrayBuffer());
+        const existingPdfBytes = await fetch('/indigency.pdf').then(res => res.arrayBuffer());
         const pdfDoc = await PDFDocument.load(existingPdfBytes);
         const form = pdfDoc.getForm();
 
@@ -85,7 +69,7 @@ const ClaimGoodMoralButton: React.FC<ClaimGoodMoralButtonProps> = ({ request }) 
         const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = `CERTIFICATE_GOOD_MORAL_${request.id}.pdf`;
+        link.download = `CERTIFICATE_INDIGENCY_${request.id}.pdf`;
         link.click();
 
         await fetch(`/api/document/set-status?id=${request.id}`, {
@@ -102,8 +86,9 @@ const ClaimGoodMoralButton: React.FC<ClaimGoodMoralButtonProps> = ({ request }) 
             onClick={fillPDF}
         >
             <Download className="h-3 w-3 mr-1" />
+            {request.status === "ready_to_claim" ? "Claim" : "Download"}
         </Button>
     );
 };
 
-export default ClaimGoodMoralButton;
+export default ClaimIndigencyButton;

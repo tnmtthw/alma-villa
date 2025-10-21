@@ -5,34 +5,52 @@ import { PDFDocument } from 'pdf-lib';
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 
-interface ClaimResidencyButtonProps {
+
+interface ClaimBusinessButtonProps {
     request: {
         id: string;
-        fullName: string
-        age: string
-        purok: string
-        type: string;
+        businessName: string
+        businessLocation: string
+        operatorName: string
+        operatorAddress: string;
+        updatedAt: string;
         requestDate: string;
         fee?: string;
+        status: string
     };
 }
 
 
-const ClaimResidencyButton: React.FC<ClaimResidencyButtonProps> = ({ request }) => {
+const ClaimBusinessButton: React.FC<ClaimBusinessButtonProps> = ({ request }) => {
     const date = new Date(request.requestDate);
     const month = date.toLocaleString("en-US", { month: "short" });
     const day = date.getDate();
 
+    const updatedDate = new Date(request.updatedAt);
+    const updatedAt = updatedDate.toLocaleString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+        hour12: true,
+    });
+
     const formData = {
-        fullName: request.fullName,
-        age: request.age,
-        purok: request.purok,
+        businessName: request.businessName,
+        businessLocation: request.businessLocation,
+        operatorName: request.operatorName,
+        operatorAddress: request.operatorAddress,
+        updatedAt,
+        requestDate: request.requestDate,
         month: month,
         day: day,
+        issuedAt: "Brgy Alma Villa, Gloria, Oriental Mindoro",
     };
 
+    const verifyUrl = `${(process.env.NEXT_PUBLIC_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : ''))}/verify/${encodeURIComponent(request.id)}`
+
+
     const fillPDF = async () => {
-        const existingPdfBytes = await fetch('/residency.pdf').then(res => res.arrayBuffer());
+        const existingPdfBytes = await fetch('/businesspermit.pdf').then(res => res.arrayBuffer());
         const pdfDoc = await PDFDocument.load(existingPdfBytes);
         const form = pdfDoc.getForm();
 
@@ -46,8 +64,6 @@ const ClaimResidencyButton: React.FC<ClaimResidencyButtonProps> = ({ request }) 
         });
 
         try {
-            const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : '')
-            const verifyUrl = `${baseUrl}/verify/${encodeURIComponent(request.id)}`
             const { default: QRCode } = await import('qrcode')
             const dataUrl = await QRCode.toDataURL(verifyUrl, { width: 256, margin: 0 })
             const pngBytes = await fetch(dataUrl).then(r => r.arrayBuffer())
@@ -75,7 +91,7 @@ const ClaimResidencyButton: React.FC<ClaimResidencyButtonProps> = ({ request }) 
         const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = `CERTIFICATE_RESIDENCY_${request.id}.pdf`;
+        link.download = `BUSINESS_PERMIT_${request.id}.pdf`;
         link.click();
 
         await fetch(`/api/document/set-status?id=${request.id}`, {
@@ -92,8 +108,9 @@ const ClaimResidencyButton: React.FC<ClaimResidencyButtonProps> = ({ request }) 
             onClick={fillPDF}
         >
             <Download className="h-3 w-3 mr-1" />
+            {request.status === "ready_to_claim" ? "Claim" : "Download"}
         </Button>
     );
 };
 
-export default ClaimResidencyButton;
+export default ClaimBusinessButton;

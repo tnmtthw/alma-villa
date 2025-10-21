@@ -5,28 +5,56 @@ import { PDFDocument } from 'pdf-lib';
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 
-interface ClaimIndigencyButtonProps {
+interface ClaimClearanceButtonProps {
     request: {
         id: string;
         fullName: string
+        age: string
+        birthDate: string
+        civilStatus: string
+        placeOfBirth: string
+        citizenship: string
+        purok: string
+        type: string;
         requestDate: string;
+        purpose: string;
+        fee?: string;
+        status: string
+        // Add other fields you need
     };
 }
 
 
-const ClaimIndigencyButton: React.FC<ClaimIndigencyButtonProps> = ({ request }) => {
+const ClaimClearanceButton: React.FC<ClaimClearanceButtonProps> = ({ request }) => {
     const date = new Date(request.requestDate);
     const month = date.toLocaleString("en-US", { month: "short" });
-    const day = date.getDate(); // e.g., 10
+    const monthLong = date.toLocaleString("en-US", { month: "long" });
+    const day = date.getDate();
+    const birthDate = new Date(request.birthDate);
+    const formattedBirthDate = birthDate.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+    }).replace(/([A-Za-z]+)\s/, "$1. ");
 
     const formData = {
         fullName: request.fullName,
-        month: month,
-        day: day,
+        age: request.age,
+        birthDate: formattedBirthDate,
+        civilStatus: request.civilStatus,
+        placeOfBirth: request.placeOfBirth,
+        citizenship: request.citizenship,
+        address: request.purok,
+        "month": month,
+        "day": day,
+        "Residence Certificate": request.id,
+        "Issued at": "Barangay Alma Villa, Gloria, Oriental Mindoro",
+        issued: monthLong + " " + day + ", 2025",
+        Purpose: request.purpose
     };
 
     const fillPDF = async () => {
-        const existingPdfBytes = await fetch('/indigency.pdf').then(res => res.arrayBuffer());
+        const existingPdfBytes = await fetch('/clearance.pdf').then(res => res.arrayBuffer());
         const pdfDoc = await PDFDocument.load(existingPdfBytes);
         const form = pdfDoc.getForm();
 
@@ -68,7 +96,7 @@ const ClaimIndigencyButton: React.FC<ClaimIndigencyButtonProps> = ({ request }) 
         const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = `CERTIFICATE_INDIGENCY_${request.id}.pdf`;
+        link.download = `BRGY_CLEARANCE_${request.id}.pdf`;
         link.click();
 
         await fetch(`/api/document/set-status?id=${request.id}`, {
@@ -85,8 +113,9 @@ const ClaimIndigencyButton: React.FC<ClaimIndigencyButtonProps> = ({ request }) 
             onClick={fillPDF}
         >
             <Download className="h-3 w-3 mr-1" />
+            {request.status === "ready_to_claim" ? "Claim" : "Download"}
         </Button>
     );
 };
 
-export default ClaimIndigencyButton;
+export default ClaimClearanceButton;

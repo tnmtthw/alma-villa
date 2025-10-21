@@ -27,8 +27,6 @@ interface FormData {
   businessLocation: string
   operatorName: string
   operatorAddress: string
-  amountPaid: string
-  orNumbers: string
   attachments: AttachmentFile[]
 }
 
@@ -36,9 +34,7 @@ const sampleData: FormData = {
   businessName: "Juan's Sari-Sari Store",
   businessLocation: "Sitio 1",
   operatorName: "Juan Dela Cruz",
-  operatorAddress: "123 Maharlika Street",
-  amountPaid: "200",
-  orNumbers: "12345678",
+  operatorAddress: "Sitio 1",
   attachments: []
 }
 
@@ -48,8 +44,6 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
     businessLocation: "",
     operatorName: "",
     operatorAddress: "",
-    amountPaid: "",
-    orNumbers: "",
     attachments: []
   })
   const { addToast } = useToast()
@@ -124,7 +118,7 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
     try {
       // Validate required fields
       const required: Array<keyof FormData> = [
-        'businessName', 'businessLocation', 'operatorName', 'operatorAddress', 'amountPaid', 'orNumbers'
+        'businessName', 'businessLocation', 'operatorName', 'operatorAddress'
       ]
       const missing = required.filter(f => !String(formData[f] ?? '').trim())
       if (missing.length) {
@@ -137,14 +131,12 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
       }
 
       // Prepare payload for Document API
-      const additionalInfo = `Amount Paid: ${formData.amountPaid}; OR Numbers: ${formData.orNumbers}`
       const documentData = {
         userId: session?.user.id,
         businessName: formData.businessName,
         businessLocation: formData.businessLocation,
         operatorName: formData.operatorName,
         operatorAddress: formData.operatorAddress,
-        additionalInfo,
         purpose: `Business Permit for ${formData.businessName}`,
         type: "Business Permit",
       }
@@ -177,8 +169,6 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
         businessLocation: "",
         operatorName: "",
         operatorAddress: "",
-        amountPaid: "",
-        orNumbers: "",
         attachments: []
       })
 
@@ -218,9 +208,6 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:gap-4 pt-4">
-            <Badge variant="outline" className="text-[#23479A] border-[#23479A]">
-              Fee: ₱200
-            </Badge>
             <Badge variant="outline">
               Processing: 3-5 days
             </Badge>
@@ -312,44 +299,9 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
           </CardContent>
         </Card>
 
-        {/* Payment Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-[#23479A]" />
-              Payment Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="amountPaid">Amount Paid (PHP) *</Label>
-                <Input
-                  id="amountPaid"
-                  type="number"
-                  placeholder="Enter amount paid"
-                  required
-                  value={formData.amountPaid}
-                  onChange={(e) => handleInputChange('amountPaid', e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="orNumbers">OR Numbers *</Label>
-                <Input
-                  id="orNumbers"
-                  placeholder="Enter Official Receipt numbers"
-                  required
-                  value={formData.orNumbers}
-                  onChange={(e) => handleInputChange('orNumbers', e.target.value)}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Supporting Documents */}
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Supporting Documents</CardTitle>
             <CardDescription>
@@ -436,7 +388,7 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
               )}
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Image Preview Modal */}
         {selectedImagePreview && (
@@ -509,7 +461,7 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
                   ) : (
                     <div className="p-6 text-center text-sm text-gray-600">
                       Preview not available for this file type. You can download it below.
-                      <div className="mt-4">
+                      <div className="mt-4">asd
                         <a
                           href={filePreview.url}
                           download={filePreview.name}

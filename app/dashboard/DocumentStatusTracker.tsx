@@ -13,13 +13,13 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-import ClaimClearanceButton from '../../components/admincomponents/pdfgenerator/ClaimClearance'
-import ClaimResidencyButton from '../../components/admincomponents/pdfgenerator/ClaimResidency'
-import ClaimIndigencyButton from '../../components/admincomponents/pdfgenerator/ClaimIndigency'
-import ClaimGoodMoralButton from '../../components/admincomponents/pdfgenerator/ClaimGoodMoral'
-import ClaimBusinessButton from '../../components/admincomponents/pdfgenerator/ClaimBusiness'
+import ClaimClearanceButton from './pdfgenerator/ClaimClearance'
+import ClaimResidencyButton from './pdfgenerator/ClaimResidency'
+import ClaimIndigencyButton from './pdfgenerator/ClaimIndigency'
+import ClaimGoodMoralButton from './pdfgenerator/ClaimGoodMoral'
+import ClaimBusinessButton from './pdfgenerator/ClaimBusiness'
 import PaymentPage from './Payment'
-import QRVerification from '@/components/admincomponents/pdfgenerator/QRVerification'
+import QRVerification from '@/app/dashboard/pdfgenerator/QRVerification'
 
 const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) =>
   fetch(...args).then((res) => res.json())
@@ -338,46 +338,45 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
                   {request.status === "approved" && request.type === "Certificate of Good Moral Character" && (
                     <PaymentPage request={request} />
                   )}
+                  {request.status === "approved" && request.type === "Business Permit" && (
+                    <PaymentPage request={request} />
+                  )}
                   {/* CLAIM BUTTON */}
                   {(request.status === "ready_to_claim" || request.status === "completed") &&
                     request.type === "Barangay Clearance" && (
                       <ClaimClearanceButton request={request} />
                     )}
-                  {request.status === "ready_to_claim" && request.type === "Certificate of Residency" &&
-                    request.type === "Certificate of Residency" && (
-                      <>
-                        <ClaimResidencyButton request={request} />
-                      </>
-                    )}
-                  {request.status === "ready_to_claim" && request.type === "Certificate of Indigency" &&
-                    request.type === "Certificate of Indigency" && (
-                      <>
-                        <ClaimIndigencyButton request={request} />
-                      </>
-                    )}
-                  {request.status === "ready_to_claim" && request.type === "Certificate of Good Moral Character" &&
-                    request.type === "Certificate of Good Moral Character" && (
-                      <>
-                        <ClaimGoodMoralButton request={request} />
-                      </>
-                    )}
-                  {request.status === "ready_to_claim" && request.type === "Business Permit" &&
-                    request.type === "Business Permit" && (
-                      <>
-                        <ClaimBusinessButton
-                          request={{
-                            id: request.id,
-                            businessName: request.businessName!,
-                            businessLocation: request.businessLocation!,
-                            operatorName: request.operatorName!,
-                            operatorAddress: request.operatorAddress!,
-                            updatedAt: request.updatedAt!,
-                            requestDate: request.requestDate,
-                            fee: request.fee,
-                          }}
-                        />
-                      </>
-                    )}
+                  {(request.status === "ready_to_claim" || request.status === "completed") && request.type === "Certificate of Residency" && (
+                    <>
+                      <ClaimResidencyButton request={request} />
+                    </>
+                  )}
+                  {(request.status === "ready_to_claim" || request.status === "completed") && request.type === "Certificate of Indigency" && (
+                    <>
+                      <ClaimIndigencyButton request={request} />
+                    </>
+                  )}
+                  {(request.status === "ready_to_claim" || request.status === "completed") && request.type === "Certificate of Good Moral Character" && (
+                    <>
+                      <ClaimGoodMoralButton request={request} />
+                    </>
+                  )}
+                  {(request.status === "ready_to_claim" || request.status === "completed") && request.type === "Business Permit" && (
+                    <>
+                      <ClaimBusinessButton
+                        request={{
+                          id: request.id,
+                          businessName: request.businessName!,
+                          businessLocation: request.businessLocation!,
+                          operatorName: request.operatorName!,
+                          operatorAddress: request.operatorAddress!,
+                          updatedAt: request.updatedAt!,
+                          requestDate: request.requestDate,
+                          status: request.status,
+                        }}
+                      />
+                    </>
+                  )}
                   {/* <Button variant="outline" size="sm" className="text-gray-600 hover:text-[#23479A]">
                     <Eye className="h-3 w-3 mr-1" />
                     View
