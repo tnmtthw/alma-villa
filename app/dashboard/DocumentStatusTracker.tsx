@@ -339,48 +339,45 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
                     <PaymentPage request={request} />
                   )}
                   {/* CLAIM BUTTON */}
-                  {request.status === "ready_to_claim" && request.type === "Barangay Clearance" && (
-                    <>
-                      {/* <QRVerification documentId={request.id} /> */}
+                  {(request.status === "ready_to_claim" || request.status === "completed") &&
+                    request.type === "Barangay Clearance" && (
                       <ClaimClearanceButton request={request} />
-                    </>
-
-                  )}
-                  {request.status === "ready_to_claim" && request.type === "Certificate of Residency" && (
-                    <>
-                      {/* <QRVerification documentId={request.id} /> */}
-                      <ClaimResidencyButton request={request} />
-                    </>
-                  )}
-                  {request.status === "ready_to_claim" && request.type === "Certificate of Indigency" && (
-                    <>
-                      {/* <QRVerification documentId={request.id} /> */}
-                      <ClaimIndigencyButton request={request} />
-                    </>
-                  )}
-                  {request.status === "ready_to_claim" && request.type === "Certificate of Good Moral Character" && (
-                    <>
-                      {/* <QRVerification documentId={request.id} /> */}
-                      <ClaimGoodMoralButton request={request} />
-                    </>
-                  )}
-                  {request.status === "ready_to_claim" && request.type === "Business Permit" && (
-                    <>
-                      {/* <QRVerification documentId={request.id} /> */}
-                      <ClaimBusinessButton
-                        request={{
-                          id: request.id,
-                          businessName: request.businessName!,
-                          businessLocation: request.businessLocation!,
-                          operatorName: request.operatorName!,
-                          operatorAddress: request.operatorAddress!,
-                          updatedAt: request.updatedAt!,
-                          requestDate: request.requestDate,
-                          fee: request.fee,
-                        }}
-                      />
-                    </>
-                  )}
+                    )}
+                  {request.status === "ready_to_claim" && request.type === "Certificate of Residency" &&
+                    request.type === "Certificate of Residency" && (
+                      <>
+                        <ClaimResidencyButton request={request} />
+                      </>
+                    )}
+                  {request.status === "ready_to_claim" && request.type === "Certificate of Indigency" &&
+                    request.type === "Certificate of Indigency" && (
+                      <>
+                        <ClaimIndigencyButton request={request} />
+                      </>
+                    )}
+                  {request.status === "ready_to_claim" && request.type === "Certificate of Good Moral Character" &&
+                    request.type === "Certificate of Good Moral Character" && (
+                      <>
+                        <ClaimGoodMoralButton request={request} />
+                      </>
+                    )}
+                  {request.status === "ready_to_claim" && request.type === "Business Permit" &&
+                    request.type === "Business Permit" && (
+                      <>
+                        <ClaimBusinessButton
+                          request={{
+                            id: request.id,
+                            businessName: request.businessName!,
+                            businessLocation: request.businessLocation!,
+                            operatorName: request.operatorName!,
+                            operatorAddress: request.operatorAddress!,
+                            updatedAt: request.updatedAt!,
+                            requestDate: request.requestDate,
+                            fee: request.fee,
+                          }}
+                        />
+                      </>
+                    )}
                   {/* <Button variant="outline" size="sm" className="text-gray-600 hover:text-[#23479A]">
                     <Eye className="h-3 w-3 mr-1" />
                     View
@@ -388,13 +385,13 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
                 </div>
               </div>
 
-              <div className="mb-4">
+              {/* <div className="mb-4">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-xs font-medium text-gray-600">Progress</span>
                   <span className="text-xs font-medium text-gray-900">{request.progress}%</span>
                 </div>
                 <Progress value={request.progress} className="h-2" />
-              </div>
+              </div> */}
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                 <div className="flex items-center gap-2">

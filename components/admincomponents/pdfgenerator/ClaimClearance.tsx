@@ -97,6 +97,12 @@ const ClaimClearanceButton: React.FC<ClaimClearanceButtonProps> = ({ request }) 
         link.href = URL.createObjectURL(blob);
         link.download = `BRGY_CLEARANCE_${request.id}.pdf`;
         link.click();
+
+        await fetch(`/api/document/set-status?id=${request.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'completed' })
+        });
     };
 
     return (
@@ -106,7 +112,6 @@ const ClaimClearanceButton: React.FC<ClaimClearanceButtonProps> = ({ request }) 
             onClick={fillPDF}
         >
             <Download className="h-3 w-3 mr-1" />
-            Claim
         </Button>
     );
 };

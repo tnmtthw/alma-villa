@@ -77,6 +77,12 @@ const ClaimResidencyButton: React.FC<ClaimResidencyButtonProps> = ({ request }) 
         link.href = URL.createObjectURL(blob);
         link.download = `CERTIFICATE_RESIDENCY_${request.id}.pdf`;
         link.click();
+
+        await fetch(`/api/document/set-status?id=${request.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'completed' })
+        });
     };
 
     return (
@@ -86,7 +92,6 @@ const ClaimResidencyButton: React.FC<ClaimResidencyButtonProps> = ({ request }) 
             onClick={fillPDF}
         >
             <Download className="h-3 w-3 mr-1" />
-            Claim
         </Button>
     );
 };
