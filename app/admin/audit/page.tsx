@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -46,7 +46,8 @@ interface AuditStats {
 }
 
 export default function AuditLogPage() {
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([])
+  const [allAuditLogs, setAllAuditLogs] = useState<AuditLog[]>([])
+  const [filteredAuditLogs, setFilteredAuditLogs] = useState<AuditLog[]>([])
   const [stats, setStats] = useState<AuditStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -59,35 +60,92 @@ export default function AuditLogPage() {
     endDate: '',
     search: '',
   })
+  const [searchInput, setSearchInput] = useState('')
+  const [isSearching, setIsSearching] = useState(false)
 
   useEffect(() => {
-    fetchAuditLogs()
-    fetchStats()
-  }, [page, filters])
+    if (searchInput.trim()) {
+      setIsSearching(true)
+    }
 
-  const fetchAuditLogs = async () => {
+    const timeoutId = setTimeout(() => {
+      setFilters(prev => ({ ...prev, search: searchInput }))
+      setIsSearching(false)
+    }, 300)
+
+    return () => clearTimeout(timeoutId)
+  }, [searchInput])
+
+  useEffect(() => {
+    fetchAllAuditLogs()
+    fetchStats()
+  }, [])
+
+  useEffect(() => {
+    applyFilters()
+  }, [allAuditLogs, filters])
+
+  const fetchAllAuditLogs = async () => {
     try {
       setLoading(true)
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: '50',
-        ...Object.fromEntries(Object.entries(filters).filter(([_, v]) => v !== '')),
-      })
-
-      console.log('Fetching audit logs with params:', params.toString())
-      const response = await fetch(`/api/admin/audit?${params}`)
+      const response = await fetch('/api/admin/audit?limit=1000')
       if (!response.ok) {
         throw new Error('Failed to fetch audit logs')
       }
       const data = await response.json()
-      console.log('Audit logs response:', data)
-      setAuditLogs(data.auditLogs)
-      setTotalPages(data.pagination.totalPages)
+      console.log('All audit logs loaded:', data.auditLogs?.length || 0)
+      setAllAuditLogs(data.auditLogs || [])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
       setLoading(false)
     }
+  }
+
+  const applyFilters = () => {
+    let filtered = [...allAuditLogs]
+
+    if (filters.search) {
+      const searchTerm = filters.search.toLowerCase()
+      filtered = filtered.filter(log => {
+        const userName = log.user ? `${log.user.firstName || ''} ${log.user.lastName || ''}`.toLowerCase() : ''
+        const userEmail = log.user?.email?.toLowerCase() || ''
+        const action = log.action.toLowerCase()
+        const details = log.details?.toLowerCase() || ''
+        const ipAddress = log.ipAddress?.toLowerCase() || ''
+
+        return userName.includes(searchTerm) ||
+          userEmail.includes(searchTerm) ||
+          action.includes(searchTerm) ||
+          details.includes(searchTerm) ||
+          ipAddress.includes(searchTerm)
+      })
+    }
+
+    if (filters.action && filters.action !== 'all') {
+      filtered = filtered.filter(log => log.action === filters.action)
+    }
+
+    if (filters.startDate) {
+      const startDate = new Date(filters.startDate)
+      filtered = filtered.filter(log => new Date(log.createdAt) >= startDate)
+    }
+
+    if (filters.endDate) {
+      const endDate = new Date(filters.endDate)
+      endDate.setHours(23, 59, 59, 999)
+      filtered = filtered.filter(log => new Date(log.createdAt) <= endDate)
+    }
+
+    const itemsPerPage = 50
+    const startIndex = (page - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const paginatedLogs = filtered.slice(startIndex, endIndex)
+
+    setFilteredAuditLogs(paginatedLogs)
+    setTotalPages(Math.ceil(filtered.length / itemsPerPage))
+
+    console.log(`Filtered ${filtered.length} logs, showing ${paginatedLogs.length} on page ${page}`)
   }
 
   const fetchStats = async () => {
@@ -119,6 +177,7 @@ export default function AuditLogPage() {
       endDate: '',
       search: '',
     })
+    setSearchInput('')
     setPage(1)
   }
 
@@ -126,10 +185,10 @@ export default function AuditLogPage() {
     const headers = [
       'ID', 'User', 'Action', 'Details', 'IP Address', 'User Agent', 'Created At'
     ]
-    
+
     const csvContent = [
       headers.join(','),
-      ...auditLogs.map(log => [
+      ...filteredAuditLogs.map(log => [
         log.id,
         `"${log.user?.email || 'System'}"`,
         `"${log.action}"`,
@@ -187,7 +246,7 @@ export default function AuditLogPage() {
     }
   }
 
-  if (loading && auditLogs.length === 0) {
+  if (loading && allAuditLogs.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -203,7 +262,7 @@ export default function AuditLogPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <p className="text-red-600 mb-4">Error: {error}</p>
-          <Button onClick={fetchAuditLogs}>Retry</Button>
+          <Button onClick={fetchAllAuditLogs}>Retry</Button>
         </div>
       </div>
     )
@@ -222,7 +281,6 @@ export default function AuditLogPage() {
         </Button>
       </div>
 
-      {/* Statistics Cards */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card>
@@ -271,87 +329,116 @@ export default function AuditLogPage() {
         </div>
       )}
 
-      {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Search className="h-5 w-5" />
+            Search & Filters
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="space-y-6">
             <div>
-              <label className="text-sm font-medium mb-2 block">Search</label>
+              <label className="text-sm font-medium mb-2 block">Search Logs</label>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 ${isSearching ? 'text-blue-500' : 'text-gray-400'}`} />
                 <Input
-                  placeholder="Search logs..."
-                  value={filters.search}
-                  onChange={(e) => handleFilterChange('search', e.target.value)}
+                  placeholder="Search by user, action, or details..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
                   className="pl-10"
+                />
+                {isSearching && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                {isSearching ? 'Searching...' : 'Search will update automatically as you type'}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">Action Type</label>
+                <Select value={filters.action} onValueChange={(value) => handleFilterChange('action', value)}>
+                  <SelectTrigger className="h-10 w-full">
+                    <SelectValue placeholder="All Actions" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Actions</SelectItem>
+                    <SelectItem value="USER_LOGIN">🔐 User Login</SelectItem>
+                    <SelectItem value="USER_LOGOUT">🔐 User Logout</SelectItem>
+                    <SelectItem value="USER_REGISTRATION">🔐 User Registration</SelectItem>
+                    <SelectItem value="PASSWORD_RESET">🔐 Password Reset</SelectItem>
+                    <SelectItem value="USER_VERIFICATION">👤 User Verification</SelectItem>
+                    <SelectItem value="ROLE_CHANGE">👤 Role Change</SelectItem>
+                    <SelectItem value="DOCUMENT_SUBMISSION">📄 Document Submission</SelectItem>
+                    <SelectItem value="DOCUMENT_APPROVAL">📄 Document Approval</SelectItem>
+                    <SelectItem value="DOCUMENT_REJECTION">📄 Document Rejection</SelectItem>
+                    <SelectItem value="DOCUMENT_STATUS_CHANGE">📄 Document Status Change</SelectItem>
+                    <SelectItem value="SYSTEM_ACCESS">⚙️ System Access</SelectItem>
+                    <SelectItem value="DATA_EXPORT">📊 Data Export</SelectItem>
+                    <SelectItem value="DATA_IMPORT">📊 Data Import</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-2 block">Start Date</label>
+                <Input
+                  type="date"
+                  value={filters.startDate}
+                  onChange={(e) => handleFilterChange('startDate', e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-2 block">End Date</label>
+                <Input
+                  type="date"
+                  value={filters.endDate}
+                  onChange={(e) => handleFilterChange('endDate', e.target.value)}
                 />
               </div>
             </div>
 
-            <div>
-              <label className="text-sm font-medium mb-2 mt-[2px] block">Action</label>
-              <Select value={filters.action} onValueChange={(value) => handleFilterChange('action', value)}>
-                <SelectTrigger className="h-10">
-                  <SelectValue placeholder="All Actions" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Actions</SelectItem>
-                  
-                  {/* Authentication Group */}
-                  <SelectItem value="USER_LOGIN">🔐 User Login</SelectItem>
-                  <SelectItem value="USER_LOGOUT">🔐 User Logout</SelectItem>
-                  <SelectItem value="USER_REGISTRATION">🔐 User Registration</SelectItem>
-                  <SelectItem value="PASSWORD_RESET">🔐 Password Reset</SelectItem>
-                  
-                  {/* User Management Group */}
-                  <SelectItem value="USER_VERIFICATION">👤 User Verification</SelectItem>
-                  <SelectItem value="ROLE_CHANGE">👤 Role Change</SelectItem>
-                  
-                  {/* Document Operations Group */}
-                  <SelectItem value="DOCUMENT_SUBMISSION">📄 Document Submission</SelectItem>
-                  <SelectItem value="DOCUMENT_APPROVAL">📄 Document Approval</SelectItem>
-                  <SelectItem value="DOCUMENT_REJECTION">📄 Document Rejection</SelectItem>
-                  <SelectItem value="DOCUMENT_STATUS_CHANGE">📄 Document Status Change</SelectItem>
-                  
-                  {/* System Operations Group */}
-                  <SelectItem value="SYSTEM_ACCESS">⚙️ System Access</SelectItem>
-                  <SelectItem value="DATA_EXPORT">📊 Data Export</SelectItem>
-                  <SelectItem value="DATA_IMPORT">📊 Data Import</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-2 block">Start Date</label>
-              <Input
-                type="date"
-                value={filters.startDate}
-                onChange={(e) => handleFilterChange('startDate', e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-2 block">End Date</label>
-              <Input
-                type="date"
-                value={filters.endDate}
-                onChange={(e) => handleFilterChange('endDate', e.target.value)}
-              />
-            </div>
-
-            <div className="flex items-end">
-              <Button variant="outline" onClick={clearFilters} className="w-full">
-                Clear Filters
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={clearFilters} className="w-full md:w-auto">
+                Clear All Filters
               </Button>
             </div>
+
+            {(filters.action !== 'all' || filters.search || filters.startDate || filters.endDate) && (
+              <div className="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg">
+                <span className="text-sm font-medium text-gray-700">Active filters:</span>
+                {filters.action !== 'all' && (
+                  <Badge variant="secondary" className="text-xs">
+                    Action: {filters.action.replace('_', ' ')}
+                  </Badge>
+                )}
+                {filters.search && (
+                  <Badge variant="secondary" className="text-xs">
+                    Search: "{filters.search}"
+                  </Badge>
+                )}
+                {filters.startDate && (
+                  <Badge variant="secondary" className="text-xs">
+                    From: {filters.startDate}
+                  </Badge>
+                )}
+                {filters.endDate && (
+                  <Badge variant="secondary" className="text-xs">
+                    To: {filters.endDate}
+                  </Badge>
+                )}
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
 
-      {/* Action Breakdown */}
       {stats && stats.actionBreakdown.length > 0 && (
         <Card>
           <CardHeader>
@@ -373,13 +460,12 @@ export default function AuditLogPage() {
         </Card>
       )}
 
-      {/* Audit Logs Table */}
       <Card>
         <CardHeader>
           <CardTitle>Audit Logs</CardTitle>
         </CardHeader>
         <CardContent>
-          {auditLogs.length === 0 ? (
+          {filteredAuditLogs.length === 0 ? (
             <div className="text-center py-8">
               <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No Audit Logs Found</h3>
@@ -408,45 +494,44 @@ export default function AuditLogPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {auditLogs.map((log) => (
-                  <tr key={log.id} className="border-b hover:bg-gray-50">
-                    <td className="p-2">
-                      <div className="flex items-center gap-2">
-                        {getActionIcon(log.action)}
-                        <Badge className={getActionColor(log.action)}>
-                          {log.action.replace('_', ' ')}
-                        </Badge>
-                      </div>
-                    </td>
-                    <td className="p-2">
-                      {log.user ? (
-                        <div>
-                          <div className="font-medium">{log.user.firstName} {log.user.lastName}</div>
-                          <div className="text-xs text-gray-500">{log.user.email}</div>
+                  {filteredAuditLogs.map((log) => (
+                    <tr key={log.id} className="border-b hover:bg-gray-50">
+                      <td className="p-2">
+                        <div className="flex items-center gap-2">
+                          {getActionIcon(log.action)}
+                          <Badge className={getActionColor(log.action)}>
+                            {log.action.replace('_', ' ')}
+                          </Badge>
                         </div>
-                      ) : (
-                        <span className="text-gray-500">System</span>
-                      )}
-                    </td>
-                    <td className="p-2">
-                      <div className="max-w-xs truncate" title={log.details || ''}>
-                        {log.details || 'No details'}
-                      </div>
-                    </td>
-                    <td className="p-2">
-                      <span className="font-mono text-xs">{log.ipAddress || 'N/A'}</span>
-                    </td>
-                    <td className="p-2">
-                      {new Date(log.createdAt).toLocaleString()}
-                    </td>
-                  </tr>
+                      </td>
+                      <td className="p-2">
+                        {log.user ? (
+                          <div>
+                            <div className="font-medium">{log.user.firstName} {log.user.lastName}</div>
+                            <div className="text-xs text-gray-500">{log.user.email}</div>
+                          </div>
+                        ) : (
+                          <span className="text-gray-500">System</span>
+                        )}
+                      </td>
+                      <td className="p-2">
+                        <div className="max-w-xs truncate" title={log.details || ''}>
+                          {log.details || 'No details'}
+                        </div>
+                      </td>
+                      <td className="p-2">
+                        <span className="font-mono text-xs">{log.ipAddress || 'N/A'}</span>
+                      </td>
+                      <td className="p-2">
+                        {new Date(log.createdAt).toLocaleString()}
+                      </td>
+                    </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           )}
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex justify-between items-center mt-4">
               <Button

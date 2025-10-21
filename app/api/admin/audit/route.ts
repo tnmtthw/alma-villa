@@ -37,12 +37,27 @@ export async function GET(req: Request) {
     }
 
     if (search) {
+      // Split search term into words for better matching
+      const searchTerms = search.trim().split(/\s+/)
+      
       where.OR = [
         { action: { contains: search, mode: 'insensitive' } },
         { details: { contains: search, mode: 'insensitive' } },
         { ipAddress: { contains: search, mode: 'insensitive' } },
         { user: { email: { contains: search, mode: 'insensitive' } } },
+        { user: { firstName: { contains: search, mode: 'insensitive' } } },
+        { user: { lastName: { contains: search, mode: 'insensitive' } } },
       ]
+
+      // Add individual word matching for names
+      searchTerms.forEach(term => {
+        if (term.length > 1) { // Only search for terms longer than 1 character
+          where.OR.push(
+            { user: { firstName: { contains: term, mode: 'insensitive' } } },
+            { user: { lastName: { contains: term, mode: 'insensitive' } } }
+          )
+        }
+      })
     }
 
     console.log('Audit API - Where clause:', where)
