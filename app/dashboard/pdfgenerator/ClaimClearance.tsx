@@ -20,6 +20,7 @@ interface ClaimClearanceButtonProps {
         purpose: string;
         fee?: string;
         status: string
+        pickupOption?: string;
         // Add other fields you need
     };
 }
@@ -105,6 +106,23 @@ const ClaimClearanceButton: React.FC<ClaimClearanceButtonProps> = ({ request }) 
             body: JSON.stringify({ status: 'completed' })
         });
     };
+
+    // Check if user can download based on pickup option
+    const canDownload = request.pickupOption !== "pickup" || request.status === "ready_to_claim";
+
+    if (!canDownload) {
+        return (
+            <Button
+                size="sm"
+                variant="outline"
+                disabled
+                className="text-gray-500"
+            >
+                <Download className="h-3 w-3 mr-1" />
+                Pickup Only
+            </Button>
+        );
+    }
 
     return (
         <Button

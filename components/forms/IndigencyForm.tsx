@@ -28,13 +28,17 @@ interface FormData {
   // Purpose and supporting info
   purpose: string
   attachments: File[]
+
+  // Delivery Option
+  pickupOption: string
 }
 
 const sampleData: FormData = {
   fullName: "Rosa Maria Garcia",
   age: "48",
   purpose: "To apply for medical assistance for my son's operation",
-  attachments: []
+  attachments: [],
+  pickupOption: "online"
 }
 
 
@@ -47,7 +51,8 @@ export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormP
     fullName: data.firstName + " " + data.lastName,
     age: data.age,
     purpose: "",
-    attachments: []
+    attachments: [],
+    pickupOption: "online"
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -99,6 +104,7 @@ export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormP
         age: formData.age,
         purpose: formData.purpose,
         type: "Certificate of Indigency",
+        pickupOption: formData.pickupOption,
       }
 
       const response = await fetch('/api/document', {
@@ -130,7 +136,7 @@ export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormP
       })
 
       // Reset form
-      setFormData({ fullName: "", age: "", purpose: "", attachments: [] })
+      setFormData({ fullName: "", age: "", purpose: "", pickupOption: "online", attachments: [] })
 
     } catch (error) {
       console.error("Error submitting form:", error)
@@ -202,16 +208,34 @@ export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormP
           <div className="space-y-4">
             <h3 className="text-lg font-medium border-b pb-2">Certificate Purpose</h3>
 
-            <div>
-              <Label htmlFor="purpose">Purpose of This Certificate *</Label>
-              <Textarea
-                id="purpose"
-                value={formData.purpose}
-                onChange={(e) => handleInputChange("purpose", e.target.value)}
-                required
-                placeholder="Please specify what you will use this certificate for (e.g., medical assistance, educational assistance, legal aid, etc.)"
-                rows={3}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="purpose">Purpose of This Certificate *</Label>
+                <Textarea
+                  id="purpose"
+                  value={formData.purpose}
+                  onChange={(e) => handleInputChange("purpose", e.target.value)}
+                  required
+                  placeholder="Please specify what you will use this certificate for (e.g., medical assistance, educational assistance, legal aid, etc.)"
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="pickupOption">Document Delivery Option *</Label>
+                <Select
+                  value={formData.pickupOption}
+                  onValueChange={(value) => handleInputChange("pickupOption", value)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select delivery option" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="online">Online Download (Pay online)</SelectItem>
+                    <SelectItem value="pickup">Pickup at Barangay Office (Pay on pickup)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 

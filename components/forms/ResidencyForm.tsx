@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Upload, X, FileText } from "lucide-react"
 import { useToast } from "@/components/ui/toast"
 import { useSession } from "next-auth/react"
@@ -27,6 +28,9 @@ interface FormData {
   // Purpose and supporting info
   purpose: string
   attachments: File[]
+
+  // Delivery Option
+  pickupOption: string
 }
 
 
@@ -40,7 +44,8 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
     age: data.age,
     address: data.purok,
     purpose: "",
-    attachments: []
+    attachments: [],
+    pickupOption: "online"
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -90,6 +95,7 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
         purok: formData.address,
         purpose: formData.purpose,
         type: "Certificate of Residency",
+        pickupOption: formData.pickupOption,
       }
 
       const response = await fetch('/api/document', {
@@ -126,6 +132,7 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
         age: "",
         address: "",
         purpose: "",
+        pickupOption: "online",
         attachments: []
       })
     } catch (error) {
@@ -146,6 +153,7 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
       age: "35",
       address: "Sitio 3",
       purpose: "Bank account opening and loan application",
+      pickupOption: "online",
       attachments: []
     })
   }
@@ -218,15 +226,33 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
           <div className="space-y-4">
             <h3 className="text-lg font-medium border-b pb-2">Certificate Purpose</h3>
 
-            <div>
-              <Label htmlFor="purpose">Purpose of This Certificate *</Label>
-              <Input
-                id="purpose"
-                value={formData.purpose}
-                onChange={(e) => handleInputChange("purpose", e.target.value)}
-                required
-                placeholder="e.g., Bank requirements, Employment, Legal proceedings, etc."
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="purpose">Purpose of This Certificate *</Label>
+                <Input
+                  id="purpose"
+                  value={formData.purpose}
+                  onChange={(e) => handleInputChange("purpose", e.target.value)}
+                  required
+                  placeholder="e.g., Bank requirements, Employment, Legal proceedings, etc."
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="pickupOption">Document Delivery Option *</Label>
+                <Select
+                  value={formData.pickupOption}
+                  onValueChange={(value) => handleInputChange("pickupOption", value)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select delivery option" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="online">Online Download (Pay online)</SelectItem>
+                    <SelectItem value="pickup">Pickup at Barangay Office (Pay on pickup)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 

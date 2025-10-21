@@ -106,7 +106,8 @@ const transformDocumentToRequest = (document: any): DocumentRequest => {
       purpose: document.purpose,
       additionalInfo: document.additionalInfo
     },
-    attachments: [] // No attachments in current document model
+    attachments: [], // No attachments in current document model
+    pickupOption: document.pickupOption || "online"
   }
 }
 

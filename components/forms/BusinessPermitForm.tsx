@@ -28,6 +28,7 @@ interface FormData {
   operatorName: string
   operatorAddress: string
   attachments: AttachmentFile[]
+  pickupOption: string
 }
 
 const sampleData: FormData = {
@@ -35,7 +36,8 @@ const sampleData: FormData = {
   businessLocation: "Sitio 1",
   operatorName: "Juan Dela Cruz",
   operatorAddress: "Sitio 1",
-  attachments: []
+  attachments: [],
+  pickupOption: "online"
 }
 
 export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessPermitFormProps) {
@@ -44,7 +46,8 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
     businessLocation: "",
     operatorName: "",
     operatorAddress: "",
-    attachments: []
+    attachments: [],
+    pickupOption: "online"
   })
   const { addToast } = useToast()
   const { data: session } = useSession()
@@ -139,6 +142,7 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
         operatorAddress: formData.operatorAddress,
         purpose: `Business Permit for ${formData.businessName}`,
         type: "Business Permit",
+        pickupOption: formData.pickupOption,
       }
 
       const response = await fetch('/api/document', {
@@ -169,6 +173,7 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
         businessLocation: "",
         operatorName: "",
         operatorAddress: "",
+        pickupOption: "online",
         attachments: []
       })
 

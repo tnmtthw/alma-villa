@@ -43,6 +43,9 @@ interface FormData {
   // Contact Information (for processing)
   contactNumber: string
   emailAddress: string
+
+  // Delivery Option
+  pickupOption: string
 }
 
 const sampleData: FormData = {
@@ -57,7 +60,8 @@ const sampleData: FormData = {
   purpose: "employment",
   additionalInfo: "Required for submission to HR department by end of month",
   contactNumber: "",
-  emailAddress: ""
+  emailAddress: "",
+  pickupOption: "online"
 }
 
 export default function BarangayClearanceForm({ onBackAction, onSubmit }: BarangayClearanceFormProps) {
@@ -77,7 +81,8 @@ export default function BarangayClearanceForm({ onBackAction, onSubmit }: Barang
     purpose: "",
     additionalInfo: "",
     contactNumber: "",
-    emailAddress: ""
+    emailAddress: "",
+    pickupOption: "online"
   })
 
 
@@ -245,7 +250,8 @@ export default function BarangayClearanceForm({ onBackAction, onSubmit }: Barang
         residencyLength: formData.residencyLength,
         purpose: formData.purpose,
         additionalInfo: formData.additionalInfo,
-        type: "Barangay Clearance"
+        type: "Barangay Clearance",
+        pickupOption: formData.pickupOption
       }
 
       const response = await fetch('/api/document', {
@@ -289,7 +295,8 @@ export default function BarangayClearanceForm({ onBackAction, onSubmit }: Barang
           purpose: "",
           additionalInfo: "",
           contactNumber: "",
-          emailAddress: ""
+          emailAddress: "",
+          pickupOption: "online"
         })
         setSupportingDocs([])
       } else {
@@ -462,7 +469,7 @@ export default function BarangayClearanceForm({ onBackAction, onSubmit }: Barang
                 value={formData.purpose}
                 onValueChange={(value) => handleInputChange('purpose', value)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select purpose" />
                 </SelectTrigger>
                 <SelectContent>
@@ -477,6 +484,22 @@ export default function BarangayClearanceForm({ onBackAction, onSubmit }: Barang
                   <SelectItem value="Insurance Claims">Insurance Claims</SelectItem>
                   <SelectItem value="Government Requirements">Government Requirements</SelectItem>
                   <SelectItem value="Other Purpose">Other Purpose</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="pickupOption">Document Delivery Option *</Label>
+              <Select
+                value={formData.pickupOption}
+                onValueChange={(value) => handleInputChange('pickupOption', value)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select delivery option" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="online">Online Download (Pay online)</SelectItem>
+                  <SelectItem value="pickup">Pickup at Barangay Office (Pay on pickup)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

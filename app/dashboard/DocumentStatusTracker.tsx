@@ -43,6 +43,7 @@ interface DocumentRequest {
   fee?: string
   progress?: number
   rejectionReason?: string
+  pickupOption: string
 
   // FOR BUSINESS PERMIT
   businessName?: string
@@ -159,7 +160,7 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
     operatorAddress: doc.operatorAddress,
     updatedAt: doc.updatedAt,
     // FOR BUSINESS PERMIT
-
+    pickupOption: doc.pickupOption,
     status: doc.status,
     purpose: doc.purpose,
     fee: "₱50.00", // Example: replace with real fee field if available
@@ -314,11 +315,22 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
                     </h3>
                     <Badge
                       variant="secondary"
-                      className={`text-xs ${statusConfig.bgColor} ${statusConfig.color} border-0 whitespace-nowrap`}
+                      className={`text-xs ${statusConfig.bgColor} ${statusConfig.color} border-0 whitespace-nowrap cursor-default`}
                     >
                       <StatusIcon className="h-3 w-3 mr-1" />
                       {statusConfig.label}
                     </Badge>
+                    {request.pickupOption && (
+                      <Badge
+                        className={
+                          request.pickupOption === "online"
+                            ? "bg-blue-500 text-white  cursor-default"
+                            : "bg-green-500 text-white  cursor-default"
+                        }
+                      >
+                        {request.pickupOption === "online" ? "Online" : "Pickup"}
+                      </Badge>
+                    )}
                   </div>
                   <p className="text-sm text-gray-600 mb-1">Request ID: {request.id}</p>
                   <p className="text-xs text-gray-500">{statusConfig.description}</p>

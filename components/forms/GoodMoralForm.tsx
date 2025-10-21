@@ -30,6 +30,9 @@ interface FormData {
   // Purpose and supporting info
   purpose: string
   attachments: File[]
+
+  // Delivery Option
+  pickupOption: string
 }
 
 const sampleData: FormData = {
@@ -40,7 +43,8 @@ const sampleData: FormData = {
   citizenship: "Filipino",
   residentOf: "Sitio 2",
   purpose: "Employment requirements",
-  attachments: []
+  attachments: [],
+  pickupOption: "online"
 }
 
 export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormProps) {
@@ -56,7 +60,8 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
     citizenship: data.nationality,
     residentOf: data.purok,
     purpose: "",
-    attachments: []
+    attachments: [],
+    pickupOption: "online"
   })
 
   const calculateAge = (birthDate: string) => {
@@ -126,6 +131,7 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
         purok: formData.residentOf,
         purpose: formData.purpose,
         type: "Certificate of Good Moral Character",
+        pickupOption: formData.pickupOption,
       }
 
       const response = await fetch('/api/document', {
@@ -159,6 +165,7 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
         citizenship: "",
         residentOf: "",
         purpose: "",
+        pickupOption: "online",
         attachments: []
       })
 
