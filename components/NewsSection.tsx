@@ -216,7 +216,7 @@ export default function DashboardNewsPage() {
             ))}
           </div>
         </div>
-        <div className="text-center mb-8 sm:mb-12">
+        {/* <div className="text-center mb-8 sm:mb-12">
           <button
             onClick={handleViewAllClick}
             className="inline-flex items-center px-6 sm:px-8 py-3 bg-[#23479A] hover:bg-[#23479A]/90 text-white rounded-lg font-medium transition-colors text-sm sm:text-base"
@@ -224,7 +224,7 @@ export default function DashboardNewsPage() {
             View All News & Announcements
             <ArrowRight className="h-4 w-4 ml-2" />
           </button>
-        </div>
+        </div> */}
         <div className="bg-red-50 border border-red-200 rounded-xl sm:rounded-2xl p-4 sm:p-6">
           <div className="flex items-start sm:items-center gap-3 sm:gap-4">
             <div className="p-2 sm:p-3 rounded-full bg-red-100 flex-shrink-0">
