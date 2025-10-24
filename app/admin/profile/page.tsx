@@ -68,6 +68,9 @@ export default function AdminProfile() {
   const [isSavingProfile, setIsSavingProfile] = useState(false)
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false)
 
+  // Password change visibility state
+  const [showPasswordChange, setShowPasswordChange] = useState(false)
+
   // Message states
   const [profileMessage, setProfileMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
   const [passwordMessage, setPasswordMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
@@ -157,6 +160,20 @@ export default function AdminProfile() {
     }
   }
 
+  // Toggle password change form visibility
+  const handleTogglePasswordChange = () => {
+    setShowPasswordChange(!showPasswordChange)
+    if (!showPasswordChange) {
+      // Clear password fields when opening
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      })
+      setPasswordMessage(null)
+    }
+  }
+
   // Update password
   const handleUpdatePassword = async () => {
     if (!session?.user?.id) {
@@ -191,12 +208,13 @@ export default function AdminProfile() {
 
       if (response.ok) {
         setPasswordMessage({ type: 'success', text: 'Password updated successfully!' })
-        // Clear password fields
+        // Clear password fields and hide form
         setPasswordData({
           currentPassword: '',
           newPassword: '',
           confirmPassword: ''
         })
+        setShowPasswordChange(false)
       } else {
         const errorData = await response.json()
         setPasswordMessage({ type: 'error', text: errorData.error || 'Failed to update password' })
@@ -351,51 +369,92 @@ export default function AdminProfile() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {passwordMessage && (
-              <div className={`p-3 rounded-md ${passwordMessage.type === 'success'
-                  ? 'bg-green-50 text-green-700 border border-green-200'
-                  : 'bg-red-50 text-red-700 border border-red-200'
-                }`}>
-                {passwordMessage.text}
+            {!showPasswordChange ? (
+              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div className="flex-1">
+                  <h3 className="font-medium text-gray-900">Password</h3>
+                  <p className="text-sm text-gray-500 mt-1">Change your account password</p>
+                </div>
+                <Button
+                  onClick={handleTogglePasswordChange}
+                  className="bg-[#23479A] hover:bg-[#23479A]/90 text-white transition-all duration-200 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2"
+                >
+                  <Lock className="h-4 w-4" />
+                  Change Password
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-medium text-gray-900">Change Password</h3>
+                  <Button
+                    variant="outline"
+                    onClick={handleTogglePasswordChange}
+                    className="flex items-center gap-2 hover:bg-gray-100 transition-all duration-200"
+                  >
+                    <X className="h-4 w-4" />
+                    Cancel
+                  </Button>
+                </div>
+                
+                {passwordMessage && (
+                  <div className={`p-3 rounded-md ${passwordMessage.type === 'success'
+                      ? 'bg-green-50 text-green-700 border border-green-200'
+                      : 'bg-red-50 text-red-700 border border-red-200'
+                    }`}>
+                    {passwordMessage.text}
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <Label>Current Password</Label>
+                  <Input
+                    type="password"
+                    placeholder="Enter current password"
+                    value={passwordData.currentPassword}
+                    onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>New Password</Label>
+                    <Input
+                      type="password"
+                      placeholder="Enter new password"
+                      value={passwordData.newPassword}
+                      onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Confirm Password</Label>
+                    <Input
+                      type="password"
+                      placeholder="Confirm new password"
+                      value={passwordData.confirmPassword}
+                      onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Button
+                    className="bg-[#23479A] hover:bg-[#23479A]/90 text-white transition-all duration-200 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2"
+                    onClick={handleUpdatePassword}
+                    disabled={isUpdatingPassword}
+                  >
+                    <Lock className="h-4 w-4" />
+                    {isUpdatingPassword ? 'Updating...' : 'Update Password'}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleTogglePasswordChange}
+                    className="flex items-center gap-2 hover:bg-gray-100 transition-all duration-200"
+                  >
+                    <X className="h-4 w-4" />
+                    Cancel
+                  </Button>
+                </div>
               </div>
             )}
-
-            <div className="space-y-2">
-              <Label>Current Password</Label>
-              <Input
-                type="password"
-                placeholder="Enter current password"
-                value={passwordData.currentPassword}
-                onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>New Password</Label>
-                <Input
-                  type="password"
-                  placeholder="Enter new password"
-                  value={passwordData.newPassword}
-                  onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Confirm Password</Label>
-                <Input
-                  type="password"
-                  placeholder="Confirm new password"
-                  value={passwordData.confirmPassword}
-                  onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
-                />
-              </div>
-            </div>
-            <Button
-              className="bg-[#23479A] hover:bg-[#23479A]/90 text-white transition-all duration-200 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
-              onClick={handleUpdatePassword}
-              disabled={isUpdatingPassword}
-            >
-              {isUpdatingPassword ? 'Updating...' : 'Update Password'}
-            </Button>
           </CardContent>
         </Card>
 

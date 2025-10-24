@@ -16,6 +16,7 @@ import {
   Eye,
   EyeOff,
   RefreshCw,
+  X,
 } from "lucide-react"
 
 export default function AdminSecuritySettings() {
@@ -30,6 +31,19 @@ export default function AdminSecuritySettings() {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [message, setMessage] = useState("")
   const [messageType, setMessageType] = useState<"success" | "error">("success")
+  const [showPasswordChange, setShowPasswordChange] = useState(false)
+
+  // Toggle password change form visibility
+  const handleTogglePasswordChange = () => {
+    setShowPasswordChange(!showPasswordChange)
+    if (!showPasswordChange) {
+      // Clear password fields when opening
+      setCurrentPassword("")
+      setNewPassword("")
+      setConfirmPassword("")
+      setMessage("")
+    }
+  }
 
   const handlePasswordChange = async () => {
     if (newPassword !== confirmPassword) {
@@ -65,6 +79,7 @@ export default function AdminSecuritySettings() {
         setCurrentPassword("")
         setNewPassword("")
         setConfirmPassword("")
+        setShowPasswordChange(false)
       } else {
         setMessage(data.error || "Failed to update password")
         setMessageType("error")
@@ -168,110 +183,150 @@ export default function AdminSecuritySettings() {
               </CardDescription>
             </CardHeader>
             <CardContent className="p-6 space-y-6">
-            {message && (
-              <div className={`p-4 rounded-lg ${
-                messageType === "success" 
-                  ? "bg-green-50 border border-green-200 text-green-800" 
-                  : "bg-red-50 border border-red-200 text-red-800"
-              }`}>
-                {message}
+            {!showPasswordChange ? (
+              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div className="flex-1">
+                  <h3 className="font-medium text-gray-900">Password</h3>
+                  <p className="text-sm text-gray-500 mt-1">Change your account password</p>
+                </div>
+                <Button
+                  onClick={handleTogglePasswordChange}
+                  className="bg-[#23479A] hover:bg-[#23479A]/90 text-white transition-all duration-200 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2"
+                >
+                  <Lock className="h-4 w-4" />
+                  Change Password
+                </Button>
               </div>
-            )}
-            
-              <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">Current Password</Label>
-                    <div className="relative">
-                      <Input 
-                        type={showCurrentPassword ? "text" : "password"}
-                        placeholder="Enter current password" 
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                        className="border-gray-200 focus:border-[#23479A] focus:ring-[#23479A]/20 pr-10"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                      >
-                        {showCurrentPassword ? (
-                          <EyeOff className="h-4 w-4 text-gray-400" />
-                        ) : (
-                          <Eye className="h-4 w-4 text-gray-400" />
-                        )}
-                      </Button>
+            ) : (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-medium text-gray-900">Change Password</h3>
+                  <Button
+                    variant="outline"
+                    onClick={handleTogglePasswordChange}
+                    className="flex items-center gap-2 hover:bg-gray-100 transition-all duration-200"
+                  >
+                    <X className="h-4 w-4" />
+                    Cancel
+                  </Button>
+                </div>
+                
+                {message && (
+                  <div className={`p-4 rounded-lg ${
+                    messageType === "success" 
+                      ? "bg-green-50 border border-green-200 text-green-800" 
+                      : "bg-red-50 border border-red-200 text-red-800"
+                  }`}>
+                    {message}
+                  </div>
+                )}
+                
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-gray-700">Current Password</Label>
+                      <div className="relative">
+                        <Input 
+                          type={showCurrentPassword ? "text" : "password"}
+                          placeholder="Enter current password" 
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                          className="border-gray-200 focus:border-[#23479A] focus:ring-[#23479A]/20 pr-10"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        >
+                          {showCurrentPassword ? (
+                            <EyeOff className="h-4 w-4 text-gray-400" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-gray-400" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-gray-700">New Password</Label>
+                      <div className="relative">
+                        <Input 
+                          type={showNewPassword ? "text" : "password"}
+                          placeholder="Enter new password" 
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                          className="border-gray-200 focus:border-[#23479A] focus:ring-[#23479A]/20 pr-10"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                        >
+                          {showNewPassword ? (
+                            <EyeOff className="h-4 w-4 text-gray-400" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-gray-400" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-gray-700">Confirm New Password</Label>
+                      <div className="relative">
+                        <Input 
+                          type={showConfirmPassword ? "text" : "password"}
+                          placeholder="Confirm new password" 
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                          className="border-gray-200 focus:border-[#23479A] focus:ring-[#23479A]/20 pr-10"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        >
+                          {showConfirmPassword ? (
+                            <EyeOff className="h-4 w-4 text-gray-400" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-gray-400" />
+                          )}
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">New Password</Label>
-                    <div className="relative">
-                      <Input 
-                        type={showNewPassword ? "text" : "password"}
-                        placeholder="Enter new password" 
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                        className="border-gray-200 focus:border-[#23479A] focus:ring-[#23479A]/20 pr-10"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                        onClick={() => setShowNewPassword(!showNewPassword)}
-                      >
-                        {showNewPassword ? (
-                          <EyeOff className="h-4 w-4 text-gray-400" />
-                        ) : (
-                          <Eye className="h-4 w-4 text-gray-400" />
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">Confirm New Password</Label>
-                    <div className="relative">
-                      <Input 
-                        type={showConfirmPassword ? "text" : "password"}
-                        placeholder="Confirm new password" 
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="border-gray-200 focus:border-[#23479A] focus:ring-[#23479A]/20 pr-10"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      >
-                        {showConfirmPassword ? (
-                          <EyeOff className="h-4 w-4 text-gray-400" />
-                        ) : (
-                          <Eye className="h-4 w-4 text-gray-400" />
-                        )}
-                      </Button>
-                    </div>
+                  <div className="flex items-center gap-3">
+                    <Button 
+                      className="bg-[#23479A] hover:bg-[#23479A]/90 text-white transition-all duration-200 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2"
+                      onClick={handlePasswordChange}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <>
+                          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                          Updating...
+                        </>
+                      ) : (
+                        <>
+                          <Lock className="h-4 w-4 mr-2" />
+                          Update Password
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={handleTogglePasswordChange}
+                      className="flex items-center gap-2 hover:bg-gray-100 transition-all duration-200"
+                    >
+                      <X className="h-4 w-4" />
+                      Cancel
+                    </Button>
                   </div>
                 </div>
-            <Button 
-              className="bg-[#23479A] hover:bg-[#23479A]/90 text-white"
-              onClick={handlePasswordChange}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  Updating...
-                </>
-              ) : (
-                <>
-                  <Lock className="h-4 w-4 mr-2" />
-                  Update Password
-                </>
-              )}
-                </Button>
+            )}
             </CardContent>
           </Card>
 

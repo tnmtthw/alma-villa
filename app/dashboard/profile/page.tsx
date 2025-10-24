@@ -9,13 +9,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
   User2,
   Mail,
   Phone,
@@ -93,18 +86,6 @@ export default function UserProfile() {
     return apiData?.email || session?.user?.email || "No email provided";
   }
 
-  // Helper functions to normalize gender and civil status values
-  const normalizeGender = (value: string): string => {
-    if (!value) return "";
-    const lower = value.toLowerCase();
-    return lower === 'male' || lower === 'female' ? lower : "";
-  }
-
-  const normalizeCivilStatus = (value: string): string => {
-    if (!value) return "";
-    const lower = value.toLowerCase();
-    return ['single', 'married', 'widowed', 'separated'].includes(lower) ? lower : "";
-  }
 
   // Set isClient to true after component mounts
   useEffect(() => {
@@ -409,37 +390,25 @@ export default function UserProfile() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="gender">Gender</Label>
-                  <Select
-                    value={normalizeGender(formData.gender || "")}
-                    onValueChange={(value) => handleInputChange('gender', value)}
+                  <Input
+                    id="gender"
+                    value={formData.gender || ""}
+                    onChange={(e) => handleInputChange('gender', e.target.value)}
                     disabled={!isEditing}
-                  >
-                    <SelectTrigger className={!isEditing ? "bg-gray-50" : ""}>
-                      <SelectValue placeholder="Select gender" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="male">Male</SelectItem>
-                      <SelectItem value="female">Female</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    className={!isEditing ? "bg-gray-50" : ""}
+                    placeholder="Enter gender"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="civilStatus">Civil Status</Label>
-                  <Select
-                    value={normalizeCivilStatus(formData.civilStatus || "")}
-                    onValueChange={(value) => handleInputChange('civilStatus', value)}
+                  <Input
+                    id="civilStatus"
+                    value={formData.civilStatus || ""}
+                    onChange={(e) => handleInputChange('civilStatus', e.target.value)}
                     disabled={!isEditing}
-                  >
-                    <SelectTrigger className={!isEditing ? "bg-gray-50" : ""}>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="single">Single</SelectItem>
-                      <SelectItem value="married">Married</SelectItem>
-                      <SelectItem value="widowed">Widowed</SelectItem>
-                      <SelectItem value="separated">Separated</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    className={!isEditing ? "bg-gray-50" : ""}
+                    placeholder="Enter civil status"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="nationality">Nationality</Label>

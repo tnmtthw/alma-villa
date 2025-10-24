@@ -140,29 +140,12 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
     }
   }
 
-  const fillSampleData = () => {
-    setFormData({
-      fullName: "Maria Elena Santos",
-      age: "35",
-      address: "Sitio 3",
-      purpose: "Bank account opening and loan application",
-      attachments: []
-    })
-  }
 
   return (
     <Card className="bg-white border-0 shadow-lg">
       <CardHeader className="border-b">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <CardTitle className="text-xl">Certificate of Residency Application Form</CardTitle>
-          <Button
-            type="button"
-            onClick={fillSampleData}
-            variant="outline"
-            className="text-sm border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10 w-full sm:w-auto"
-          >
-            Fill Sample Data
-          </Button>
         </div>
         <p className="text-sm text-gray-600 mt-2">
           Please provide your basic information for the Certificate of Residency request.
@@ -181,10 +164,13 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
                 <Input
                   id="fullName"
                   value={formData.fullName}
-                  onChange={(e) => handleInputChange("fullName", e.target.value)}
                   required
                   placeholder="Enter your complete name"
+                  readOnly
+                  disabled
+                  className="bg-gray-50"
                 />
+                <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
               </div>
               <div>
                 <Label htmlFor="age">Age *</Label>
@@ -192,10 +178,13 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
                   id="age"
                   type="number"
                   value={formData.age}
-                  onChange={(e) => handleInputChange("age", e.target.value)}
                   required
                   placeholder="Age"
+                  readOnly
+                  disabled
+                  className="bg-gray-50"
                 />
+                <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
               </div>
             </div>
 
@@ -204,12 +193,14 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
               <Input
                 id="address"
                 value={formData.address}
-                onChange={(e) => handleInputChange("address", e.target.value)}
                 required
                 placeholder="Street/Purok (address within Barangay Alma Villa)"
+                readOnly
+                disabled
+                className="bg-gray-50"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Enter specific address within Barangay Alma Villa (Gloria Oriental Mindoro will be added automatically)
+                This information is from your profile and cannot be edited
               </p>
             </div>
           </div>

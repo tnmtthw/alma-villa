@@ -55,9 +55,6 @@ export default function HelpSupport() {
                 </p>
               </div>
             </div>
-            <Button variant="outline" className="w-full">
-              View All FAQs
-            </Button>
           </CardContent>
         </Card>
 

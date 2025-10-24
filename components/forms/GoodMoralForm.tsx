@@ -32,16 +32,6 @@ interface FormData {
   attachments: File[]
 }
 
-const sampleData: FormData = {
-  fullName: "Maria Santos Cruz",
-  dateOfBirth: "1985-08-15",
-  placeOfBirth: "Gloria, Oriental Mindoro",
-  civilStatus: "married",
-  citizenship: "Filipino",
-  residentOf: "Sitio 2",
-  purpose: "Employment requirements",
-  attachments: []
-}
 
 export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormProps) {
   const { addToast } = useToast()
@@ -174,23 +164,12 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
     }
   }
 
-  const fillSampleData = () => {
-    setFormData(sampleData)
-  }
 
   return (
     <Card className="bg-white border-0 shadow-lg">
       <CardHeader className="border-b">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <CardTitle className="text-xl">Certificate of Good Moral Character Application Form</CardTitle>
-          <Button
-            type="button"
-            onClick={fillSampleData}
-            variant="outline"
-            className="text-sm border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10 w-full sm:w-auto"
-          >
-            Fill Sample Data
-          </Button>
         </div>
         <p className="text-sm text-gray-600 mt-2">
           Please provide your personal information for the Certificate of Good Moral Character.
@@ -209,10 +188,13 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
                 <Input
                   id="fullName"
                   value={formData.fullName}
-                  onChange={(e) => handleInputChange("fullName", e.target.value)}
                   required
                   placeholder="Enter your complete name"
+                  readOnly
+                  disabled
+                  className="bg-gray-50"
                 />
+                <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
               </div>
               <div>
                 <Label htmlFor="dateOfBirth">Date of Birth *</Label>
@@ -220,9 +202,12 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
                   id="dateOfBirth"
                   type="date"
                   value={formData.dateOfBirth}
-                  onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
                   required
+                  readOnly
+                  disabled
+                  className="bg-gray-50"
                 />
+                <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
               </div>
             </div>
 
@@ -232,51 +217,52 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
                 <Input
                   id="placeOfBirth"
                   value={formData.placeOfBirth}
-                  onChange={(e) => handleInputChange("placeOfBirth", e.target.value)}
                   required
                   placeholder="City/Municipality, Province"
+                  readOnly
+                  disabled
+                  className="bg-gray-50"
                 />
+                <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
               <div>
                 <Label>Civil Status *</Label>
-                <Select
+                <Input
                   value={formData.civilStatus}
-                  onValueChange={(value) => handleInputChange("civilStatus", value)}
-                >
-                  <SelectTrigger className="w-full mt-1">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Single">Single</SelectItem>
-                    <SelectItem value="Married">Married</SelectItem>
-                    <SelectItem value="Widowed">Widowed</SelectItem>
-                    <SelectItem value="Separated">Separated</SelectItem>
-                    <SelectItem value="Divorced">Divorced</SelectItem>
-                  </SelectContent>
-                </Select>
+                  readOnly
+                  disabled
+                  className="bg-gray-50"
+                />
+                <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
               </div>
               <div>
                 <Label htmlFor="citizenship">Citizenship *</Label>
                 <Input
                   id="citizenship"
                   value={formData.citizenship}
-                  onChange={(e) => handleInputChange("citizenship", e.target.value)}
                   required
                   placeholder="Filipino"
+                  readOnly
+                  disabled
+                  className="bg-gray-50"
                 />
+                <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
               </div>
               <div>
                 <Label htmlFor="residentOf">Sitio</Label>
                 <Input
                   id="residentOf"
                   value={formData.residentOf}
-                  onChange={(e) => handleInputChange("residentOf", e.target.value)}
                   required
                   placeholder="Sitio"
+                  readOnly
+                  disabled
+                  className="bg-gray-50"
                 />
+                <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
               </div>
             </div>
           </div>

@@ -40,13 +40,18 @@ const Navbar = () => {
   const handleNewsClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (pathname === "/") {
       e.preventDefault()
-      const newsSection = document.getElementById('news-section')
-      if (newsSection) {
-        newsSection.scrollIntoView({ 
-          behavior: 'smooth',
-          block: 'start'
-        })
-      }
+      // Add a small delay to ensure the page is fully loaded
+      setTimeout(() => {
+        const newsSection = document.getElementById('news-section')
+        if (newsSection) {
+          newsSection.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+          })
+        } else {
+          console.log('News section not found')
+        }
+      }, 100)
     }
     // If not on homepage, let the default link behavior work
   }

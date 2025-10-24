@@ -77,7 +77,6 @@ export default function DashboardNewsPage() {
   }
 
   const handleReadMoreClick = () => setIsSignInModalOpen(true)
-  const handleViewAllClick = () => setIsSignInModalOpen(true)
 
   if (isLoading) {
     return <div className="p-6 text-center text-gray-500">Loading news...</div>
@@ -195,36 +194,23 @@ export default function DashboardNewsPage() {
             <p className="text-gray-500 text-sm">Try adjusting your search or category filter</p>
           </div>
         )}
-        <div className="mb-8 sm:mb-12">
-          <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-6 sm:mb-8 text-center">Popular Updates Today</h3>
-          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
-            {[
-              'Barangay Hall hours extended for document processing',
-              'New COVID-19 safety protocols implemented in public areas',
-              'Scholarship program applications now open for students',
-              'Weekly market schedule adjusted for holiday season',
-              'Basketball court renovation project starts next week',
-            ].map((title, i) => (
-              <div key={i} className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-100">
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 bg-[#23479A] text-white text-xs sm:text-sm font-bold rounded-full flex items-center justify-center">
-                    {i + 1}
+        {filtered.length > 0 && (
+          <div className="mb-8 sm:mb-12">
+            <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-6 sm:mb-8 text-center">Popular Updates Today</h3>
+            <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
+              {filtered.slice(0, Math.min(filtered.length, 5)).map((item, i) => (
+                <div key={item.id} className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-100">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 bg-[#23479A] text-white text-xs sm:text-sm font-bold rounded-full flex items-center justify-center">
+                      {i + 1}
+                    </div>
+                    <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">{item.title}</p>
                   </div>
-                  <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">{title}</p>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-        <div className="text-center mb-8 sm:mb-12">
-          <button
-            onClick={handleViewAllClick}
-            className="inline-flex items-center px-6 sm:px-8 py-3 bg-[#23479A] hover:bg-[#23479A]/90 text-white rounded-lg font-medium transition-colors text-sm sm:text-base"
-          >
-            View All News & Announcements
-            <ArrowRight className="h-4 w-4 ml-2" />
-          </button>
-        </div>
+        )}
         <div className="bg-red-50 border border-red-200 rounded-xl sm:rounded-2xl p-4 sm:p-6">
           <div className="flex items-start sm:items-center gap-3 sm:gap-4">
             <div className="p-2 sm:p-3 rounded-full bg-red-100 flex-shrink-0">

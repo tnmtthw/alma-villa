@@ -32,15 +32,6 @@ interface FormData {
   attachments: AttachmentFile[]
 }
 
-const sampleData: FormData = {
-  businessName: "Juan's Sari-Sari Store",
-  businessLocation: "Sitio 1",
-  operatorName: "Juan Dela Cruz",
-  operatorAddress: "123 Maharlika Street",
-  amountPaid: "200",
-  orNumbers: "12345678",
-  attachments: []
-}
 
 export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessPermitFormProps) {
   const [formData, setFormData] = useState<FormData>({
@@ -112,9 +103,6 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
     setFilePreview(null)
   }
 
-  const fillWithSampleData = () => {
-    setFormData(sampleData)
-  }
 
   // Removed PDF generation; using API submission instead
 
@@ -224,14 +212,6 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
             <Badge variant="outline">
               Processing: 3-5 days
             </Badge>
-            <Button
-              type="button"
-              onClick={fillWithSampleData}
-              variant="outline"
-              size="sm"
-            >
-              Fill Sample Data
-            </Button>
           </div>
         </CardHeader>
       </Card>

@@ -45,20 +45,6 @@ interface FormData {
   emailAddress: string
 }
 
-const sampleData: FormData = {
-  fullName: "Juan Dela Cruz",
-  suffix: "Jr.",
-  birthDate: "1990-01-15",
-  civilStatus: "single",
-  placeOfBirth: "Makati City",
-  citizenship: "Filipino",
-  purok: "Sitio 1",
-  residencyLength: "5",
-  purpose: "employment",
-  additionalInfo: "Required for submission to HR department by end of month",
-  contactNumber: "",
-  emailAddress: ""
-}
 
 export default function BarangayClearanceForm({ onBackAction, onSubmit }: BarangayClearanceFormProps) {
   const { addToast } = useToast()
@@ -170,9 +156,6 @@ export default function BarangayClearanceForm({ onBackAction, onSubmit }: Barang
     }
   }
 
-  const fillWithSampleData = () => {
-    setFormData(sampleData)
-  }
 
   // Auto-calculate age when birth date changes
   const calculateAge = (birthDate: string) => {
@@ -324,14 +307,6 @@ export default function BarangayClearanceForm({ onBackAction, onSubmit }: Barang
         <p className="text-sm text-gray-600">Complete the form to apply for a barangay clearance certificate</p>
       </div>
 
-      <Button
-        type="button"
-        onClick={fillWithSampleData}
-        variant="outline"
-        className="mb-6 w-full sm:w-auto border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10"
-      >
-        Fill with Sample Data
-      </Button>
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Personal Information Section */}
@@ -344,11 +319,13 @@ export default function BarangayClearanceForm({ onBackAction, onSubmit }: Barang
               <Input
                 id="fullName"
                 placeholder="Enter full name"
-                className="mt-1"
+                className="mt-1 bg-gray-50"
                 required
                 value={formData.fullName}
-                onChange={(e) => handleInputChange('fullName', e.target.value)}
+                readOnly
+                disabled
               />
+              <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
             </div>
 
             <div>
@@ -356,10 +333,12 @@ export default function BarangayClearanceForm({ onBackAction, onSubmit }: Barang
               <Input
                 id="suffix"
                 placeholder="Jr., Sr., III, etc."
-                className="mt-1"
+                className="mt-1 bg-gray-50"
                 value={formData.suffix}
-                onChange={(e) => handleInputChange('suffix', e.target.value)}
+                readOnly
+                disabled
               />
+              <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
             </div>
 
 
@@ -368,12 +347,13 @@ export default function BarangayClearanceForm({ onBackAction, onSubmit }: Barang
               <Input
                 id="birthDate"
                 type="date"
-                className="mt-1"
+                className="mt-1 bg-gray-50"
                 required
-                max={todayLocalDateString}
                 value={formData.birthDate}
-                onChange={(e) => handleBirthDateChange(e.target.value)}
+                readOnly
+                disabled
               />
+              <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
             </div>
 
             <div>
@@ -381,10 +361,12 @@ export default function BarangayClearanceForm({ onBackAction, onSubmit }: Barang
               <Input
                 id="placeOfBirth"
                 placeholder="Enter place of birth"
-                className="mt-1"
+                className="mt-1 bg-gray-50"
                 value={formData.placeOfBirth}
-                onChange={(e) => handleInputChange('suffix', e.target.value)}
+                readOnly
+                disabled
               />
+              <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
             </div>
 
             <div>
@@ -392,29 +374,24 @@ export default function BarangayClearanceForm({ onBackAction, onSubmit }: Barang
               <Input
                 id="citizenship"
                 placeholder="Enter citizenship"
-                className="mt-1"
+                className="mt-1 bg-gray-50"
                 value={formData.citizenship}
-                onChange={(e) => handleInputChange('suffix', e.target.value)}
+                readOnly
+                disabled
               />
+              <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
             </div>
 
             <div>
               <Label htmlFor="civilStatus">Civil Status</Label>
-              <Select
+              <Input
+                id="civilStatus"
+                className="mt-1 bg-gray-50"
                 value={formData.civilStatus}
-                onValueChange={(value) => handleInputChange('civilStatus', value)}
-              >
-                <SelectTrigger className="w-full mt-1">
-                  <SelectValue placeholder="select gender" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Single">Single</SelectItem>
-                  <SelectItem value="Married">Married</SelectItem>
-                  <SelectItem value="Widowed">Widowed</SelectItem>
-                  <SelectItem value="Separated">Separated</SelectItem>
-                  <SelectItem value="Divorced">Divorced</SelectItem>
-                </SelectContent>
-              </Select>
+                readOnly
+                disabled
+              />
+              <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
             </div>
           </div>
         </div>
@@ -429,11 +406,13 @@ export default function BarangayClearanceForm({ onBackAction, onSubmit }: Barang
               <Input
                 id="purok"
                 placeholder="Sitio"
-                className="mt-1"
+                className="mt-1 bg-gray-50"
                 required
                 value={formData.purok}
-                onChange={(e) => handleInputChange('purok', e.target.value)}
+                readOnly
+                disabled
               />
+              <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
             </div>
 
             <div>
@@ -442,11 +421,13 @@ export default function BarangayClearanceForm({ onBackAction, onSubmit }: Barang
                 id="residencyLength"
                 type="number"
                 placeholder="Years"
-                className="mt-1"
+                className="mt-1 bg-gray-50"
                 required
                 value={formData.residencyLength}
-                onChange={(e) => handleInputChange('residencyLength', e.target.value)}
+                readOnly
+                disabled
               />
+              <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
             </div>
           </div>
         </div>

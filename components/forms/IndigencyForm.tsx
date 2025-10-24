@@ -30,12 +30,6 @@ interface FormData {
   attachments: File[]
 }
 
-const sampleData: FormData = {
-  fullName: "Rosa Maria Garcia",
-  age: "48",
-  purpose: "To apply for medical assistance for my son's operation",
-  attachments: []
-}
 
 
 export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormProps) {
@@ -144,23 +138,12 @@ export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormP
     }
   }
 
-  const fillSampleData = () => {
-    setFormData(sampleData)
-  }
 
   return (
     <Card className="bg-white border-0 shadow-lg">
       <CardHeader className="border-b">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <CardTitle className="text-xl">Certificate of Indigency Application Form</CardTitle>
-          <Button
-            type="button"
-            onClick={fillSampleData}
-            variant="outline"
-            className="text-sm border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10 w-full sm:w-auto"
-          >
-            Fill Sample Data
-          </Button>
         </div>
         <p className="text-sm text-gray-600 mt-2">
           Please provide your basic information for the Certificate of Indigency request.
@@ -179,10 +162,13 @@ export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormP
                 <Input
                   id="fullName"
                   value={formData.fullName}
-                  onChange={(e) => handleInputChange("fullName", e.target.value)}
                   required
                   placeholder="Enter your complete name"
+                  readOnly
+                  disabled
+                  className="bg-gray-50"
                 />
+                <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
               </div>
               <div>
                 <Label htmlFor="age">Age *</Label>
@@ -190,10 +176,13 @@ export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormP
                   id="age"
                   type="number"
                   value={formData.age}
-                  onChange={(e) => handleInputChange("age", e.target.value)}
                   required
                   placeholder="Age"
+                  readOnly
+                  disabled
+                  className="bg-gray-50"
                 />
+                <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
               </div>
             </div>
           </div>
