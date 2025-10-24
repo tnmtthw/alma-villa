@@ -16,6 +16,8 @@ interface ClaimBusinessButtonProps {
         updatedAt: string;
         requestDate: string;
         fee?: string;
+        status: string
+        pickupOption?: string;
     };
 }
 
@@ -42,6 +44,7 @@ const ClaimBusinessButton: React.FC<ClaimBusinessButtonProps> = ({ request }) =>
         requestDate: request.requestDate,
         month: month,
         day: day,
+        issuedAt: "Brgy Alma Villa, Gloria, Oriental Mindoro",
     };
 
     const verifyUrl = `${(process.env.NEXT_PUBLIC_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : ''))}/verify/${encodeURIComponent(request.id)}`
@@ -91,7 +94,30 @@ const ClaimBusinessButton: React.FC<ClaimBusinessButtonProps> = ({ request }) =>
         link.href = URL.createObjectURL(blob);
         link.download = `BUSINESS_PERMIT_${request.id}.pdf`;
         link.click();
+
+        await fetch(`/api/document/set-status?id=${request.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'completed' })
+        });
     };
+
+    // Check if user can download based on pickup option
+    const canDownload = request.pickupOption !== "pickup" || request.status === "ready_to_claim";
+
+    if (!canDownload) {
+        return (
+            <Button
+                size="sm"
+                variant="outline"
+                disabled
+                className="text-gray-500"
+            >
+                <Download className="h-3 w-3 mr-1" />
+                Pickup Only
+            </Button>
+        );
+    }
 
     return (
         <Button
@@ -100,7 +126,7 @@ const ClaimBusinessButton: React.FC<ClaimBusinessButtonProps> = ({ request }) =>
             onClick={fillPDF}
         >
             <Download className="h-3 w-3 mr-1" />
-            Claim
+            {request.status === "ready_to_claim" ? "Claim" : "Download"}
         </Button>
     );
 };

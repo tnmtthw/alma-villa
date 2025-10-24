@@ -18,6 +18,7 @@ interface PaymentProps {
     request: {
         id: string;
         fullName: string;
+        businessName?: string;
         age: string;
         birthDate: string;
         civilStatus: string;
@@ -56,7 +57,7 @@ const PaymentPage: React.FC<PaymentProps> = ({ request }) => {
 
             setFormData(prev => ({ ...prev, image: data.url }));
             setPreviewImage(data.url);
-            
+
             // Show success toast
             addToast({
                 title: "Image Uploaded Successfully!",
@@ -85,7 +86,7 @@ const PaymentPage: React.FC<PaymentProps> = ({ request }) => {
                 });
                 return;
             }
-            
+
             const response = await fetch(`/api/document/set-status?id=${request.id}`, {
                 method: "PATCH",
                 body: JSON.stringify({ status: "payment_sent", proofOfPayment: formData.image }),
@@ -104,7 +105,7 @@ const PaymentPage: React.FC<PaymentProps> = ({ request }) => {
                     description: "Your payment proof has been submitted and your request status has been updated.",
                     variant: "default"
                 });
-                
+
                 // Auto-close modal after 3 seconds
                 setTimeout(() => {
                     setIsModalOpen(false);
@@ -125,7 +126,11 @@ const PaymentPage: React.FC<PaymentProps> = ({ request }) => {
     return (
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger asChild>
-                <Button onClick={() => setIsModalOpen(true)}>Payment</Button>
+                <Button
+                    size="sm"
+                    onClick={() => setIsModalOpen(true)}>
+                    Payment
+                </Button>
             </DialogTrigger>
             <DialogContent className="bg-white">
                 <DialogHeader>
@@ -137,7 +142,7 @@ const PaymentPage: React.FC<PaymentProps> = ({ request }) => {
 
                 <div className="space-y-2">
                     <p>
-                        <strong>Name:</strong> {request.fullName}
+                        <strong>Name:</strong> {request.fullName || request.businessName}
                     </p>
                     <p>
                         <strong>Type:</strong> {request.type}

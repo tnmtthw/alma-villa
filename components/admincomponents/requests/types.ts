@@ -18,6 +18,7 @@ export interface DocumentRequest {
   urgentRequest: boolean
   formData: any
   attachments: string[]
+  pickupOption?: string
 }
 
 export interface RequestStats {

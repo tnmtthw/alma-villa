@@ -30,6 +30,7 @@ export async function POST(req: Request) {
     operatorAddress: body.operatorAddress ?? undefined,
     citizenship: body.citizenship ?? undefined,
     proofOfPayment: body.proofOfPayment ?? undefined,
+    pickupOption: body.pickupOption ?? "online",
   }
 
   const document = await prisma.document.create({

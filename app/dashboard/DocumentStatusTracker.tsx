@@ -13,13 +13,13 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-import ClaimClearanceButton from '../../components/admincomponents/pdfgenerator/ClaimClearance'
-import ClaimResidencyButton from '../../components/admincomponents/pdfgenerator/ClaimResidency'
-import ClaimIndigencyButton from '../../components/admincomponents/pdfgenerator/ClaimIndigency'
-import ClaimGoodMoralButton from '../../components/admincomponents/pdfgenerator/ClaimGoodMoral'
-import ClaimBusinessButton from '../../components/admincomponents/pdfgenerator/ClaimBusiness'
+import ClaimClearanceButton from './pdfgenerator/ClaimClearance'
+import ClaimResidencyButton from './pdfgenerator/ClaimResidency'
+import ClaimIndigencyButton from './pdfgenerator/ClaimIndigency'
+import ClaimGoodMoralButton from './pdfgenerator/ClaimGoodMoral'
+import ClaimBusinessButton from './pdfgenerator/ClaimBusiness'
 import PaymentPage from './Payment'
-import QRVerification from '@/components/admincomponents/pdfgenerator/QRVerification'
+import QRVerification from '@/app/dashboard/pdfgenerator/QRVerification'
 
 const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) =>
   fetch(...args).then((res) => res.json())
@@ -43,6 +43,7 @@ interface DocumentRequest {
   fee?: string
   progress?: number
   rejectionReason?: string
+  pickupOption: string
 
   // FOR BUSINESS PERMIT
   businessName?: string
@@ -159,7 +160,7 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
     operatorAddress: doc.operatorAddress,
     updatedAt: doc.updatedAt,
     // FOR BUSINESS PERMIT
-
+    pickupOption: doc.pickupOption,
     status: doc.status,
     purpose: doc.purpose,
     fee: "₱50.00", // Example: replace with real fee field if available
@@ -314,11 +315,22 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
                     </h3>
                     <Badge
                       variant="secondary"
-                      className={`text-xs ${statusConfig.bgColor} ${statusConfig.color} border-0 whitespace-nowrap`}
+                      className={`text-xs ${statusConfig.bgColor} ${statusConfig.color} border-0 whitespace-nowrap cursor-default`}
                     >
                       <StatusIcon className="h-3 w-3 mr-1" />
                       {statusConfig.label}
                     </Badge>
+                    {request.pickupOption && (
+                      <Badge
+                        className={
+                          request.pickupOption === "online"
+                            ? "bg-blue-500 text-white  cursor-default"
+                            : "bg-green-500 text-white  cursor-default"
+                        }
+                      >
+                        {request.pickupOption === "online" ? "Online" : "Pickup"}
+                      </Badge>
+                    )}
                   </div>
                   <p className="text-sm text-gray-600 mb-1">Request ID: {request.id}</p>
                   <p className="text-xs text-gray-500">{statusConfig.description}</p>
@@ -338,35 +350,31 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
                   {request.status === "approved" && request.type === "Certificate of Good Moral Character" && (
                     <PaymentPage request={request} />
                   )}
-                  {/* CLAIM BUTTON */}
-                  {request.status === "ready_to_claim" && request.type === "Barangay Clearance" && (
-                    <>
-                      {/* <QRVerification documentId={request.id} /> */}
-                      <ClaimClearanceButton request={request} />
-                    </>
-
+                  {request.status === "approved" && request.type === "Business Permit" && (
+                    <PaymentPage request={request} />
                   )}
-                  {request.status === "ready_to_claim" && request.type === "Certificate of Residency" && (
+                  {/* CLAIM BUTTON */}
+                  {(request.status === "ready_to_claim" || request.status === "completed") &&
+                    request.type === "Barangay Clearance" && (
+                      <ClaimClearanceButton request={request} />
+                    )}
+                  {(request.status === "ready_to_claim" || request.status === "completed") && request.type === "Certificate of Residency" && (
                     <>
-                      {/* <QRVerification documentId={request.id} /> */}
                       <ClaimResidencyButton request={request} />
                     </>
                   )}
-                  {request.status === "ready_to_claim" && request.type === "Certificate of Indigency" && (
+                  {(request.status === "ready_to_claim" || request.status === "completed") && request.type === "Certificate of Indigency" && (
                     <>
-                      {/* <QRVerification documentId={request.id} /> */}
                       <ClaimIndigencyButton request={request} />
                     </>
                   )}
-                  {request.status === "ready_to_claim" && request.type === "Certificate of Good Moral Character" && (
+                  {(request.status === "ready_to_claim" || request.status === "completed") && request.type === "Certificate of Good Moral Character" && (
                     <>
-                      {/* <QRVerification documentId={request.id} /> */}
                       <ClaimGoodMoralButton request={request} />
                     </>
                   )}
-                  {request.status === "ready_to_claim" && request.type === "Business Permit" && (
+                  {(request.status === "ready_to_claim" || request.status === "completed") && request.type === "Business Permit" && (
                     <>
-                      {/* <QRVerification documentId={request.id} /> */}
                       <ClaimBusinessButton
                         request={{
                           id: request.id,
@@ -376,7 +384,7 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
                           operatorAddress: request.operatorAddress!,
                           updatedAt: request.updatedAt!,
                           requestDate: request.requestDate,
-                          fee: request.fee,
+                          status: request.status,
                         }}
                       />
                     </>
@@ -388,13 +396,13 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
                 </div>
               </div>
 
-              <div className="mb-4">
+              {/* <div className="mb-4">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-xs font-medium text-gray-600">Progress</span>
                   <span className="text-xs font-medium text-gray-900">{request.progress}%</span>
                 </div>
                 <Progress value={request.progress} className="h-2" />
-              </div>
+              </div> */}
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                 <div className="flex items-center gap-2">
