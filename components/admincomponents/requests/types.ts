@@ -10,7 +10,7 @@ export interface DocumentRequest {
   requestDate: string
   estimatedCompletion: string
   lastUpdated: string
-  fee: string
+  fee?: string
   paymentReference?: string
   proofOfPayment?: string
   rejectionReason?: string

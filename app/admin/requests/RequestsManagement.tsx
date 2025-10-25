@@ -33,6 +33,7 @@ import RequestTableRow from "../../../components/admincomponents/requests/Reques
 import RequestDetailsModal from "../../../components/admincomponents/requests/RequestDetailsModal"
 import StatusUpdateModal from "../../../components/admincomponents/requests/StatusUpdateModal"
 import PaymentReviewModal from "../../../components/admincomponents/requests/PaymentReviewModal"
+import PickupPaymentModal from "../../../components/admincomponents/requests/PickupPaymentModal"
 
 import { DocumentRequest, RequestStats } from "../../../components/admincomponents/requests/types"
 import Link from 'next/link'
@@ -90,7 +91,7 @@ const transformDocumentToRequest = (document: any): DocumentRequest => {
     requestDate: document.createdAt || new Date().toISOString(),
     estimatedCompletion: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days from now
     lastUpdated: document.createdAt || new Date().toISOString(),
-    fee: "₱50.00", // Default fee
+    fee: "0",
     proofOfPayment: document.proofOfPayment || null,
     urgentRequest: false, // Default to false
     formData: {
@@ -134,6 +135,7 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
   const [isStatusUpdateModalOpen, setIsStatusUpdateModalOpen] = useState(false)
   const [isPaymentReviewModalOpen, setIsPaymentReviewModalOpen] = useState(false)
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
   const [updateStatusData, setUpdateStatusData] = useState({
     newStatus: "",
     adminNotes: "",
@@ -289,6 +291,11 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
     setIsPaymentReviewModalOpen(true)
   }
 
+  const handlePaymentModal = (request: DocumentRequest) => {
+    setSelectedRequest(request)
+    setIsPaymentModalOpen(true)
+  }
+
   const handleStatusUpdateSubmit = async () => {
     if (!selectedRequest) return
 
@@ -319,14 +326,14 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
           const newStatus = updateStatusData.newStatus
           const documentType = selectedRequest.documentType
           const userId = selectedRequest.userId
-          
+
           // Create detailed audit log entry
           const auditDetails = `Document status changed from "${oldStatus}" to "${newStatus}" for ${documentType} (ID: ${selectedRequest.id})`
-          const additionalInfo = updateStatusData.rejectionReason 
+          const additionalInfo = updateStatusData.rejectionReason
             ? `Rejection reason: ${updateStatusData.rejectionReason}`
-            : updateStatusData.adminNotes 
-            ? `Admin notes: ${updateStatusData.adminNotes}`
-            : ''
+            : updateStatusData.adminNotes
+              ? `Admin notes: ${updateStatusData.adminNotes}`
+              : ''
 
           await fetch('/api/admin/audit/log', {
             method: 'POST',
@@ -627,7 +634,6 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
                   <TableHead className="min-w-[100px]">Status</TableHead>
                   <TableHead className="min-w-[120px]">Request Date</TableHead>
                   <TableHead className="min-w-[120px]">Est. Completion</TableHead>
-                  <TableHead className="min-w-[80px]">Fee</TableHead>
                   <TableHead className="min-w-[100px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -639,6 +645,7 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
                     onViewDetails={handleViewDetails}
                     onUpdateStatus={handleUpdateStatus}
                     onPaymentReview={handlePaymentReview}
+                    onPaymentModal={handlePaymentModal}
                     getStatusConfig={getStatusConfig}
                     formatDate={formatDate}
                   />
@@ -686,6 +693,12 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
         request={selectedRequest}
         onApprovePayment={handleApprovePayment}
         onRejectPayment={handleRejectPayment}
+      />
+
+      <PickupPaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        request={selectedRequest}
       />
     </div>
   )

@@ -20,35 +20,14 @@ import {
   Download,
   Edit
 } from "lucide-react"
-
-// Import types
-interface DocumentRequest {
-  id: string
-  userId: string
-  userFullName: string
-  userEmail: string
-  userPhone: string
-  documentType: string
-  purpose: string
-  status: "pending" | "processing" | "approved" | "payment_sent" | "ready_to_claim" | "completed" | "rejected"
-  requestDate: string
-  estimatedCompletion: string
-  lastUpdated: string
-  fee: string
-  paymentReference?: string
-  proofOfPayment?: string
-  rejectionReason?: string
-  adminNotes?: string
-  urgentRequest: boolean
-  formData: any
-  attachments: string[]
-}
+import { DocumentRequest } from "./types"
 
 interface RequestTableRowProps {
   request: DocumentRequest
   onViewDetails: (request: DocumentRequest) => void
   onUpdateStatus: (request: DocumentRequest) => void
   onPaymentReview: (request: DocumentRequest) => void
+  onPaymentModal: (request: DocumentRequest) => void
   getStatusConfig: (status: DocumentRequest["status"]) => {
     label: string
     color: string
@@ -62,6 +41,7 @@ export default function RequestTableRow({
   onViewDetails,
   onUpdateStatus,
   onPaymentReview,
+  onPaymentModal,
   getStatusConfig,
   formatDate,
 }: RequestTableRowProps) {
@@ -72,6 +52,23 @@ export default function RequestTableRow({
     icon: FileText,
   }
   const StatusIcon = safeConfig.icon
+
+  const getFeeByType = (type: string) => {
+    switch (type) {
+      case "Barangay Clearance":
+        return "₱50";
+      case "Certificate of Residency":
+        return "₱30";
+      case "Certificate of Indigency":
+        return "₱30";
+      case "Business Permit":
+        return "₱200";
+      case "Certificate of Good Moral Character":
+        return "₱120";
+      default:
+        return "₱0";
+    }
+  };
 
   return (
     <TableRow className="hover:bg-gray-50/50">
@@ -101,7 +98,20 @@ export default function RequestTableRow({
       <TableCell className="p-3 md:p-4">
         <div className="space-y-1">
           <p className="font-medium text-gray-900 text-sm md:text-base">{request.documentType}</p>
-          <p className="text-xs md:text-sm text-gray-600">Fee: {request.fee}</p>
+          <div className="flex items-center gap-2">
+            <p className="text-xs md:text-sm text-gray-600">Fee: {getFeeByType(request.documentType)}</p>
+            {request.pickupOption && (
+              <Badge
+                className={
+                  request.pickupOption === "online"
+                    ? "bg-blue-500 text-white cursor-default"
+                    : "bg-green-500 text-white cursor-default"
+                }
+              >
+                {request.pickupOption === "online" ? "Online" : "Pickup"}
+              </Badge>
+            )}
+          </div>
         </div>
       </TableCell>
 
@@ -150,6 +160,12 @@ export default function RequestTableRow({
               <DropdownMenuItem onClick={() => onPaymentReview(request)}>
                 <CreditCard className="mr-2 h-4 w-4" />
                 Review Payment
+              </DropdownMenuItem>
+            )}
+            {request.status === "approved" && request.pickupOption === "pickup" && (
+              <DropdownMenuItem onClick={() => onPaymentModal(request)}>
+                <CreditCard className="mr-2 h-4 w-4" />
+                Payment Details
               </DropdownMenuItem>
             )}
           </DropdownMenuContent>

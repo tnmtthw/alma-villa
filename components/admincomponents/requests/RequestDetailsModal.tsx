@@ -24,7 +24,7 @@ interface DocumentRequest {
   requestDate: string
   estimatedCompletion: string
   lastUpdated: string
-  fee: string
+  fee?: string
   paymentReference?: string
   paymentProof?: string
   rejectionReason?: string
@@ -59,7 +59,7 @@ export default function RequestDetailsModal({
   // Function to format form data into readable text
   const formatFormData = (formData: any) => {
     if (!formData) return [{ label: "Form Data", value: "No form data available" }]
-    
+
     const formatKey = (key: string) => {
       // Handle specific field names for better readability
       const fieldMap: { [key: string]: string } = {
@@ -73,9 +73,9 @@ export default function RequestDetailsModal({
         'operatorName': 'Operator Name',
         'operatorAddress': 'Operator Address'
       }
-      
+
       if (fieldMap[key]) return fieldMap[key]
-      
+
       return key
         .replace(/([A-Z])/g, ' $1')
         .replace(/^./, str => str.toUpperCase())

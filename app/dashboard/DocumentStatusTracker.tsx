@@ -338,19 +338,19 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
                 <div className="flex gap-2 shrink-0">
                   {/* PAYMENT BUTTON */}
 
-                  {request.status === "approved" && request.type === "Barangay Clearance" && (
+                  {request.status === "approved" && request.pickupOption !== "pickup" && request.type === "Barangay Clearance" && (
                     <PaymentPage request={request} />
                   )}
-                  {request.status === "approved" && request.type === "Certificate of Residency" && (
+                  {request.status === "approved" && request.pickupOption !== "pickup" && request.type === "Certificate of Residency" && (
                     <PaymentPage request={request} />
                   )}
-                  {request.status === "approved" && request.type === "Certificate of Indigency" && (
+                  {request.status === "approved" && request.pickupOption !== "pickup" && request.type === "Certificate of Indigency" && (
                     <PaymentPage request={request} />
                   )}
-                  {request.status === "approved" && request.type === "Certificate of Good Moral Character" && (
+                  {request.status === "approved" && request.pickupOption !== "pickup" && request.type === "Certificate of Good Moral Character" && (
                     <PaymentPage request={request} />
                   )}
-                  {request.status === "approved" && request.type === "Business Permit" && (
+                  {request.status === "approved" && request.pickupOption !== "pickup" && request.type === "Business Permit" && (
                     <PaymentPage request={request} />
                   )}
                   {/* CLAIM BUTTON */}

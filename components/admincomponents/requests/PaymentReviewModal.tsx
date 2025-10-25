@@ -29,12 +29,12 @@ export default function PaymentReviewModal({
   const [isImageModalOpen, setIsImageModalOpen] = useState(false)
   const [imageZoom, setImageZoom] = useState(1)
   const [imageRotation, setImageRotation] = useState(0)
-  
+
   if (!request) return null
 
   const handleDownloadImage = async () => {
     if (!request.proofOfPayment) return
-    
+
     try {
       const response = await fetch(request.proofOfPayment)
       const blob = await response.blob()
@@ -56,6 +56,23 @@ export default function PaymentReviewModal({
     setImageRotation(0)
   }
 
+  const getFeeByType = (type: string) => {
+    switch (type) {
+      case "Barangay Clearance":
+        return "₱50";
+      case "Certificate of Residency":
+        return "₱30";
+      case "Certificate of Indigency":
+        return "₱30";
+      case "Business Permit":
+        return "₱200";
+      case "Certificate of Good Moral Character":
+        return "₱120";
+      default:
+        return "₱0";
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="bg-white max-w-2xl">
@@ -73,12 +90,12 @@ export default function PaymentReviewModal({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium text-gray-500">Amount Due</label>
-              <p className="text-lg font-semibold text-gray-900">{request.fee}</p>
+              <p className="text-lg font-semibold text-gray-900">{getFeeByType(request.documentType)}</p>
             </div>
-            <div>
+            {/* <div>
               <label className="text-sm font-medium text-gray-500">Payment Reference</label>
               <p className="text-sm text-gray-900">{request.paymentReference}</p>
-            </div>
+            </div> */}
           </div>
 
           <div>
