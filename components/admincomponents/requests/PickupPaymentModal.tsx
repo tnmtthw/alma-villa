@@ -247,8 +247,6 @@ export default function PickupPaymentModal({
             <ul className="text-sm text-blue-800 space-y-1">
               <li>• Bring a valid ID for verification</li>
               <li>• Payment of {getFeeByType(request.documentType)} is required upon pickup</li>
-              <li>• Visit the barangay office during business hours</li>
-              <li>• Contact the office if you have any questions</li>
             </ul>
           </div>
         </div>
