@@ -4,6 +4,7 @@ import React from 'react';
 import { PDFDocument } from 'pdf-lib';
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
+import { useSession } from 'next-auth/react';
 
 interface ClaimResidencyButtonProps {
     request: {
@@ -21,6 +22,7 @@ interface ClaimResidencyButtonProps {
 
 
 const ClaimResidencyButton: React.FC<ClaimResidencyButtonProps> = ({ request }) => {
+    const { data: session } = useSession();
     const date = new Date(request.requestDate);
     const month = date.toLocaleString("en-US", { month: "short" });
     const day = date.getDate();
@@ -77,8 +79,24 @@ const ClaimResidencyButton: React.FC<ClaimResidencyButtonProps> = ({ request }) 
         const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = `CERTIFICATE_RESIDENCY_${request.id}.pdf`;
+        const fileName = `CERTIFICATE_RESIDENCY_${request.id}.pdf`;
+        link.download = fileName;
         link.click();
+
+        // Log PDF download in audit
+        try {
+            await fetch('/api/audit/log-pdf-download', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    documentId: request.id,
+                    documentType: 'Certificate of Residency',
+                    fileName: fileName
+                })
+            });
+        } catch (error) {
+            console.warn('Failed to log PDF download:', error);
+        }
 
         await fetch(`/api/document/set-status?id=${request.id}`, {
             method: 'PATCH',

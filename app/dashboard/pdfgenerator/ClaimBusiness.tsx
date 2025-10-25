@@ -4,6 +4,7 @@ import React from 'react';
 import { PDFDocument } from 'pdf-lib';
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
+import { useSession } from 'next-auth/react';
 
 
 interface ClaimBusinessButtonProps {
@@ -23,6 +24,7 @@ interface ClaimBusinessButtonProps {
 
 
 const ClaimBusinessButton: React.FC<ClaimBusinessButtonProps> = ({ request }) => {
+    const { data: session } = useSession();
     const date = new Date(request.requestDate);
     const month = date.toLocaleString("en-US", { month: "short" });
     const day = date.getDate();
@@ -92,8 +94,29 @@ const ClaimBusinessButton: React.FC<ClaimBusinessButtonProps> = ({ request }) =>
         const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = `BUSINESS_PERMIT_${request.id}.pdf`;
+        const fileName = `BUSINESS_PERMIT_${request.id}.pdf`;
+        link.download = fileName;
         link.click();
+
+        // Log PDF download in audit
+        try {
+            const response = await fetch('/api/audit/log-pdf-download', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    documentId: request.id,
+                    documentType: 'Business Permit',
+                    fileName: fileName
+                })
+            });
+            
+            if (!response.ok) {
+                const result = await response.json();
+                console.error('PDF download audit failed:', result);
+            }
+        } catch (error) {
+            console.error('Failed to log PDF download:', error);
+        }
 
         await fetch(`/api/document/set-status?id=${request.id}`, {
             method: 'PATCH',

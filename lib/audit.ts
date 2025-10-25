@@ -222,6 +222,19 @@ export class AuditLogger {
       userAgent,
     })
   }
+
+  /**
+   * Log PDF download
+   */
+  static async logPDFDownload(userId: string, documentId: string, documentType: string, fileName: string, ipAddress?: string, userAgent?: string): Promise<void> {
+    await this.log({
+      userId,
+      action: 'PDF_DOWNLOAD',
+      details: `PDF downloaded: ${documentType} (ID: ${documentId}) - File: ${fileName}`,
+      ipAddress,
+      userAgent,
+    })
+  }
 }
 
 /**

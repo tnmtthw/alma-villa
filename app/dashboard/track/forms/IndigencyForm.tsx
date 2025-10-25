@@ -5,7 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Upload, X, FileText } from "lucide-react"
 import { useToast } from "@/components/ui/toast"
 import { useSession } from "next-auth/react"
@@ -13,7 +15,7 @@ import useSWR from 'swr'
 
 const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) => fetch(...args).then((res) => res.json());
 
-interface ResidencyFormProps {
+interface IndigencyFormProps {
   onSubmit: (formData: any) => void
   onBackAction: () => void
 }
@@ -22,15 +24,25 @@ interface FormData {
   // Personal Information - only what's needed for the PDF
   fullName: string
   age: string
-  address: string
 
   // Purpose and supporting info
   purpose: string
   attachments: File[]
+
+  // Delivery Option
+  pickupOption: string
+}
+
+const sampleData: FormData = {
+  fullName: "Rosa Maria Garcia",
+  age: "48",
+  purpose: "To apply for medical assistance for my son's operation",
+  attachments: [],
+  pickupOption: "online"
 }
 
 
-export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormProps) {
+export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormProps) {
   const { addToast } = useToast()
   const { data: session } = useSession()
   const { data } = useSWR(`/api/user?id=${session?.user.id}`, fetcher)
@@ -38,12 +50,13 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
   const [formData, setFormData] = useState<FormData>({
     fullName: data.firstName + " " + data.lastName,
     age: data.age,
-    address: data.purok,
     purpose: "",
-    attachments: []
+    attachments: [],
+    pickupOption: "online"
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+
 
   const handleInputChange = (field: keyof FormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -71,8 +84,8 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
     setIsSubmitting(true)
 
     try {
-      // Basic validation
-      const requiredFields: Array<keyof FormData> = ['fullName', 'age', 'address', 'purpose']
+      // Validate required fields
+      const requiredFields: Array<keyof FormData> = ['fullName', 'age', 'purpose']
       const missing = requiredFields.filter(field => !String(formData[field] ?? '').trim())
       if (missing.length) {
         addToast({
@@ -83,13 +96,15 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
         return
       }
 
-      const documentData: Record<string, any> = {
+
+      // Prepare payload for Document API
+      const documentData = {
         userId: session?.user.id,
         fullName: formData.fullName,
         age: formData.age,
-        purok: formData.address,
         purpose: formData.purpose,
-        type: "Certificate of Residency",
+        type: "Certificate of Indigency",
+        pickupOption: formData.pickupOption,
       }
 
       const response = await fetch('/api/document', {
@@ -109,25 +124,20 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
 
       addToast({
         title: "Success!",
-        description: "Certificate of Residency request submitted successfully!",
+        description: "Certificate of Indigency request submitted successfully!",
         variant: "default",
       })
 
       // Notify parent (if needed)
       await onSubmit({
-        documentType: "certificate-of-residency",
+        documentType: "certificate-of-indigency",
         formData,
         submittedAt: new Date().toISOString()
       })
 
       // Reset form
-      setFormData({
-        fullName: "",
-        age: "",
-        address: "",
-        purpose: "",
-        attachments: []
-      })
+      setFormData({ fullName: "", age: "", purpose: "", pickupOption: "online", attachments: [] })
+
     } catch (error) {
       console.error("Error submitting form:", error)
       addToast({
@@ -140,15 +150,26 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
     }
   }
 
+  const fillSampleData = () => {
+    setFormData(sampleData)
+  }
 
   return (
     <Card className="bg-white border-0 shadow-lg">
       <CardHeader className="border-b">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <CardTitle className="text-xl">Certificate of Residency Application Form</CardTitle>
+          <CardTitle className="text-xl">Certificate of Indigency Application Form</CardTitle>
+          {/* <Button
+            type="button"
+            onClick={fillSampleData}
+            variant="outline"
+            className="text-sm border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10 w-full sm:w-auto"
+          >
+            Fill Sample Data
+          </Button> */}
         </div>
         <p className="text-sm text-gray-600 mt-2">
-          Please provide your basic information for the Certificate of Residency request.
+          Please provide your basic information for the Certificate of Indigency request.
         </p>
       </CardHeader>
 
@@ -158,50 +179,30 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
           <div className="space-y-4">
             <h3 className="text-lg font-medium border-b pb-2">Personal Information</h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
-              <div className="md:col-span-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+              <div>
                 <Label htmlFor="fullName">Full Name *</Label>
                 <Input
+                  disabled
                   id="fullName"
                   value={formData.fullName}
+                  onChange={(e) => handleInputChange("fullName", e.target.value)}
                   required
                   placeholder="Enter your complete name"
-                  readOnly
-                  disabled
-                  className="bg-gray-50"
                 />
-                <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
               </div>
               <div>
                 <Label htmlFor="age">Age *</Label>
                 <Input
+                  disabled
                   id="age"
                   type="number"
                   value={formData.age}
+                  onChange={(e) => handleInputChange("age", e.target.value)}
                   required
                   placeholder="Age"
-                  readOnly
-                  disabled
-                  className="bg-gray-50"
                 />
-                <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
               </div>
-            </div>
-
-            <div>
-              <Label htmlFor="address">Address *</Label>
-              <Input
-                id="address"
-                value={formData.address}
-                required
-                placeholder="Street/Purok (address within Barangay Alma Villa)"
-                readOnly
-                disabled
-                className="bg-gray-50"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                This information is from your profile and cannot be edited
-              </p>
             </div>
           </div>
 
@@ -209,15 +210,52 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
           <div className="space-y-4">
             <h3 className="text-lg font-medium border-b pb-2">Certificate Purpose</h3>
 
-            <div>
-              <Label htmlFor="purpose">Purpose of This Certificate *</Label>
-              <Input
-                id="purpose"
-                value={formData.purpose}
-                onChange={(e) => handleInputChange("purpose", e.target.value)}
-                required
-                placeholder="e.g., Bank requirements, Employment, Legal proceedings, etc."
-              />
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+              <div>
+                <Label htmlFor="purpose">Purpose of This Certificate *</Label>
+                <Textarea
+                  id="purpose"
+                  value={formData.purpose}
+                  onChange={(e) => handleInputChange("purpose", e.target.value)}
+                  required
+                  placeholder="Please specify what you will use this certificate for (e.g., medical assistance, educational assistance, legal aid, etc.)"
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <Label>How would you like to receive your document? *</Label>
+                <div className="mt-2 space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="radio"
+                      id="pickup-online"
+                      name="pickupOption"
+                      value="online"
+                      checked={formData.pickupOption === "online"}
+                      onChange={(e) => handleInputChange("pickupOption", e.target.value)}
+                      className="h-4 w-4 text-[#23479A] focus:ring-[#23479A] border-gray-300"
+                    />
+                    <Label htmlFor="pickup-online" className="text-sm font-normal cursor-pointer">
+                      <span className="font-medium">Online</span>
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="radio"
+                      id="pickup-physical"
+                      name="pickupOption"
+                      value="pickup"
+                      checked={formData.pickupOption === "pickup"}
+                      onChange={(e) => handleInputChange("pickupOption", e.target.value)}
+                      className="h-4 w-4 text-[#23479A] focus:ring-[#23479A] border-gray-300"
+                    />
+                    <Label htmlFor="pickup-physical" className="text-sm font-normal cursor-pointer">
+                      <span className="font-medium">Pickup</span>
+                    </Label>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -246,12 +284,11 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
                   <p className="text-sm text-gray-500">or drag and drop</p>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  Valid ID, Utility Bills - PDF, JPG, PNG, DOC up to 10MB each
+                  Valid ID, Utility Bills, Medical Records, etc. - PDF, JPG, PNG, DOC up to 10MB each
                 </p>
               </div>
             </div>
 
- 
           {formData.attachments.length > 0 && (
             <div className="space-y-2">
               <Label>Uploaded Files:</Label>
@@ -282,6 +319,17 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
           )}
         </div> */}
 
+          {/* Important Notice */}
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 sm:p-4">
+            <h4 className="font-medium text-yellow-800 mb-2">Important Notice:</h4>
+            <ul className="text-sm text-yellow-700 space-y-1">
+              <li>• All information provided must be true and accurate</li>
+              <li>• False statements may result in legal consequences</li>
+              <li>• This certificate is for assistance purposes only</li>
+              <li>• You may be required to provide additional verification</li>
+            </ul>
+          </div>
+
           {/* Submit Button */}
           <div className="flex flex-col sm:flex-row sm:justify-end gap-2 sm:gap-4">
             <Button
@@ -303,7 +351,7 @@ export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormP
                   Submitting...
                 </>
               ) : (
-                "Submit Request"
+                "Submit"
               )}
             </Button>
           </div>

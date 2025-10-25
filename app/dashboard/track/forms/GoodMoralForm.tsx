@@ -5,8 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Upload, X, FileText } from "lucide-react"
 import { useToast } from "@/components/ui/toast"
@@ -15,37 +13,69 @@ import useSWR from 'swr'
 
 const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) => fetch(...args).then((res) => res.json());
 
-interface IndigencyFormProps {
+interface GoodMoralFormProps {
   onSubmit: (formData: any) => void
   onBackAction: () => void
 }
 
 interface FormData {
-  // Personal Information - only what's needed for the PDF
+  // Personal Information
   fullName: string
-  age: string
+  dateOfBirth: string
+  placeOfBirth: string
+  civilStatus: string
+  citizenship: string
+  residentOf: string
 
   // Purpose and supporting info
   purpose: string
   attachments: File[]
+
+  // Delivery Option
+  pickupOption: string
 }
 
+const sampleData: FormData = {
+  fullName: "Maria Santos Cruz",
+  dateOfBirth: "1985-08-15",
+  placeOfBirth: "Gloria, Oriental Mindoro",
+  civilStatus: "married",
+  citizenship: "Filipino",
+  residentOf: "Sitio 2",
+  purpose: "Employment requirements",
+  attachments: [],
+  pickupOption: "online"
+}
 
-
-export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormProps) {
+export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormProps) {
   const { addToast } = useToast()
   const { data: session } = useSession()
   const { data } = useSWR(`/api/user?id=${session?.user.id}`, fetcher)
 
   const [formData, setFormData] = useState<FormData>({
     fullName: data.firstName + " " + data.lastName,
-    age: data.age,
+    dateOfBirth: data.birthDate,
+    placeOfBirth: data.placeOfBirth,
+    civilStatus: data.civilStatus,
+    citizenship: data.nationality,
+    residentOf: data.purok,
     purpose: "",
-    attachments: []
+    attachments: [],
+    pickupOption: "online"
   })
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const calculateAge = (birthDate: string) => {
+    const today = new Date()
+    const birth = new Date(birthDate)
+    let age = today.getFullYear() - birth.getFullYear()
+    const monthDiff = today.getMonth() - birth.getMonth()
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--
+    }
+    return age.toString()
+  }
 
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleInputChange = (field: keyof FormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -73,9 +103,11 @@ export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormP
     setIsSubmitting(true)
 
     try {
-      // Validate required fields
-      const requiredFields: Array<keyof FormData> = ['fullName', 'age', 'purpose']
-      const missing = requiredFields.filter(field => !String(formData[field] ?? '').trim())
+      // Validate required fields (age is auto-calculated)
+      const required: Array<keyof FormData> = [
+        'fullName', 'dateOfBirth', 'placeOfBirth', 'civilStatus', 'citizenship', 'residentOf', 'purpose'
+      ]
+      const missing = required.filter(f => !String(formData[f] ?? '').trim())
       if (missing.length) {
         addToast({
           title: "Validation Error",
@@ -86,13 +118,20 @@ export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormP
       }
 
 
-      // Prepare payload for Document API
+      const calculatedAge = formData.dateOfBirth ? calculateAge(formData.dateOfBirth) : ""
+
       const documentData = {
         userId: session?.user.id,
         fullName: formData.fullName,
-        age: formData.age,
+        birthDate: formData.dateOfBirth,
+        placeOfBirth: formData.placeOfBirth,
+        age: calculatedAge,
+        civilStatus: formData.civilStatus,
+        citizenship: formData.citizenship,
+        purok: formData.residentOf,
         purpose: formData.purpose,
-        type: "Certificate of Indigency",
+        type: "Certificate of Good Moral Character",
+        pickupOption: formData.pickupOption,
       }
 
       const response = await fetch('/api/document', {
@@ -101,30 +140,34 @@ export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormP
         body: JSON.stringify(documentData),
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to submit document')
-      }
-
+      if (!response.ok) throw new Error('Failed to submit document')
       const result = await response.json()
-      if (!result?.success) {
-        throw new Error(result?.error || 'Submission failed')
-      }
+      if (!result?.success) throw new Error(result?.error || 'Submission failed')
 
       addToast({
         title: "Success!",
-        description: "Certificate of Indigency request submitted successfully!",
+        description: "Good Moral certificate request submitted successfully!",
         variant: "default",
       })
 
-      // Notify parent (if needed)
       await onSubmit({
-        documentType: "certificate-of-indigency",
+        documentType: "good-moral-character",
         formData,
         submittedAt: new Date().toISOString()
       })
 
       // Reset form
-      setFormData({ fullName: "", age: "", purpose: "", attachments: [] })
+      setFormData({
+        fullName: "",
+        dateOfBirth: "",
+        placeOfBirth: "",
+        civilStatus: "",
+        citizenship: "",
+        residentOf: "",
+        purpose: "",
+        pickupOption: "online",
+        attachments: []
+      })
 
     } catch (error) {
       console.error("Error submitting form:", error)
@@ -138,15 +181,26 @@ export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormP
     }
   }
 
+  const fillSampleData = () => {
+    setFormData(sampleData)
+  }
 
   return (
     <Card className="bg-white border-0 shadow-lg">
       <CardHeader className="border-b">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <CardTitle className="text-xl">Certificate of Indigency Application Form</CardTitle>
+          <CardTitle className="text-xl">Certificate of Good Moral Character Application Form</CardTitle>
+          {/* <Button
+            type="button"
+            onClick={fillSampleData}
+            variant="outline"
+            className="text-sm border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10 w-full sm:w-auto"
+          >
+            Fill Sample Data
+          </Button> */}
         </div>
         <p className="text-sm text-gray-600 mt-2">
-          Please provide your basic information for the Certificate of Indigency request.
+          Please provide your personal information for the Certificate of Good Moral Character.
         </p>
       </CardHeader>
 
@@ -160,29 +214,83 @@ export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormP
               <div>
                 <Label htmlFor="fullName">Full Name *</Label>
                 <Input
+                  disabled
                   id="fullName"
                   value={formData.fullName}
+                  onChange={(e) => handleInputChange("fullName", e.target.value)}
                   required
                   placeholder="Enter your complete name"
-                  readOnly
-                  disabled
-                  className="bg-gray-50"
                 />
-                <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
               </div>
               <div>
-                <Label htmlFor="age">Age *</Label>
+                <Label htmlFor="dateOfBirth">Date of Birth *</Label>
                 <Input
-                  id="age"
-                  type="number"
-                  value={formData.age}
-                  required
-                  placeholder="Age"
-                  readOnly
                   disabled
-                  className="bg-gray-50"
+                  id="dateOfBirth"
+                  type="date"
+                  value={formData.dateOfBirth}
+                  onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+                  required
                 />
-                <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+              <div>
+                <Label htmlFor="placeOfBirth">Place of Birth *</Label>
+                <Input
+                  disabled
+                  id="placeOfBirth"
+                  value={formData.placeOfBirth}
+                  onChange={(e) => handleInputChange("placeOfBirth", e.target.value)}
+                  required
+                  placeholder="City/Municipality, Province"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+              <div>
+
+                <Label>Civil Status *</Label>
+                <Select
+                  disabled
+                  value={formData.civilStatus}
+                  onValueChange={(value) => handleInputChange("civilStatus", value)}
+                >
+                  <SelectTrigger className="w-full mt-1">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Single">Single</SelectItem>
+                    <SelectItem value="Married">Married</SelectItem>
+                    <SelectItem value="Widowed">Widowed</SelectItem>
+                    <SelectItem value="Separated">Separated</SelectItem>
+                    <SelectItem value="Divorced">Divorced</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="citizenship">Citizenship *</Label>
+                <Input
+                  disabled
+                  id="citizenship"
+                  value={formData.citizenship}
+                  onChange={(e) => handleInputChange("citizenship", e.target.value)}
+                  required
+                  placeholder="Filipino"
+                />
+              </div>
+              <div>
+                <Label htmlFor="residentOf">Sitio</Label>
+                <Input
+                  disabled
+                  id="residentOf"
+                  value={formData.residentOf}
+                  onChange={(e) => handleInputChange("residentOf", e.target.value)}
+                  required
+                  placeholder="Sitio"
+                />
               </div>
             </div>
           </div>
@@ -193,14 +301,52 @@ export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormP
 
             <div>
               <Label htmlFor="purpose">Purpose of This Certificate *</Label>
-              <Textarea
+              <Input
                 id="purpose"
                 value={formData.purpose}
                 onChange={(e) => handleInputChange("purpose", e.target.value)}
                 required
-                placeholder="Please specify what you will use this certificate for (e.g., medical assistance, educational assistance, legal aid, etc.)"
-                rows={3}
+                placeholder="e.g., Employment requirements, Scholarship application, etc."
               />
+            </div>
+          </div>
+
+          {/* Pickup Option Section */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium border-b pb-2">Document Delivery</h3>
+
+            <div>
+              <Label>How would you like to receive your certificate? *</Label>
+              <div className="mt-2 space-y-3">
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="radio"
+                    id="pickup-online"
+                    name="pickupOption"
+                    value="online"
+                    checked={formData.pickupOption === "online"}
+                    onChange={(e) => handleInputChange("pickupOption", e.target.value)}
+                    className="h-4 w-4 text-[#23479A] focus:ring-[#23479A] border-gray-300"
+                  />
+                  <Label htmlFor="pickup-online" className="text-sm font-normal cursor-pointer">
+                    <span className="font-medium">Online</span>
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="radio"
+                    id="pickup-physical"
+                    name="pickupOption"
+                    value="physical"
+                    checked={formData.pickupOption === "physical"}
+                    onChange={(e) => handleInputChange("pickupOption", e.target.value)}
+                    className="h-4 w-4 text-[#23479A] focus:ring-[#23479A] border-gray-300"
+                  />
+                  <Label htmlFor="pickup-physical" className="text-sm font-normal cursor-pointer">
+                    <span className="font-medium">Pickup</span>
+                  </Label>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -229,7 +375,7 @@ export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormP
                   <p className="text-sm text-gray-500">or drag and drop</p>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  Valid ID, Utility Bills, Medical Records, etc. - PDF, JPG, PNG, DOC up to 10MB each
+                  Valid ID, Birth Certificate, etc. - PDF, JPG, PNG, DOC up to 10MB each
                 </p>
               </div>
             </div>
@@ -270,7 +416,7 @@ export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormP
             <ul className="text-sm text-yellow-700 space-y-1">
               <li>• All information provided must be true and accurate</li>
               <li>• False statements may result in legal consequences</li>
-              <li>• This certificate is for assistance purposes only</li>
+              <li>• This certificate verifies good moral character and no pending cases</li>
               <li>• You may be required to provide additional verification</li>
             </ul>
           </div>
@@ -296,7 +442,7 @@ export default function IndigencyForm({ onSubmit, onBackAction }: IndigencyFormP
                   Submitting...
                 </>
               ) : (
-                "Submit Request"
+                "Submit"
               )}
             </Button>
           </div>

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Upload, X, FileText } from "lucide-react"
 import { useToast } from "@/components/ui/toast"
@@ -13,52 +14,39 @@ import useSWR from 'swr'
 
 const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) => fetch(...args).then((res) => res.json());
 
-interface GoodMoralFormProps {
+interface ResidencyFormProps {
   onSubmit: (formData: any) => void
   onBackAction: () => void
 }
 
 interface FormData {
-  // Personal Information
+  // Personal Information - only what's needed for the PDF
   fullName: string
-  dateOfBirth: string
-  placeOfBirth: string
-  civilStatus: string
-  citizenship: string
-  residentOf: string
+  age: string
+  address: string
 
   // Purpose and supporting info
   purpose: string
   attachments: File[]
+
+  // Delivery Option
+  pickupOption: string
 }
 
 
-export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormProps) {
+export default function ResidencyForm({ onSubmit, onBackAction }: ResidencyFormProps) {
   const { addToast } = useToast()
   const { data: session } = useSession()
   const { data } = useSWR(`/api/user?id=${session?.user.id}`, fetcher)
 
   const [formData, setFormData] = useState<FormData>({
     fullName: data.firstName + " " + data.lastName,
-    dateOfBirth: data.birthDate,
-    placeOfBirth: data.placeOfBirth,
-    civilStatus: data.civilStatus,
-    citizenship: data.nationality,
-    residentOf: data.purok,
+    age: data.age,
+    address: data.purok,
     purpose: "",
-    attachments: []
+    attachments: [],
+    pickupOption: "online"
   })
-
-  const calculateAge = (birthDate: string) => {
-    const today = new Date()
-    const birth = new Date(birthDate)
-    let age = today.getFullYear() - birth.getFullYear()
-    const monthDiff = today.getMonth() - birth.getMonth()
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--
-    }
-    return age.toString()
-  }
 
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -88,11 +76,9 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
     setIsSubmitting(true)
 
     try {
-      // Validate required fields (age is auto-calculated)
-      const required: Array<keyof FormData> = [
-        'fullName', 'dateOfBirth', 'placeOfBirth', 'civilStatus', 'citizenship', 'residentOf', 'purpose'
-      ]
-      const missing = required.filter(f => !String(formData[f] ?? '').trim())
+      // Basic validation
+      const requiredFields: Array<keyof FormData> = ['fullName', 'age', 'address', 'purpose']
+      const missing = requiredFields.filter(field => !String(formData[field] ?? '').trim())
       if (missing.length) {
         addToast({
           title: "Validation Error",
@@ -102,20 +88,14 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
         return
       }
 
-
-      const calculatedAge = formData.dateOfBirth ? calculateAge(formData.dateOfBirth) : ""
-
-      const documentData = {
+      const documentData: Record<string, any> = {
         userId: session?.user.id,
         fullName: formData.fullName,
-        birthDate: formData.dateOfBirth,
-        placeOfBirth: formData.placeOfBirth,
-        age: calculatedAge,
-        civilStatus: formData.civilStatus,
-        citizenship: formData.citizenship,
-        purok: formData.residentOf,
+        age: formData.age,
+        purok: formData.address,
         purpose: formData.purpose,
-        type: "Certificate of Good Moral Character",
+        type: "Certificate of Residency",
+        pickupOption: formData.pickupOption,
       }
 
       const response = await fetch('/api/document', {
@@ -124,18 +104,24 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
         body: JSON.stringify(documentData),
       })
 
-      if (!response.ok) throw new Error('Failed to submit document')
+      if (!response.ok) {
+        throw new Error('Failed to submit document')
+      }
+
       const result = await response.json()
-      if (!result?.success) throw new Error(result?.error || 'Submission failed')
+      if (!result?.success) {
+        throw new Error(result?.error || 'Submission failed')
+      }
 
       addToast({
         title: "Success!",
-        description: "Good Moral certificate request submitted successfully!",
+        description: "Certificate of Residency request submitted successfully!",
         variant: "default",
       })
 
+      // Notify parent (if needed)
       await onSubmit({
-        documentType: "good-moral-character",
+        documentType: "certificate-of-residency",
         formData,
         submittedAt: new Date().toISOString()
       })
@@ -143,15 +129,12 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
       // Reset form
       setFormData({
         fullName: "",
-        dateOfBirth: "",
-        placeOfBirth: "",
-        civilStatus: "",
-        citizenship: "",
-        residentOf: "",
+        age: "",
+        address: "",
         purpose: "",
+        pickupOption: "online",
         attachments: []
       })
-
     } catch (error) {
       console.error("Error submitting form:", error)
       addToast({
@@ -164,15 +147,33 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
     }
   }
 
+  const fillSampleData = () => {
+    setFormData({
+      fullName: "Maria Elena Santos",
+      age: "35",
+      address: "Sitio 3",
+      purpose: "Bank account opening and loan application",
+      pickupOption: "online",
+      attachments: []
+    })
+  }
 
   return (
     <Card className="bg-white border-0 shadow-lg">
       <CardHeader className="border-b">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <CardTitle className="text-xl">Certificate of Good Moral Character Application Form</CardTitle>
+          <CardTitle className="text-xl">Certificate of Residency Application Form</CardTitle>
+          {/* <Button
+            type="button"
+            onClick={fillSampleData}
+            variant="outline"
+            className="text-sm border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10 w-full sm:w-auto"
+          >
+            Fill Sample Data
+          </Button> */}
         </div>
         <p className="text-sm text-gray-600 mt-2">
-          Please provide your personal information for the Certificate of Good Moral Character.
+          Please provide your basic information for the Certificate of Residency request.
         </p>
       </CardHeader>
 
@@ -182,88 +183,45 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
           <div className="space-y-4">
             <h3 className="text-lg font-medium border-b pb-2">Personal Information</h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-              <div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+              <div className="md:col-span-2">
                 <Label htmlFor="fullName">Full Name *</Label>
                 <Input
+                  disabled
                   id="fullName"
                   value={formData.fullName}
+                  onChange={(e) => handleInputChange("fullName", e.target.value)}
                   required
                   placeholder="Enter your complete name"
-                  readOnly
-                  disabled
-                  className="bg-gray-50"
                 />
-                <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
               </div>
               <div>
-                <Label htmlFor="dateOfBirth">Date of Birth *</Label>
+                <Label htmlFor="age">Age *</Label>
                 <Input
-                  id="dateOfBirth"
-                  type="date"
-                  value={formData.dateOfBirth}
-                  required
-                  readOnly
                   disabled
-                  className="bg-gray-50"
+                  id="age"
+                  type="number"
+                  value={formData.age}
+                  onChange={(e) => handleInputChange("age", e.target.value)}
+                  required
+                  placeholder="Age"
                 />
-                <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-              <div>
-                <Label htmlFor="placeOfBirth">Place of Birth *</Label>
-                <Input
-                  id="placeOfBirth"
-                  value={formData.placeOfBirth}
-                  required
-                  placeholder="City/Municipality, Province"
-                  readOnly
-                  disabled
-                  className="bg-gray-50"
-                />
-                <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
-              <div>
-                <Label>Civil Status *</Label>
-                <Input
-                  value={formData.civilStatus}
-                  readOnly
-                  disabled
-                  className="bg-gray-50"
-                />
-                <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
-              </div>
-              <div>
-                <Label htmlFor="citizenship">Citizenship *</Label>
-                <Input
-                  id="citizenship"
-                  value={formData.citizenship}
-                  required
-                  placeholder="Filipino"
-                  readOnly
-                  disabled
-                  className="bg-gray-50"
-                />
-                <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
-              </div>
-              <div>
-                <Label htmlFor="residentOf">Sitio</Label>
-                <Input
-                  id="residentOf"
-                  value={formData.residentOf}
-                  required
-                  placeholder="Sitio"
-                  readOnly
-                  disabled
-                  className="bg-gray-50"
-                />
-                <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
-              </div>
+            <div>
+              <Label htmlFor="address">Address *</Label>
+              <Input
+                disabled
+                id="address"
+                value={formData.address}
+                onChange={(e) => handleInputChange("address", e.target.value)}
+                required
+                placeholder="Street/Purok (address within Barangay Alma Villa)"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Enter specific address within Barangay Alma Villa (Gloria Oriental Mindoro will be added automatically)
+              </p>
             </div>
           </div>
 
@@ -271,15 +229,51 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
           <div className="space-y-4">
             <h3 className="text-lg font-medium border-b pb-2">Certificate Purpose</h3>
 
-            <div>
-              <Label htmlFor="purpose">Purpose of This Certificate *</Label>
-              <Input
-                id="purpose"
-                value={formData.purpose}
-                onChange={(e) => handleInputChange("purpose", e.target.value)}
-                required
-                placeholder="e.g., Employment requirements, Scholarship application, etc."
-              />
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+              <div>
+                <Label htmlFor="purpose">Purpose of This Certificate *</Label>
+                <Input
+                  id="purpose"
+                  value={formData.purpose}
+                  onChange={(e) => handleInputChange("purpose", e.target.value)}
+                  required
+                  placeholder="e.g., Bank requirements, Employment, Legal proceedings, etc."
+                />
+              </div>
+
+              <div>
+                <Label>How would you like to receive your document? *</Label>
+                <div className="mt-2 space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="radio"
+                      id="pickup-online"
+                      name="pickupOption"
+                      value="online"
+                      checked={formData.pickupOption === "online"}
+                      onChange={(e) => handleInputChange("pickupOption", e.target.value)}
+                      className="h-4 w-4 text-[#23479A] focus:ring-[#23479A] border-gray-300"
+                    />
+                    <Label htmlFor="pickup-online" className="text-sm font-normal cursor-pointer">
+                      <span className="font-medium">Online</span>
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="radio"
+                      id="pickup-physical"
+                      name="pickupOption"
+                      value="pickup"
+                      checked={formData.pickupOption === "pickup"}
+                      onChange={(e) => handleInputChange("pickupOption", e.target.value)}
+                      className="h-4 w-4 text-[#23479A] focus:ring-[#23479A] border-gray-300"
+                    />
+                    <Label htmlFor="pickup-physical" className="text-sm font-normal cursor-pointer">
+                      <span className="font-medium">Pickup</span>
+                    </Label>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -308,11 +302,12 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
                   <p className="text-sm text-gray-500">or drag and drop</p>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  Valid ID, Birth Certificate, etc. - PDF, JPG, PNG, DOC up to 10MB each
+                  Valid ID, Utility Bills - PDF, JPG, PNG, DOC up to 10MB each
                 </p>
               </div>
             </div>
 
+ 
           {formData.attachments.length > 0 && (
             <div className="space-y-2">
               <Label>Uploaded Files:</Label>
@@ -343,17 +338,6 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
           )}
         </div> */}
 
-          {/* Important Notice */}
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 sm:p-4">
-            <h4 className="font-medium text-yellow-800 mb-2">Important Notice:</h4>
-            <ul className="text-sm text-yellow-700 space-y-1">
-              <li>• All information provided must be true and accurate</li>
-              <li>• False statements may result in legal consequences</li>
-              <li>• This certificate verifies good moral character and no pending cases</li>
-              <li>• You may be required to provide additional verification</li>
-            </ul>
-          </div>
-
           {/* Submit Button */}
           <div className="flex flex-col sm:flex-row sm:justify-end gap-2 sm:gap-4">
             <Button
@@ -375,7 +359,7 @@ export default function GoodMoralForm({ onSubmit, onBackAction }: GoodMoralFormP
                   Submitting...
                 </>
               ) : (
-                "Submit Request"
+                "Submit"
               )}
             </Button>
           </div>

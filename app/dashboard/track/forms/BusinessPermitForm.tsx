@@ -27,11 +27,18 @@ interface FormData {
   businessLocation: string
   operatorName: string
   operatorAddress: string
-  amountPaid: string
-  orNumbers: string
   attachments: AttachmentFile[]
+  pickupOption: string
 }
 
+const sampleData: FormData = {
+  businessName: "Juan's Sari-Sari Store",
+  businessLocation: "Sitio 1",
+  operatorName: "Juan Dela Cruz",
+  operatorAddress: "Sitio 1",
+  attachments: [],
+  pickupOption: "online"
+}
 
 export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessPermitFormProps) {
   const [formData, setFormData] = useState<FormData>({
@@ -39,9 +46,8 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
     businessLocation: "",
     operatorName: "",
     operatorAddress: "",
-    amountPaid: "",
-    orNumbers: "",
-    attachments: []
+    attachments: [],
+    pickupOption: "online"
   })
   const { addToast } = useToast()
   const { data: session } = useSession()
@@ -103,6 +109,9 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
     setFilePreview(null)
   }
 
+  const fillWithSampleData = () => {
+    setFormData(sampleData)
+  }
 
   // Removed PDF generation; using API submission instead
 
@@ -112,7 +121,7 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
     try {
       // Validate required fields
       const required: Array<keyof FormData> = [
-        'businessName', 'businessLocation', 'operatorName', 'operatorAddress', 'amountPaid', 'orNumbers'
+        'businessName', 'businessLocation', 'operatorName', 'operatorAddress'
       ]
       const missing = required.filter(f => !String(formData[f] ?? '').trim())
       if (missing.length) {
@@ -125,16 +134,15 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
       }
 
       // Prepare payload for Document API
-      const additionalInfo = `Amount Paid: ${formData.amountPaid}; OR Numbers: ${formData.orNumbers}`
       const documentData = {
         userId: session?.user.id,
         businessName: formData.businessName,
         businessLocation: formData.businessLocation,
         operatorName: formData.operatorName,
         operatorAddress: formData.operatorAddress,
-        additionalInfo,
         purpose: `Business Permit for ${formData.businessName}`,
         type: "Business Permit",
+        pickupOption: formData.pickupOption,
       }
 
       const response = await fetch('/api/document', {
@@ -165,8 +173,7 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
         businessLocation: "",
         operatorName: "",
         operatorAddress: "",
-        amountPaid: "",
-        orNumbers: "",
+        pickupOption: "online",
         attachments: []
       })
 
@@ -186,15 +193,6 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
       <Card>
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-            <Button
-              type="button"
-              onClick={onBackAction}
-              variant="outline"
-              size="sm"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Button>
             <div className="flex items-center gap-3">
               <div className="p-2 bg-[#23479A]/10 rounded-lg">
                 <Building className="h-6 w-6 text-[#23479A]" />
@@ -206,12 +204,17 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:gap-4 pt-4">
-            <Badge variant="outline" className="text-[#23479A] border-[#23479A]">
-              Fee: ₱200
-            </Badge>
             <Badge variant="outline">
               Processing: 3-5 days
             </Badge>
+            {/* <Button
+              type="button"
+              onClick={fillWithSampleData}
+              variant="outline"
+              size="sm"
+            >
+              Fill Sample Data
+            </Button> */}
           </div>
         </CardHeader>
       </Card>
@@ -292,44 +295,56 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
           </CardContent>
         </Card>
 
-        {/* Payment Information */}
+        {/* Pickup Option */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-[#23479A]" />
-              Payment Information
+              <Building className="h-5 w-5 text-[#23479A]" />
+              Document Pickup Option
             </CardTitle>
+            <CardDescription>
+              Choose how you would like to receive your business permit
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="amountPaid">Amount Paid (PHP) *</Label>
-                <Input
-                  id="amountPaid"
-                  type="number"
-                  placeholder="Enter amount paid"
-                  required
-                  value={formData.amountPaid}
-                  onChange={(e) => handleInputChange('amountPaid', e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="orNumbers">OR Numbers *</Label>
-                <Input
-                  id="orNumbers"
-                  placeholder="Enter Official Receipt numbers"
-                  required
-                  value={formData.orNumbers}
-                  onChange={(e) => handleInputChange('orNumbers', e.target.value)}
-                />
+            <div className="space-y-2">
+              <Label>How would you like to receive your document? *</Label>
+              <div className="mt-2 space-y-3">
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="radio"
+                    id="pickup-online"
+                    name="pickupOption"
+                    value="online"
+                    checked={formData.pickupOption === "online"}
+                    onChange={(e) => handleInputChange('pickupOption', e.target.value)}
+                    className="h-4 w-4 text-[#23479A] focus:ring-[#23479A] border-gray-300"
+                  />
+                  <Label htmlFor="pickup-online" className="text-sm font-normal cursor-pointer">
+                    <span className="font-medium">Online</span>
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="radio"
+                    id="pickup-physical"
+                    name="pickupOption"
+                    value="pickup"
+                    checked={formData.pickupOption === "pickup"}
+                    onChange={(e) => handleInputChange('pickupOption', e.target.value)}
+                    className="h-4 w-4 text-[#23479A] focus:ring-[#23479A] border-gray-300"
+                  />
+                  <Label htmlFor="pickup-physical" className="text-sm font-normal cursor-pointer">
+                    <span className="font-medium">Pickup</span>
+                  </Label>
+                </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Supporting Documents */}
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Supporting Documents</CardTitle>
             <CardDescription>
@@ -416,7 +431,7 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
               )}
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Image Preview Modal */}
         {selectedImagePreview && (
@@ -520,13 +535,13 @@ export default function BusinessPermitForm({ onBackAction, onSubmit }: BusinessP
                   variant="outline"
                   className="w-full sm:w-auto"
                 >
-                  Cancel
+                  Back
                 </Button>
                 <Button
                   type="submit"
                   className="bg-[#23479A] hover:bg-[#23479A]/90 w-full sm:w-auto"
                 >
-                  Submit Application
+                  Submit
                 </Button>
               </div>
             </div>

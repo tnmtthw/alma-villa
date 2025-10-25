@@ -51,7 +51,7 @@ export default function DocumentRequestPage() {
       description: "Document certifying low-income status for assistance programs",
       category: "certificate",
       icon: Users,
-      fee: "Free",
+      fee: "₱30",
       processingTime: "2-3 Working Days",
       requirements: ["Valid ID", "Income Statement", "Family Composition"]
     },
@@ -87,7 +87,7 @@ export default function DocumentRequestPage() {
 
   const filteredDocuments = documentTypes.filter(doc => {
     const matchesSearch = doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         doc.description.toLowerCase().includes(searchQuery.toLowerCase())
+      doc.description.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory = selectedCategory === "all" || doc.category === selectedCategory
     return matchesSearch && matchesCategory
   })
@@ -107,7 +107,7 @@ export default function DocumentRequestPage() {
               Request Documents
             </h1>
             <p className="text-lg text-gray-600">
-              Select the type of document you need from Barangay Alma Villa. 
+              Select the type of document you need from Barangay Alma Villa.
               All requests are processed securely and efficiently with automated PDF generation.
             </p>
           </div>
@@ -128,7 +128,7 @@ export default function DocumentRequestPage() {
                     className="pl-10"
                   />
                 </div>
-                
+
                 {/* Category Filter */}
                 <div className="flex gap-2 overflow-x-auto">
                   {categories.map((category) => (
@@ -136,11 +136,10 @@ export default function DocumentRequestPage() {
                       key={category.id}
                       onClick={() => setSelectedCategory(category.id)}
                       variant={selectedCategory === category.id ? "default" : "outline"}
-                      className={`whitespace-nowrap ${
-                        selectedCategory === category.id 
-                          ? "bg-[#23479A] hover:bg-[#23479A]/90" 
-                          : "hover:bg-gray-50"
-                      }`}
+                      className={`whitespace-nowrap ${selectedCategory === category.id
+                        ? "bg-[#23479A] hover:bg-[#23479A]/90"
+                        : "hover:bg-gray-50"
+                        }`}
                     >
                       {category.label}
                       <Badge variant="outline" className="ml-2 text-xs">
@@ -230,7 +229,7 @@ export default function DocumentRequestPage() {
                       </div>
                     </div>
                   </CardHeader>
-                  
+
                   <CardContent>
                     <div className="space-y-4">
                       {/* Fee and Processing Time */}
@@ -300,8 +299,8 @@ export default function DocumentRequestPage() {
                 <div>
                   <h3 className="font-semibold text-blue-900 mb-2">Need Help?</h3>
                   <p className="text-blue-800 text-sm">
-                    If you can't find the document you're looking for or need assistance with requirements, 
-                    please contact the Barangay Office at <strong>almavilla.gloria@gmail.com</strong> or 
+                    If you can't find the document you're looking for or need assistance with requirements,
+                    please contact the Barangay Office at <strong>almavilla.gloria@gmail.com</strong> or
                     visit us during office hours. All forms automatically generate PDF documents for admin processing.
                   </p>
                 </div>

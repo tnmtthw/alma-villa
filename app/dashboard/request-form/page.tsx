@@ -7,13 +7,13 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 
 // Import all form components
-import BarangayClearanceForm from "@/components/forms/BarangayClearanceForm"
-import BusinessPermitForm from "@/components/forms/BusinessPermitForm"
+import BarangayClearanceForm from "@/app/dashboard/track/forms/BarangayClearanceForm"
+import BusinessPermitForm from "@/app/dashboard/track/forms/BusinessPermitForm"
 
-import ResidencyForm from "@/components/forms/ResidencyForm"
-import IndigencyForm from "@/components/forms/IndigencyForm"
+import ResidencyForm from "@/app/dashboard/track/forms/ResidencyForm"
+import IndigencyForm from "@/app/dashboard/track/forms/IndigencyForm"
 
-import GoodMoralForm from "@/components/forms/GoodMoralForm"
+import GoodMoralForm from "@/app/dashboard/track/forms/GoodMoralForm"
 
 // Document type configuration
 const documentTypes = {
@@ -25,7 +25,7 @@ const documentTypes = {
     component: BarangayClearanceForm
   },
   "certificate-of-residency": {
-    title: "Certificate of Residency", 
+    title: "Certificate of Residency",
     description: "Official document proving your residence in the barangay",
     fee: "₱30",
     processingTime: "2-3 Working Days",
@@ -33,7 +33,7 @@ const documentTypes = {
   },
   "certificate-of-indigency": {
     title: "Certificate of Indigency",
-    description: "Document certifying low-income status for assistance programs", 
+    description: "Document certifying low-income status for assistance programs",
     fee: "Free",
     processingTime: "2-3 Working Days",
     component: IndigencyForm
@@ -41,7 +41,7 @@ const documentTypes = {
   "business-permit": {
     title: "Barangay Business Permit",
     description: "Permit to operate a business within the barangay",
-    fee: "₱200", 
+    fee: "₱200",
     processingTime: "2-3 Working Days",
     component: BusinessPermitForm
   },
@@ -78,7 +78,7 @@ function RequestFormContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const documentType = searchParams.get("type") as DocumentType
-  
+
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -140,7 +140,7 @@ function RequestFormContent() {
             <ArrowLeft className="h-4 w-4" />
             Back to Documents
           </Button>
-          
+
           <Card className="bg-white border-0 shadow-sm">
             <CardHeader>
               <CardTitle className="text-2xl text-[#23479A]">{document.title}</CardTitle>

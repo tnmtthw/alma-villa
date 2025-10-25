@@ -123,6 +123,25 @@ const PaymentPage: React.FC<PaymentProps> = ({ request }) => {
         }
     };
 
+    const getFeeByType = (type: string) => {
+        switch (type) {
+            case "Barangay Clearance":
+                return "50";
+            case "Certificate of Residency":
+                return "₱30";
+            case "Certificate of Indigency":
+                return "₱30";
+            case "Business Permit":
+                return "₱200";
+            case "Certificate of Good Moral Character":
+                return "₱120";
+            default:
+                return "₱0";
+        }
+    };
+
+    const fee = getFeeByType(request.type);
+
     return (
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger asChild>
@@ -141,24 +160,45 @@ const PaymentPage: React.FC<PaymentProps> = ({ request }) => {
                 </DialogHeader>
 
                 <div className="space-y-2">
+                    {request.type === "Barangay Clearance" && (
+                        <img src="/qrcode/QR_Clearance.jpg" />
+                    )}
+
+                    {request.type === "Certificate of Residency" && (
+                        <img src="/qrcode/QR_Residency.jpg" />
+                    )}
+
+                    {request.type === "Certificate of Indigency" && (
+                        <img src="/qrcode/QR_Indigency.jpg" />
+                    )}
+
+                    {request.type === "Business Permit" && (
+                        <img src="/qrcode/QR_Business.jpg" />
+                    )}
+                    {request.type === "Certificate of Good Moral Character" && (
+                        <img src="/qrcode/QR_Goodmoral.jpg" />
+                    )}
                     <p>
                         <strong>Name:</strong> {request.fullName || request.businessName}
                     </p>
                     <p>
                         <strong>Type:</strong> {request.type}
                     </p>
-                    {request.fee && (
-                        <p>
-                            <strong>Fee:</strong> {request.fee}
-                        </p>
-                    )}
+                    <p>
+                        <strong>Fee:</strong> {fee}
+                    </p>
 
                     {/* File Upload Input */}
-                    <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={e => e.target.files && handleImageUpload(e.target.files[0])}
-                    />
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700">
+                            Proof of payment
+                        </label>
+                        <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={e => e.target.files && handleImageUpload(e.target.files[0])}
+                        />
+                    </div>
 
                     {uploading && <p>Uploading...</p>}
                     {previewImage && (

@@ -43,8 +43,26 @@ interface FormData {
   // Contact Information (for processing)
   contactNumber: string
   emailAddress: string
+
+  // Delivery Option
+  pickupOption: string
 }
 
+const sampleData: FormData = {
+  fullName: "Juan Dela Cruz",
+  suffix: "Jr.",
+  birthDate: "1990-01-15",
+  civilStatus: "single",
+  placeOfBirth: "Makati City",
+  citizenship: "Filipino",
+  purok: "Sitio 1",
+  residencyLength: "5",
+  purpose: "employment",
+  additionalInfo: "Required for submission to HR department by end of month",
+  contactNumber: "",
+  emailAddress: "",
+  pickupOption: "online"
+}
 
 export default function BarangayClearanceForm({ onBackAction, onSubmit }: BarangayClearanceFormProps) {
   const { addToast } = useToast()
@@ -63,7 +81,8 @@ export default function BarangayClearanceForm({ onBackAction, onSubmit }: Barang
     purpose: "",
     additionalInfo: "",
     contactNumber: "",
-    emailAddress: ""
+    emailAddress: "",
+    pickupOption: "online"
   })
 
 
@@ -156,6 +175,9 @@ export default function BarangayClearanceForm({ onBackAction, onSubmit }: Barang
     }
   }
 
+  const fillWithSampleData = () => {
+    setFormData(sampleData)
+  }
 
   // Auto-calculate age when birth date changes
   const calculateAge = (birthDate: string) => {
@@ -228,7 +250,8 @@ export default function BarangayClearanceForm({ onBackAction, onSubmit }: Barang
         residencyLength: formData.residencyLength,
         purpose: formData.purpose,
         additionalInfo: formData.additionalInfo,
-        type: "Barangay Clearance"
+        type: "Barangay Clearance",
+        pickupOption: formData.pickupOption
       }
 
       const response = await fetch('/api/document', {
@@ -272,7 +295,8 @@ export default function BarangayClearanceForm({ onBackAction, onSubmit }: Barang
           purpose: "",
           additionalInfo: "",
           contactNumber: "",
-          emailAddress: ""
+          emailAddress: "",
+          pickupOption: "online"
         })
         setSupportingDocs([])
       } else {
@@ -307,6 +331,14 @@ export default function BarangayClearanceForm({ onBackAction, onSubmit }: Barang
         <p className="text-sm text-gray-600">Complete the form to apply for a barangay clearance certificate</p>
       </div>
 
+      {/* <Button
+        type="button"
+        onClick={fillWithSampleData}
+        variant="outline"
+        className="mb-6 w-full sm:w-auto border-[#23479A] text-[#23479A] hover:bg-[#23479A]/10"
+      >
+        Fill with Sample Data
+      </Button> */}
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Personal Information Section */}
@@ -317,81 +349,85 @@ export default function BarangayClearanceForm({ onBackAction, onSubmit }: Barang
             <div>
               <Label htmlFor="fullName">Full Name</Label>
               <Input
+                disabled
                 id="fullName"
                 placeholder="Enter full name"
-                className="mt-1 bg-gray-50"
+                className="mt-1"
                 required
                 value={formData.fullName}
-                readOnly
-                disabled
+                onChange={(e) => handleInputChange('fullName', e.target.value)}
               />
-              <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
             </div>
 
             <div>
               <Label htmlFor="suffix">Suffix</Label>
               <Input
+                disabled
                 id="suffix"
                 placeholder="Jr., Sr., III, etc."
-                className="mt-1 bg-gray-50"
+                className="mt-1"
                 value={formData.suffix}
-                readOnly
-                disabled
+                onChange={(e) => handleInputChange('suffix', e.target.value)}
               />
-              <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
             </div>
 
 
             <div>
               <Label htmlFor="birthDate">Date of Birth</Label>
               <Input
+                disabled
                 id="birthDate"
                 type="date"
-                className="mt-1 bg-gray-50"
+                className="mt-1"
                 required
+                max={todayLocalDateString}
                 value={formData.birthDate}
-                readOnly
-                disabled
+                onChange={(e) => handleBirthDateChange(e.target.value)}
               />
-              <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
             </div>
 
             <div>
               <Label htmlFor="placeOfBirth">Place of Birth</Label>
               <Input
+                disabled
                 id="placeOfBirth"
                 placeholder="Enter place of birth"
-                className="mt-1 bg-gray-50"
+                className="mt-1"
                 value={formData.placeOfBirth}
-                readOnly
-                disabled
+                onChange={(e) => handleInputChange('suffix', e.target.value)}
               />
-              <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
             </div>
 
             <div>
               <Label htmlFor="citizenship">Citizenship</Label>
               <Input
+                disabled
                 id="citizenship"
                 placeholder="Enter citizenship"
-                className="mt-1 bg-gray-50"
+                className="mt-1"
                 value={formData.citizenship}
-                readOnly
-                disabled
+                onChange={(e) => handleInputChange('suffix', e.target.value)}
               />
-              <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
             </div>
 
             <div>
               <Label htmlFor="civilStatus">Civil Status</Label>
-              <Input
-                id="civilStatus"
-                className="mt-1 bg-gray-50"
-                value={formData.civilStatus}
-                readOnly
+              <Select
                 disabled
-              />
-              <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
+                value={formData.civilStatus}
+                onValueChange={(value) => handleInputChange('civilStatus', value)}
+              >
+                <SelectTrigger className="w-full mt-1">
+                  <SelectValue placeholder="select gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Single">Single</SelectItem>
+                  <SelectItem value="Married">Married</SelectItem>
+                  <SelectItem value="Widowed">Widowed</SelectItem>
+                  <SelectItem value="Separated">Separated</SelectItem>
+                  <SelectItem value="Divorced">Divorced</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
@@ -404,30 +440,28 @@ export default function BarangayClearanceForm({ onBackAction, onSubmit }: Barang
             <div>
               <Label htmlFor="purok">Sitio</Label>
               <Input
+                disabled
                 id="purok"
                 placeholder="Sitio"
-                className="mt-1 bg-gray-50"
+                className="mt-1"
                 required
                 value={formData.purok}
-                readOnly
-                disabled
+                onChange={(e) => handleInputChange('purok', e.target.value)}
               />
-              <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
             </div>
 
             <div>
               <Label htmlFor="residencyLength">Length of Residency (years)</Label>
               <Input
+                disabled
                 id="residencyLength"
                 type="number"
                 placeholder="Years"
-                className="mt-1 bg-gray-50"
+                className="mt-1"
                 required
                 value={formData.residencyLength}
-                readOnly
-                disabled
+                onChange={(e) => handleInputChange('residencyLength', e.target.value)}
               />
-              <p className="text-xs text-gray-500 mt-1">This information is from your profile and cannot be edited</p>
             </div>
           </div>
         </div>
@@ -436,14 +470,14 @@ export default function BarangayClearanceForm({ onBackAction, onSubmit }: Barang
         <div className="space-y-6">
           <h2 className="text-xl font-semibold text-gray-900 border-b pb-2">Purpose</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-4 sm:gap-6">
             <div>
               <Label htmlFor="purpose">Purpose of Clearance *</Label>
               <Select
                 value={formData.purpose}
                 onValueChange={(value) => handleInputChange('purpose', value)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select purpose" />
                 </SelectTrigger>
                 <SelectContent>
@@ -460,6 +494,40 @@ export default function BarangayClearanceForm({ onBackAction, onSubmit }: Barang
                   <SelectItem value="Other Purpose">Other Purpose</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div>
+              <Label>How would you like to receive your document? *</Label>
+              <div className="mt-2 space-y-3">
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="radio"
+                    id="pickup-online"
+                    name="pickupOption"
+                    value="online"
+                    checked={formData.pickupOption === "online"}
+                    onChange={(e) => handleInputChange('pickupOption', e.target.value)}
+                    className="h-4 w-4 text-[#23479A] focus:ring-[#23479A] border-gray-300"
+                  />
+                  <Label htmlFor="pickup-online" className="text-sm font-normal cursor-pointer">
+                    <span className="font-medium">Online</span>
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="radio"
+                    id="pickup-physical"
+                    name="pickupOption"
+                    value="pickup"
+                    checked={formData.pickupOption === "pickup"}
+                    onChange={(e) => handleInputChange('pickupOption', e.target.value)}
+                    className="h-4 w-4 text-[#23479A] focus:ring-[#23479A] border-gray-300"
+                  />
+                  <Label htmlFor="pickup-physical" className="text-sm font-normal cursor-pointer">
+                    <span className="font-medium">Pickup</span>
+                  </Label>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -555,6 +623,14 @@ export default function BarangayClearanceForm({ onBackAction, onSubmit }: Barang
         {/* Submit Button */}
         <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-4">
           <Button
+            type="button"
+            onClick={onBackAction}
+            variant="outline"
+            className="w-full sm:w-auto"
+          >
+            Back
+          </Button>
+          <Button
             type="submit"
             disabled={isSubmitting}
             className="bg-[#23479A] hover:bg-[#23479A]/90 text-white px-6 sm:px-8 py-3 text-base w-full sm:w-auto"
@@ -562,10 +638,10 @@ export default function BarangayClearanceForm({ onBackAction, onSubmit }: Barang
             {isSubmitting ? (
               <>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                Processing Application...
+                Submitting...
               </>
             ) : (
-              "Submit Barangay Clearance Request"
+              "Submit"
             )}
           </Button>
         </div>
