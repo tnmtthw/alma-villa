@@ -354,40 +354,30 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
                     <PaymentPage request={request} />
                   )}
                   {/* CLAIM BUTTON */}
-                  {(request.status === "ready_to_claim" || request.status === "completed") &&
-                    request.type === "Barangay Clearance" && (
-                      <ClaimClearanceButton request={request} />
-                    )}
-                  {(request.status === "ready_to_claim" || request.status === "completed") && request.type === "Certificate of Residency" && (
-                    <>
-                      <ClaimResidencyButton request={request} />
-                    </>
+                  {request.pickupOption !== "pickup" && (request.status === "ready_to_claim" || request.status === "completed") && request.type === "Barangay Clearance" && (
+                    <ClaimClearanceButton request={request} />
                   )}
-                  {(request.status === "ready_to_claim" || request.status === "completed") && request.type === "Certificate of Indigency" && (
-                    <>
-                      <ClaimIndigencyButton request={request} />
-                    </>
+                  {request.pickupOption !== "pickup" && (request.status === "ready_to_claim" || request.status === "completed") && request.type === "Certificate of Residency" && (
+                    <ClaimResidencyButton request={request} />
                   )}
-                  {(request.status === "ready_to_claim" || request.status === "completed") && request.type === "Certificate of Good Moral Character" && (
-                    <>
-                      <ClaimGoodMoralButton request={request} />
-                    </>
+                  {request.pickupOption !== "pickup" && (request.status === "ready_to_claim" || request.status === "completed") && request.type === "Certificate of Indigency" && (
+                    <ClaimIndigencyButton request={request} />
                   )}
-                  {(request.status === "ready_to_claim" || request.status === "completed") && request.type === "Business Permit" && (
-                    <>
-                      <ClaimBusinessButton
-                        request={{
-                          id: request.id,
-                          businessName: request.businessName!,
-                          businessLocation: request.businessLocation!,
-                          operatorName: request.operatorName!,
-                          operatorAddress: request.operatorAddress!,
-                          updatedAt: request.updatedAt!,
-                          requestDate: request.requestDate,
-                          status: request.status,
-                        }}
-                      />
-                    </>
+                  {request.pickupOption !== "pickup" && (request.status === "ready_to_claim" || request.status === "completed") && request.type === "Certificate of Good Moral Character" && (
+                    <ClaimGoodMoralButton request={request} />
+                  )}
+                  {request.pickupOption !== "pickup" && (request.status === "ready_to_claim" || request.status === "completed") && request.type === "Business Permit" && (
+                    <ClaimBusinessButton
+                      request={{
+                        id: request.id,
+                        businessName: request.businessName!,
+                        businessLocation: request.businessLocation!,
+                        operatorName: request.operatorName!,
+                        operatorAddress: request.operatorAddress!,
+                        updatedAt: request.updatedAt!,
+                        requestDate: request.requestDate,
+                        status: request.status,
+                      }} />
                   )}
                   {/* <Button variant="outline" size="sm" className="text-gray-600 hover:text-[#23479A]">
                     <Eye className="h-3 w-3 mr-1" />
