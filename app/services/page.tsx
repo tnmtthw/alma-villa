@@ -20,7 +20,7 @@ const services = [
     description: "Download and fill out necessary forms for your transactions",
     icon: FileText,
     href: "/forms",
-    features: ["Business Permit Application", "Barangay Clearance Form", "Certificate Request Form", "Complaint Form"],
+    features: ["Business Permit Application", "Barangay Clearance Form", "Certificate Request Form",],
     color: "bg-emerald-500"
   },
   {
