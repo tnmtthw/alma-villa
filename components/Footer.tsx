@@ -16,7 +16,7 @@ const Footer = () => {
         { label: "Request Document", href: "/dashboard/request" },
         { label: "Track Requests", href: "/dashboard/track" },
         { label: "News", href: "/dashboard/news" },
-        { label: "Forms", href: "/dashboard/Download" },
+        { label: "Downloadable Forms", href: "/dashboard/Download" },
       ],
     },
     {
@@ -25,7 +25,7 @@ const Footer = () => {
         { label: "Document Request", href: "/dashboard/request" },
         { label: "Request Form", href: "/dashboard/request-form" },
         { label: "Track Requests", href: "/dashboard/track" },
-        { label: "Download Forms", href: "/dashboard/Download" },
+        { label: "Downloadable Forms", href: "/dashboard/Download" },
       ],
     },
     {

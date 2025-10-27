@@ -3,11 +3,12 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { LogIn, LogOut, Menu, Home, Settings, FileText, Newspaper } from "lucide-react"
+import { LogIn, LogOut, Menu, Home, Settings, FileText, Newspaper, UserPlus } from "lucide-react"
 import { usePathname } from "next/navigation"
 import { useSession, signOut } from 'next-auth/react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { useState } from "react"
 
 interface MenuItem {
   href: string
@@ -18,7 +19,7 @@ interface MenuItem {
 const menuItems: MenuItem[] = [
   { href: "/", label: "Home", icon: Home },
   { href: "/services", label: "Services", icon: Settings },
-  { href: "/forms", label: "Forms", icon: FileText },
+  { href: "/forms", label: "Downloadable Forms", icon: FileText },
   { href: "/news", label: "News", icon: Newspaper },
 ]
 
@@ -26,6 +27,11 @@ const Navbar = () => {
   const pathname = usePathname()
   const isDashboard = pathname?.startsWith("/dashboard")
   const { data: session } = useSession();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false)
+  }
 
   const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
@@ -78,7 +84,7 @@ const Navbar = () => {
         </div>
 
         {/* Mobile Menu Button */}
-        <Sheet>
+        <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
           <SheetTrigger asChild>
             <Button
               variant="outline"
@@ -102,10 +108,12 @@ const Navbar = () => {
                   <Link
                     key={item.href}
                     href={item.href}
-                    onClick={
-                      item.label === "News" ? handleNewsClick : 
-                      undefined
-                    }
+                    onClick={(e) => {
+                      if (item.label === "News") {
+                        handleNewsClick(e)
+                      }
+                      closeMobileMenu()
+                    }}
                     className="flex items-center px-3 py-3 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-[#23479A] transition-colors duration-200 w-full"
                   >
                     <item.icon className="mr-3 h-5 w-5" />
@@ -118,7 +126,10 @@ const Navbar = () => {
                   {session ? (
                     <Button
                       variant="default"
-                      onClick={() => signOut()}
+                      onClick={() => {
+                        signOut()
+                        closeMobileMenu()
+                      }}
                       className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px] w-full"
                     >
                       <span className="flex items-center gap-2 text-white">
@@ -127,16 +138,36 @@ const Navbar = () => {
                       </span>
                     </Button>
                   ) : (
-                    <Button
-                      variant="default"
-                      asChild
-                      className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px] w-full"
-                    >
-                      <Link href="/account/login" className="flex items-center gap-2 text-white">
-                        Login
-                        <LogIn className="h-4 w-4" />
-                      </Link>
-                    </Button>
+                    <div className="space-y-3">
+                      <Button
+                        variant="default"
+                        asChild
+                        className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px] w-full"
+                      >
+                        <Link 
+                          href="/account/login" 
+                          className="flex items-center gap-2 text-white"
+                          onClick={closeMobileMenu}
+                        >
+                          Login
+                          <LogIn className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        asChild
+                        className="border-[#23479A] text-black bg-white hover:bg-gray-50 rounded-[2px] w-full"
+                      >
+                        <Link 
+                          href="/account/signup" 
+                          className="flex items-center gap-2"
+                          onClick={closeMobileMenu}
+                        >
+                          Signup
+                          <UserPlus className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </div>
                   )}
                 </div>
               </div>
@@ -171,16 +202,28 @@ const Navbar = () => {
               </span>
             </Button>
           ) : (
-            <Button
-              variant="default"
-              asChild
-              className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px]"
-            >
-              <Link href="/account/login" className="flex items-center gap-2 text-white">
-                Login
-                <LogIn className="h-4 w-4" />
-              </Link>
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="default"
+                asChild
+                className="bg-[#23479A] hover:bg-[#23479A]/90 rounded-[2px]"
+              >
+                <Link href="/account/login" className="flex items-center gap-2 text-white">
+                  Login
+                  <LogIn className="h-4 w-4" />
+                </Link>
+              </Button>
+              <Button
+                variant="outline"
+                asChild
+                className="border-[#23479A] text-black bg-white hover:bg-gray-50 rounded-[2px]"
+              >
+                <Link href="/account/signup" className="flex items-center gap-2">
+                  Signup
+                  <UserPlus className="h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
           )}
         </div>
       </div>

@@ -408,34 +408,10 @@ export default function DashboardPage() {
 
             {/* Sidebar - Mobile Stack */}
             <div className="space-y-4 sm:space-y-6">
-              <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-lg">
-                <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
-                  <CardTitle className="text-base sm:text-lg font-semibold flex items-center gap-2">
-                    <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-[#23479A]" />
-                    Upcoming Events
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3 sm:space-y-4 px-4 sm:px-6 pb-4 sm:pb-6">
-                  {upcomingEvents.map((event, index) => (
-                    <div key={index} className="p-3 rounded-lg border border-gray-100 hover:border-[#23479A]/20 hover:bg-[#23479A]/5 transition-all duration-200">
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
-                        <h4 className="text-sm font-medium text-gray-900 flex-1">{event.title}</h4>
-                        <Badge variant="outline" className="text-xs w-fit">{event.type}</Badge>
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-xs text-gray-600 flex items-center gap-1">
-                          <Calendar className="h-3 w-3 flex-shrink-0" />
-                          {event.date} at {event.time}
-                        </p>
-                        <p className="text-xs text-gray-500">{event.location}</p>
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+              {/* Upcoming Events Card - REMOVED */}
 
-              {/* Mobile-Optimized Quick Stats Card */}
-              <Card className="bg-gradient-to-br from-[#23479A] to-[#23479A]/80 text-white border-0 shadow-lg">
+              {/* Mobile-Optimized Quick Stats Card - COMMENTED OUT */}
+              {/* <Card className="bg-gradient-to-br from-[#23479A] to-[#23479A]/80 text-white border-0 shadow-lg">
                 <CardContent className="p-4 sm:p-6">
                   <div className="grid grid-cols-2 gap-4 sm:space-y-4 sm:block">
                     <div className="flex items-center gap-3">
@@ -454,7 +430,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+              </Card> */}
             </div>
           </div>
 

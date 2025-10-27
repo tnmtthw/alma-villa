@@ -65,7 +65,7 @@ const navigationItems: NavigationItem[] = [
   },
   {
     icon: FileText,
-    label: "Forms",
+    label: "Downloadable Forms",
     href: "/dashboard/Download",
   },
   {

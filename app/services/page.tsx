@@ -16,7 +16,7 @@ const services = [
     color: "bg-blue-500"
   },
   {
-    title: "Online Forms",
+    title: "Downloadable Forms",
     description: "Download and fill out necessary forms for your transactions",
     icon: FileText,
     href: "/forms",

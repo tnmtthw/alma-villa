@@ -153,43 +153,7 @@ export default function DocumentRequestPage() {
           </Card>
         </div>
 
-        {/* Popular Documents Section */}
-        {selectedCategory === "all" && !searchQuery && (
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Most Requested Documents</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {documentTypes.filter(doc => doc.popular).map((doc) => {
-                const Icon = doc.icon
-                return (
-                  <Card key={doc.id} className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 rounded-lg bg-[#23479A]/10">
-                          <Icon className="h-6 w-6 text-[#23479A]" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-gray-900 group-hover:text-[#23479A] transition-colors">
-                            {doc.title}
-                          </h3>
-                          <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                            {doc.description}
-                          </p>
-                          <div className="flex items-center gap-3 mt-3">
-                            <span className="text-sm font-medium text-[#23479A]">{doc.fee}</span>
-                            <span className="text-xs text-gray-500 flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              {doc.processingTime}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
-          </div>
-        )}
+        {/* Popular Documents Section - REMOVED */}
 
         {/* All Documents Grid */}
         <div>

@@ -13,7 +13,7 @@ const services = [
     iconColor: "text-blue-600"
   },
   {
-    title: "Online Forms",
+    title: "Downloadable Forms",
     description: "Download and fill out necessary forms for your transactions quickly and efficiently.",
     icon: "/window.svg",
     href: "/dashboard/Download",

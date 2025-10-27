@@ -190,40 +190,7 @@ export default function DownloadableFormsPage() {
           </Card>
         </div>
 
-        {/* Popular Forms Section */}
-        {selectedCategory === "all" && !searchQuery && (
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Most Downloaded Forms</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {downloadableForms.filter(form => form.popular).map((form) => {
-                const Icon = form.icon
-                return (
-                  <Card key={form.id} className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow">
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 rounded-lg bg-[#23479A]/10">
-                          <Icon className="h-6 w-6 text-[#23479A]" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-gray-900 line-clamp-2">
-                            {form.title}
-                          </h3>
-                          <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                            {form.description}
-                          </p>
-                          <div className="flex items-center gap-3 mt-3">
-                            <span className="text-xs text-gray-500">{form.fileSize}</span>
-                            <span className="text-xs text-gray-500">{form.pages} page{form.pages !== 1 ? 's' : ''}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
-          </div>
-        )}
+        {/* Popular Forms Section - REMOVED */}
 
         {/* All Forms Grid */}
         <div>
