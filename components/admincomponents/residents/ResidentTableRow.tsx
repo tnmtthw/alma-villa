@@ -4,6 +4,7 @@
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
+import ProfilePicture from "@/components/ProfilePicture"
 import {
   User2,
   Phone,
@@ -86,28 +87,17 @@ export default function ResidentTableRow({
         
         <td className="px-6 py-4">
           <div className="flex items-center gap-3">
-            {/* Avatar with captured photo or initials */}
+            {/* Profile Picture with Captured Photo */}
             <div className="relative">
-              {resident.capturedPhoto ? (
-                <img
-                  src={resident.capturedPhoto}
-                  alt={`${resident.firstName} ${resident.lastName}`}
-                  className="h-10 w-10 rounded-full object-cover border-2 border-gray-200"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    const fallback = target.nextElementSibling as HTMLElement;
-                    if (fallback) fallback.style.display = 'flex';
-                  }}
-                />
-              ) : null}
-              <div 
-                className={`h-10 w-10 rounded-full bg-[#23479A] text-white font-medium flex items-center justify-center text-sm ${
-                  resident.capturedPhoto ? 'hidden' : 'flex'
-                }`}
-              >
-                {getInitials(resident.firstName, resident.lastName)}
-              </div>
+              <ProfilePicture
+                capturedPhoto={resident.capturedPhoto}
+                firstName={resident.firstName}
+                lastName={resident.lastName}
+                middleName={resident.middleName}
+                size="md"
+                showBadge={false}
+                className="border-2 border-gray-200"
+              />
               
               {/* Status indicator */}
               <div className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white ${

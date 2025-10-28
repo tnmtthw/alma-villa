@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
+import ProfilePicture from "@/components/ProfilePicture"
 import {
   User2,
   Mail,
@@ -235,6 +236,43 @@ export default function AdminProfile() {
           Manage your personal information and account preferences.
         </p>
       </div>
+
+      {/* Profile Picture Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <User2 className="h-5 w-5 text-[#23479A]" />
+            Profile Picture
+          </CardTitle>
+          <CardDescription>
+            Your profile picture and personal information.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-6">
+            <ProfilePicture
+              capturedPhoto={apiData?.capturedPhoto}
+              firstName={apiData?.firstName}
+              lastName={apiData?.lastName}
+              middleName={apiData?.middleName}
+              size="xl"
+              showBadge={true}
+            />
+            <div className="flex-1">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {apiData?.firstName} {apiData?.lastName}
+              </h3>
+              <p className="text-gray-600 mb-4">
+                This photo was captured during your account registration for identity verification.
+              </p>
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 bg-green-500 rounded-full"></div>
+                <span className="text-sm text-gray-600">Verified Identity</span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6">
         <Card>

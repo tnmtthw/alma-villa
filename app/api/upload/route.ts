@@ -2,6 +2,7 @@
 
 import { put } from '@vercel/blob';
 import { NextResponse } from 'next/server';
+import { validateImageFile } from '@/lib/fileValidation';
 
 export const runtime = "edge"
 
@@ -19,6 +20,12 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     if (!file || typeof file === 'string') {
       return NextResponse.json({ error: 'Invalid or missing file' }, { status: 400 });
+    }
+
+    // Validate file size and type
+    const validation = validateImageFile(file);
+    if (!validation.isValid) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
     // Use file object directly for upload with random suffix to avoid conflicts

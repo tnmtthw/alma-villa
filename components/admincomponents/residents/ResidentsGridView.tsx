@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
+import ProfilePicture from "@/components/ProfilePicture"
 import {
   MoreVertical,
   Eye,
@@ -126,31 +127,29 @@ export default function ResidentsGridView({
                       <Archive className="h-4 w-4 mr-2" />
                       Archive
                     </DropdownMenuItem>
-                    <DropdownMenuItem
+                    {/* <DropdownMenuItem
                       onClick={() => onDelete(resident)}
                       className="text-red-600"
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
                       Delete
-                    </DropdownMenuItem>
+                    </DropdownMenuItem> */}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
 
-              {/* Avatar and Name */}
+              {/* Profile Picture and Name */}
               <div className="text-center mb-4">
                 <div className="relative inline-block">
-                  {resident.capturedPhoto ? (
-                    <img
-                      src={resident.capturedPhoto}
-                      alt={`${resident.firstName} ${resident.lastName}`}
-                      className="h-16 w-16 rounded-full object-cover mx-auto"
-                    />
-                  ) : (
-                    <div className="h-16 w-16 rounded-full bg-[#23479A] text-white font-medium flex items-center justify-center mx-auto text-lg">
-                      {resident.firstName[0]}{resident.lastName[0]}
-                    </div>
-                  )}
+                  <ProfilePicture
+                    capturedPhoto={resident.capturedPhoto}
+                    firstName={resident.firstName}
+                    lastName={resident.lastName}
+                    middleName={resident.middleName}
+                    size="lg"
+                    showBadge={false}
+                    className="mx-auto"
+                  />
                   {/* Role Badge */}
                   <Badge
                     className={`absolute -bottom-1 -right-1 px-1.5 py-0.5 text-xs ${resident.role === "Admin"

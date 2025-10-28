@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Upload, X, Eye, Trash2 } from "lucide-react"
+import { validateImageFile, FILE_SIZE_LIMITS } from "@/lib/fileValidation"
 
 interface DocumentUploadProps {
   onNextAction: () => void
@@ -110,10 +111,19 @@ export default function DocumentUpload({ onNextAction, onBackAction }: DocumentU
     const files = e.target.files
     if (!files) return
 
+    const file = files[0]
+    
+    // Validate file before processing
+    const validation = validateImageFile(file)
+    if (!validation.isValid) {
+      alert(validation.error)
+      return
+    }
+
     if (type === "front") {
-      setFrontImage(files[0])
+      setFrontImage(file)
     } else if (type === "back") {
-      setBackImage(files[0])
+      setBackImage(file)
     } else {
       setSupportingDocs([...supportingDocs, ...Array.from(files)])
     }
@@ -268,7 +278,7 @@ export default function DocumentUpload({ onNextAction, onBackAction }: DocumentU
                         />
                       </label>
                     </div>
-                    <p className="text-xs text-gray-500">PNG, JPG up to 5MB</p>
+                    <p className="text-xs text-gray-500">PNG, JPG up to {FILE_SIZE_LIMITS.IMAGE_MAX_SIZE_MB}MB</p>
                   </div>
                 </div>
               ) : (
@@ -353,7 +363,7 @@ export default function DocumentUpload({ onNextAction, onBackAction }: DocumentU
                         />
                       </label>
                     </div>
-                    <p className="text-xs text-gray-500">PNG, JPG up to 5MB</p>
+                    <p className="text-xs text-gray-500">PNG, JPG up to {FILE_SIZE_LIMITS.IMAGE_MAX_SIZE_MB}MB</p>
                   </div>
                 </div>
               ) : (

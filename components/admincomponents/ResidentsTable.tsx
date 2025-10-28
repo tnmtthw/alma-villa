@@ -950,14 +950,14 @@ export default function ResidentsTable() {
                       <Archive className="h-4 w-4 mr-1" />
                       Archive
                     </Button>
-                    <Button
+                    {/* <Button
                       size="sm"
                       onClick={handleBulkDelete}
                       className="bg-red-600 hover:bg-red-700 text-white"
                     >
                       <Trash2 className="h-4 w-4 mr-1" />
                       Delete
-                    </Button>
+                    </Button> */}
                   </div>
                 </div>
               </div>

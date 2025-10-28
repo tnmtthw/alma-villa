@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
+import ProfilePicture from "@/components/ProfilePicture"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -86,29 +87,16 @@ export default function ResidentsGrid({
                   />
                   
                   <div className="flex flex-col items-center gap-2">
-                    {/* Avatar */}
-                    <div className="relative">
-                      {resident.capturedPhoto ? (
-                        <img
-                          src={resident.capturedPhoto}
-                          alt={`${resident.firstName} ${resident.lastName}`}
-                          className="h-16 w-16 rounded-full object-cover border-2 border-gray-200"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.style.display = 'none';
-                            const fallback = target.nextElementSibling as HTMLElement;
-                            if (fallback) fallback.style.display = 'flex';
-                          }}
-                        />
-                      ) : null}
-                      <div 
-                        className={`h-16 w-16 rounded-full bg-gradient-to-br from-[#23479A] to-[#23479A]/80 text-white font-semibold flex items-center justify-center text-lg ${
-                          resident.capturedPhoto ? 'hidden' : 'flex'
-                        }`}
-                      >
-                        {getInitials(resident.firstName, resident.lastName)}
-                      </div>
-                    </div>
+                    {/* Profile Picture */}
+                    <ProfilePicture
+                      capturedPhoto={resident.capturedPhoto}
+                      firstName={resident.firstName}
+                      lastName={resident.lastName}
+                      middleName={resident.middleName}
+                      size="lg"
+                      showBadge={false}
+                      className="border-2 border-gray-200"
+                    />
                     
                     {/* Name and Role */}
                     <div className="text-center">
@@ -226,13 +214,13 @@ export default function ResidentsGrid({
                     
                     <DropdownMenuSeparator />
                     
-                    <DropdownMenuItem
+                    {/* <DropdownMenuItem
                       className="text-red-600 hover:bg-gray-50 cursor-pointer"
                       onClick={() => onDelete(resident.id)}
                     >
                       <Trash2 className="mr-2 h-3 w-3" />
                       Delete
-                    </DropdownMenuItem>
+                    </DropdownMenuItem> */}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import ProfilePicture from "@/components/ProfilePicture"
 import {
   User2,
   Mail,
@@ -692,21 +693,15 @@ export default function UserProfile() {
             <Card className="bg-white border-0 shadow-sm">
               <CardContent className="p-4 sm:p-6 md:p-8">
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6">
-                  {/* Avatar Section */}
-
-
-                  <div className="relative flex-shrink-0">
-                    <Avatar className="h-20 w-20 sm:h-24 sm:w-24">
-                      <AvatarImage src="/placeholder-avatar.jpg" />
-                      <AvatarFallback className="bg-[#23479A] text-white text-lg sm:text-xl">
-                        {getUserFullName().split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-
-                    <div className="absolute -bottom-1 -right-1 h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-white border-0 border-gray-200 shadow-sm flex items-center justify-center">
-                      <BadgeCheck className="h-6 w-6 text-green-500 sm:h-8 sm:w-8" />
-                    </div>
-                  </div>
+                  {/* Profile Picture with Captured Photo */}
+                  <ProfilePicture
+                    capturedPhoto={apiData?.capturedPhoto}
+                    firstName={apiData?.firstName}
+                    lastName={apiData?.lastName}
+                    middleName={apiData?.middleName}
+                    size="lg"
+                    showBadge={true}
+                  />
 
 
                   {/* User Info */}

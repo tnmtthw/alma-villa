@@ -29,6 +29,7 @@ import {
   Eye,
   Image as ImageIcon
 } from "lucide-react"
+import { validateImageFile, FILE_SIZE_LIMITS } from "@/lib/fileValidation"
 
 interface Event {
   id?: string
@@ -136,6 +137,13 @@ export default function CreateEventModal({
   }
 
   const handleImageUpload = async (file: File) => {
+    // Validate file before upload
+    const validation = validateImageFile(file);
+    if (!validation.isValid) {
+      alert(validation.error);
+      return;
+    }
+
     setUploading(true)
     try {
       const formData = new FormData()
@@ -263,6 +271,9 @@ export default function CreateEventModal({
               }}
               className="text-sm h-11 border-gray-300 focus:border-[#23479A]"
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Supported formats: JPG, PNG, WebP (max {FILE_SIZE_LIMITS.IMAGE_MAX_SIZE_MB}MB)
+            </p>
             {uploading && <p className="text-xs text-gray-500 mt-1">Uploading...</p>}
             {previewImage && (
               <div className="mt-3">
