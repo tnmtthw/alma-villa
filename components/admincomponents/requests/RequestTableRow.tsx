@@ -28,6 +28,7 @@ interface RequestTableRowProps {
   onUpdateStatus: (request: DocumentRequest) => void
   onPaymentReview: (request: DocumentRequest) => void
   onPaymentModal: (request: DocumentRequest) => void
+  onViewReceipt: (request: DocumentRequest) => void
   getStatusConfig: (status: DocumentRequest["status"]) => {
     label: string
     color: string
@@ -42,6 +43,7 @@ export default function RequestTableRow({
   onUpdateStatus,
   onPaymentReview,
   onPaymentModal,
+  onViewReceipt,
   getStatusConfig,
   formatDate,
 }: RequestTableRowProps) {
@@ -160,6 +162,12 @@ export default function RequestTableRow({
               <DropdownMenuItem onClick={() => onPaymentReview(request)}>
                 <CreditCard className="mr-2 h-4 w-4" />
                 Review Payment
+              </DropdownMenuItem>
+            )}
+            {(request.status === "payment_sent" || request.status === "ready_to_claim" || request.status === "completed") && (
+              <DropdownMenuItem onClick={() => onViewReceipt(request)}>
+                <FileText className="mr-2 h-4 w-4" />
+                View Receipt
               </DropdownMenuItem>
             )}
             {request.status === "approved" && request.pickupOption === "pickup" && (

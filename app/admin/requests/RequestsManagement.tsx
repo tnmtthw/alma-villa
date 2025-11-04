@@ -34,6 +34,7 @@ import RequestDetailsModal from "../../../components/admincomponents/requests/Re
 import StatusUpdateModal from "../../../components/admincomponents/requests/StatusUpdateModal"
 import PaymentReviewModal from "../../../components/admincomponents/requests/PaymentReviewModal"
 import PickupPaymentModal from "../../../components/admincomponents/requests/PickupPaymentModal"
+import { InvoiceModal } from "../../../components/invoicemodal"
 
 import { DocumentRequest, RequestStats } from "../../../components/admincomponents/requests/types"
 import Link from 'next/link'
@@ -136,6 +137,8 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
   const [isStatusUpdateModalOpen, setIsStatusUpdateModalOpen] = useState(false)
   const [isPaymentReviewModalOpen, setIsPaymentReviewModalOpen] = useState(false)
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
+  const [isInvoiceOpen, setIsInvoiceOpen] = useState(false)
+  const [invoiceData, setInvoiceData] = useState<any | null>(null)
   const [updateStatusData, setUpdateStatusData] = useState({
     newStatus: "",
     adminNotes: "",
@@ -294,6 +297,39 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
   const handlePaymentModal = (request: DocumentRequest) => {
     setSelectedRequest(request)
     setIsPaymentModalOpen(true)
+  }
+
+  const handleViewReceipt = (request: DocumentRequest) => {
+    // Build a simple invoice UI payload (UI only)
+    const sampleInvoice = {
+      companyName: 'Alma Villa Barangay',
+      companyAddress: 'Alma Villa, Gloria, Oriental Mindoro 5209',
+      clientName: request.userFullName,
+      clientAddress: {
+        street: request.formData?.houseNumber ? `${request.formData.houseNumber} ${request.formData.street || ''}`.trim() : (request.formData?.street || ''),
+        city: request.formData?.purok || 'Alma Villa',
+        postcode: '5209',
+        country: 'Philippines'
+      },
+      invoiceNo: request.id?.slice(0, 6) || 'INV001',
+      issueDate: new Date(request.requestDate).toLocaleDateString(),
+      dueDate: new Date(request.requestDate).toLocaleDateString(),
+      reference: request.id,
+      items: [
+        {
+          name: request.documentType,
+          description: request.purpose || 'Document request',
+          quantity: 1,
+          unitPrice: request.documentType === 'Barangay Clearance' ? 50 : request.documentType === 'Business Permit' ? 200 : 30,
+          amount: request.documentType === 'Barangay Clearance' ? 50 : request.documentType === 'Business Permit' ? 200 : 30,
+        },
+      ],
+      total: request.documentType === 'Barangay Clearance' ? 50 : request.documentType === 'Business Permit' ? 200 : 30,
+      totalDue: request.documentType === 'Barangay Clearance' ? 50 : request.documentType === 'Business Permit' ? 200 : 30,
+      signature: 'Barangay Alma Villa'
+    }
+    setInvoiceData(sampleInvoice)
+    setIsInvoiceOpen(true)
   }
 
   const handleStatusUpdateSubmit = async () => {
@@ -646,6 +682,7 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
                     onUpdateStatus={handleUpdateStatus}
                     onPaymentReview={handlePaymentReview}
                     onPaymentModal={handlePaymentModal}
+                    onViewReceipt={handleViewReceipt}
                     getStatusConfig={getStatusConfig}
                     formatDate={formatDate}
                   />
@@ -699,6 +736,14 @@ export default function RequestsManagement({ userId }: RequestsManagementProps) 
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
         request={selectedRequest}
+      />
+
+      {/* Receipt / Invoice Modal (UI only) */}
+      <InvoiceModal
+        isOpen={isInvoiceOpen}
+        onClose={() => setIsInvoiceOpen(false)}
+        invoice={invoiceData || {}}
+        previewMode={false}
       />
     </div>
   )

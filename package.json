@@ -38,6 +38,7 @@
     "convert-base64-to-image": "^0.0.16",
     "exceljs": "^4.4.0",
     "framer-motion": "^12.23.0",
+    "html2canvas": "^1.4.1",
     "lucide-react": "^0.344.0",
     "next": "^14.2.30",
     "next-auth": "^5.0.0-beta.28",
