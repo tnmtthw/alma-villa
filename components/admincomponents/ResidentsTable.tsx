@@ -141,8 +141,8 @@ export default function ResidentsTable() {
       active: residents.filter(r => r.role === "Verified").length,
       inactive: archivedResidents.length,
       newThisMonth,
-      maleCount: residents.filter(r => r.gender === "male").length,
-      femaleCount: residents.filter(r => r.gender === "female").length,
+      maleCount: residents.filter(r => (r.gender || "").toLowerCase() === "male").length,
+      femaleCount: residents.filter(r => (r.gender || "").toLowerCase() === "female").length,
       adminCount: residents.filter(r => r.role === "Admin").length,
     }
   }, [residents, archivedResidents])
@@ -164,7 +164,7 @@ export default function ResidentsTable() {
         resident.mobileNumber.includes(searchTerm) ||
         resident.id.toLowerCase().includes(searchTerm.toLowerCase())
 
-      const matchesGender = filterGender === "All" || resident.gender === filterGender.toLowerCase()
+      const matchesGender = filterGender === "All" || (resident.gender || "").toLowerCase() === filterGender.toLowerCase()
       const matchesRole = filterRole === "All" || resident.role === filterRole
 
       return matchesSearch && matchesGender && matchesRole

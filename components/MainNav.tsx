@@ -93,6 +93,7 @@ export function MainNav() {
   const userEmail = data?.email || session?.user?.email;
   const [mounted, setMounted] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -120,7 +121,7 @@ export function MainNav() {
     <nav className="w-full border-b bg-white sticky top-0 z-50">
       <div className="flex h-16 items-center max-w-7xl mx-auto px-4 md:px-8">
         {/* Mobile Menu Button */}
-        <Sheet>
+        <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
           <SheetTrigger asChild>
             <Button variant="outline" size="sm" className="mr-3 md:mr-4 h-9 w-9 p-0 lg:hidden">
               <Menu className="h-5 w-5" />
@@ -140,6 +141,7 @@ export function MainNav() {
                   <Link
                     key={item.href}
                     href={item.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
                     className="flex items-center px-3 py-3 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-[#23479A] transition-colors duration-200"
                   >
                     <item.icon className="mr-3 h-5 w-5" />
