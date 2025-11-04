@@ -48,7 +48,7 @@ export default function DocumentUpload({ onNextAction, onBackAction }: DocumentU
   const [supportingDocs, setSupportingDocs] = useState<File[]>([])
   const [frontImagePreview, setFrontImagePreview] = useState<string | null>(null)
   const [backImagePreview, setBackImagePreview] = useState<string | null>(null)
-  const [previewModal, setPreviewModal] = useState<{isOpen: boolean, image: string, title: string}>({
+  const [previewModal, setPreviewModal] = useState<{ isOpen: boolean, image: string, title: string }>({
     isOpen: false,
     image: '',
     title: ''
@@ -112,7 +112,7 @@ export default function DocumentUpload({ onNextAction, onBackAction }: DocumentU
     if (!files) return
 
     const file = files[0]
-    
+
     // Validate file before processing
     const validation = validateImageFile(file)
     if (!validation.isValid) {
@@ -238,7 +238,7 @@ export default function DocumentUpload({ onNextAction, onBackAction }: DocumentU
             value={selectedId}
             onValueChange={setSelectedId}
           >
-            <SelectTrigger className="mt-1">
+            <SelectTrigger className="mt-1 w-full">
               <SelectValue placeholder="Select ID Type" />
             </SelectTrigger>
             <SelectContent>

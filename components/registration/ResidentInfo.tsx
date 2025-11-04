@@ -490,15 +490,14 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                   <Input
                     id="birthDate"
                     type="date"
-                    className={`mt-1 transition-all duration-200 ${
-                      isFutureDate
-                        ? "border-red-400 focus:border-red-500 bg-red-50"
-                        : isMinor
-                          ? "border-orange-400 focus:border-orange-500 bg-orange-50"
-                          : formData.birthDate && !isFutureDate && !isMinor
-                            ? "border-green-400 focus:border-green-500 bg-green-50"
-                            : ""
-                    }`}
+                    className={`mt-1 transition-all duration-200 ${isFutureDate
+                      ? "border-red-400 focus:border-red-500 bg-red-50"
+                      : isMinor
+                        ? "border-orange-400 focus:border-orange-500 bg-orange-50"
+                        : formData.birthDate && !isFutureDate && !isMinor
+                          ? "border-green-400 focus:border-green-500 bg-green-50"
+                          : ""
+                      }`}
                     required
                     value={formData.birthDate}
                     onChange={handleInputChange}
@@ -526,15 +525,14 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                   <Input
                     id="age"
                     type="number"
-                    className={`mt-1 bg-gray-100 transition-all duration-200 ${
-                      isFutureDate
-                        ? "border-red-400 bg-red-50"
-                        : isMinor
-                          ? "border-orange-400 bg-orange-50"
-                          : formData.age && !isMinor
-                            ? "border-green-400 bg-green-50"
-                            : ""
-                    }`}
+                    className={`mt-1 bg-gray-100 transition-all duration-200 ${isFutureDate
+                      ? "border-red-400 bg-red-50"
+                      : isMinor
+                        ? "border-orange-400 bg-orange-50"
+                        : formData.age && !isMinor
+                          ? "border-green-400 bg-green-50"
+                          : ""
+                      }`}
                     required
                     value={formData.age}
                     readOnly
@@ -566,7 +564,7 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                       handleSelectChange(value, "gender")
                     }
                   >
-                    <SelectTrigger className="mt-1">
+                    <SelectTrigger className="mt-1 w-full">
                       <SelectValue placeholder="Select gender" />
                     </SelectTrigger>
                     <SelectContent>
@@ -583,7 +581,7 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
                       handleSelectChange(value, "civilStatus")
                     }
                   >
-                    <SelectTrigger className="mt-1">
+                    <SelectTrigger className="mt-1 w-full">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                     <SelectContent>
@@ -794,11 +792,10 @@ export default function ResidentInfo({ onNextAction }: ResidentInfoProps) {
             type="submit"
             onClick={handleNext}
             disabled={!isFormValid()}
-            className={`rounded-[2px] px-8 ${
-              isMinor || isFutureDate
-                ? "bg-gray-400 hover:bg-gray-400 cursor-not-allowed"
-                : "bg-[#23479A] hover:bg-[#23479A]/90"
-            } text-white disabled:opacity-50 disabled:cursor-not-allowed`}
+            className={`rounded-[2px] px-8 ${isMinor || isFutureDate
+              ? "bg-gray-400 hover:bg-gray-400 cursor-not-allowed"
+              : "bg-[#23479A] hover:bg-[#23479A]/90"
+              } text-white disabled:opacity-50 disabled:cursor-not-allowed`}
             title={
               isFutureDate
                 ? "Birth date cannot be in the future"
