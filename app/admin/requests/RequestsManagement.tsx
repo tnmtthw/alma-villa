@@ -94,6 +94,7 @@ const transformDocumentToRequest = (document: any): DocumentRequest => {
     lastUpdated: document.createdAt || new Date().toISOString(),
     fee: "0",
     proofOfPayment: document.proofOfPayment || null,
+    paymentReference: document.paymentReference || null,
     urgentRequest: false, // Default to false
     formData: {
       fullName: document.fullName,

@@ -92,10 +92,10 @@ export default function PaymentReviewModal({
               <label className="text-sm font-medium text-gray-500">Amount Due</label>
               <p className="text-lg font-semibold text-gray-900">{getFeeByType(request.documentType)}</p>
             </div>
-            {/* <div>
+            <div>
               <label className="text-sm font-medium text-gray-500">Payment Reference</label>
               <p className="text-sm text-gray-900">{request.paymentReference}</p>
-            </div> */}
+            </div>
           </div>
 
           <div>

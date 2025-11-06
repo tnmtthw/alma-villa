@@ -24,12 +24,15 @@ export async function PATCH(request: Request) {
         console.log('Received request body:', body);
         
         // Extract only the fields that exist in the Document model
-        const { status, proofOfPayment, ...otherFields } = body;
+        const { status, proofOfPayment, paymentReference, referencePayment, ...otherFields } = body;
         const updateData: any = {};
         
         // Only add fields that exist in the database schema
         if (status !== undefined) updateData.status = status;
         if (proofOfPayment !== undefined) updateData.proofOfPayment = proofOfPayment;
+        // Support both keys; persist to prisma field `referencePayment`
+        if (paymentReference !== undefined) updateData.referencePayment = paymentReference;
+        else if (referencePayment !== undefined) updateData.referencePayment = referencePayment;
         
         console.log('Filtered update data:', updateData);
 

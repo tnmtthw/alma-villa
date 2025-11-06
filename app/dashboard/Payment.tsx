@@ -38,7 +38,7 @@ const PaymentPage: React.FC<PaymentProps> = ({ request }) => {
     const { addToast } = useToast();
     const [uploading, setUploading] = useState(false);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
-    const [formData, setFormData] = useState<{ image?: string }>({});
+    const [formData, setFormData] = useState<{ image?: string; paymentReference?: string }>({});
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleImageUpload = async (file: File) => {
@@ -91,6 +91,15 @@ const PaymentPage: React.FC<PaymentProps> = ({ request }) => {
 
     const handleProceedToPayment = async () => {
         try {
+            if (!formData.paymentReference || formData.paymentReference.trim() === "") {
+                addToast({
+                    title: "Missing Reference Number",
+                    description: "Please enter the payment reference number.",
+                    variant: "destructive"
+                });
+                return;
+            }
+
             if (!formData.image) {
                 addToast({
                     title: "Missing Payment Proof",
@@ -102,7 +111,7 @@ const PaymentPage: React.FC<PaymentProps> = ({ request }) => {
 
             const response = await fetch(`/api/document/set-status?id=${request.id}`, {
                 method: "PATCH",
-                body: JSON.stringify({ status: "payment_sent", proofOfPayment: formData.image }),
+                body: JSON.stringify({ status: "payment_sent", proofOfPayment: formData.image, paymentReference: formData.paymentReference }),
                 headers: { "Content-Type": "application/json" },
             });
 
@@ -159,7 +168,7 @@ const PaymentPage: React.FC<PaymentProps> = ({ request }) => {
         try {
             const response = await fetch(qrImagePath);
             const blob = await response.blob();
-            
+
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
@@ -244,6 +253,13 @@ const PaymentPage: React.FC<PaymentProps> = ({ request }) => {
                             Proof of payment
                         </label>
                         <Input
+                            type="text"
+                            placeholder="Reference Number"
+                            value={formData.paymentReference || ""}
+                            onChange={(e) => setFormData(prev => ({ ...prev, paymentReference: e.target.value }))}
+                            required
+                        />
+                        <Input
                             type="file"
                             accept="image/*"
                             onChange={e => e.target.files && handleImageUpload(e.target.files[0])}
@@ -258,7 +274,7 @@ const PaymentPage: React.FC<PaymentProps> = ({ request }) => {
                         <img
                             src={previewImage}
                             alt="Proof of Payment"
-                            className="mt-2 w-40 rounded"
+                            className="object-fill w-full h-64 pl-12 pr-12"
                         />
                     )}
                 </div>
