@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -31,92 +31,101 @@ import {
   Coins,
 } from "lucide-react"
 
-// Mock data for demonstration - using same status values as request flow
-const mockTransactions = [
-  {
-    id: "TXN-00001",
-    residentName: "Mary Joy Ramos",
-    purpose: "Barangay Clearance",
-    purposeSubtext: "Bank Of Requirements",
-    amount: 30.00,
-    modeOfPayment: "Gcash",
-    dateTime: "2024-01-15 10:30 AM",
-    receivedBy: "Admin",
-    status: "completed",
-  },
-  {
-    id: "TXN-00002",
-    residentName: "Mary Joy Ramos",
-    purpose: "Barangay Clearance",
-    purposeSubtext: "Bank Of Requirements",
-    amount: 30.00,
-    modeOfPayment: "Gcash",
-    dateTime: "2024-01-15 11:00 AM",
-    receivedBy: "Admin",
-    status: "payment_sent",
-  },
-  {
-    id: "TXN-00003",
-    residentName: "John Doe",
-    purpose: "Business Permit",
-    purposeSubtext: "Business Registration",
-    amount: 200.00,
-    modeOfPayment: "Cash",
-    dateTime: "2024-01-15 2:15 PM",
-    receivedBy: "Admin",
-    status: "completed",
-  },
-  {
-    id: "TXN-00004",
-    residentName: "Jane Smith",
-    purpose: "Certificate of Residency",
-    purposeSubtext: "Employment Requirements",
-    amount: 30.00,
-    modeOfPayment: "PayMaya",
-    dateTime: "2024-01-14 3:45 PM",
-    receivedBy: "Admin",
-    status: "pending",
-  },
-  {
-    id: "TXN-00005",
-    residentName: "Robert Johnson",
-    purpose: "Certificate of Indigency",
-    purposeSubtext: "Medical Assistance",
-    amount: 30.00,
-    modeOfPayment: "Gcash",
-    dateTime: "2024-01-14 9:20 AM",
-    receivedBy: "Admin",
-    status: "completed",
-  },
-  {
-    id: "TXN-00006",
-    residentName: "Sarah Lee",
-    purpose: "Barangay Clearance",
-    purposeSubtext: "Employment Requirements",
-    amount: 30.00,
-    modeOfPayment: "Gcash",
-    dateTime: "2024-01-13 4:30 PM",
-    receivedBy: "Admin",
-    status: "rejected",
-  },
-]
+type Transaction = {
+  id: string
+  residentName: string
+  purpose: string
+  purposeSubtext?: string
+  amount: number
+  modeOfPayment: string
+  dateTime: string
+  receivedBy: string
+  status: string
+}
+
+const getAmountByType = (type?: string): number => {
+  switch (type) {
+    case "Barangay Clearance":
+      return 50
+    case "Certificate of Residency":
+      return 30
+    case "Certificate of Indigency":
+      return 30
+    case "Business Permit":
+      return 200
+    case "Certificate of Good Moral Character":
+      return 120
+    default:
+      return 0
+  }
+}
+
+const formatDisplayDate = (isoString?: string): string => {
+  if (!isoString || isoString === "N/A") return ""
+  const d = new Date(isoString)
+  if (isNaN(d.getTime())) return ""
+  const datePart = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+  const timePart = d.toLocaleTimeString([], { hour12: false, hour: "2-digit", minute: "2-digit" })
+  return `${datePart} ${timePart}`
+}
 
 export default function CashMovementPage() {
   const [statusFilter, setStatusFilter] = useState("all")
   const [dateFilter, setDateFilter] = useState("")
+  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [loading, setLoading] = useState<boolean>(false)
 
-  // Calculate statistics - using same status values as request flow
-  const totalReceived = mockTransactions.reduce((sum, tx) => {
-    // Count completed payments as received
-    if (tx.status === "completed") return sum + tx.amount
-    return sum
-  }, 0)
+  useEffect(() => {
+    const fetchPayments = async () => {
+      try {
+        setLoading(true)
+        const res = await fetch("/api/payment", { cache: "no-store" })
+        if (!res.ok) throw new Error("Failed to load payments")
+        const data = await res.json()
+        const docs = (data?.documents ?? []) as any[]
+        const txs: Transaction[] = docs.map((d) => {
+          const amount = getAmountByType(d?.type)
+          const name = d?.fullName || d?.businessName || "N/A"
+          const dateIso = (d?.paymentDate && d.paymentDate !== "N/A") ? d.paymentDate : d?.createdAt
+          const dateTime = formatDisplayDate(dateIso)
+          return {
+            id: d?.id,
+            residentName: name,
+            purpose: d?.type || "N/A",
+            purposeSubtext: d?.purpose || undefined,
+            amount,
+            modeOfPayment: "Gcash", // default
+            dateTime,
+            receivedBy: "Admin", // default
+            status: (d?.status || "").toLowerCase(),
+          }
+        })
+        setTransactions(txs)
+      } catch (e) {
+        console.error(e)
+        setTransactions([])
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchPayments()
+  }, [])
 
-  const pendingPayment = mockTransactions.filter((tx) => 
-    tx.status === "pending" || tx.status === "payment_sent"
-  ).length
+  // Calculate statistics from API data
+  const totalReceived = useMemo(() => {
+    return transactions.reduce((sum, tx) => {
+      if (tx.status === "completed" || tx.status === "ready_to_claim") return sum + tx.amount
+      return sum
+    }, 0)
+  }, [transactions])
 
-  const successfulTransactions = mockTransactions.filter((tx) => tx.status === "completed").length
+  const pendingPayment = useMemo(() => {
+    return transactions.filter((tx) => tx.status === "pending" || tx.status === "payment_sent").length
+  }, [transactions])
+
+  const successfulTransactions = useMemo(() => {
+    return transactions.filter((tx) => tx.status === "completed" || tx.status === "ready_to_claim").length
+  }, [transactions])
 
   // Calculate trends and changes (mock data for demonstration)
   const previousTotalReceived = totalReceived * 0.85 // Example: 15% increase
@@ -138,7 +147,7 @@ export default function CashMovementPage() {
     : "0.0"
 
   // Filter transactions
-  const filteredTransactions = mockTransactions.filter((tx) => {
+  const filteredTransactions = transactions.filter((tx) => {
     const statusMatch = statusFilter === "all" || tx.status.toLowerCase() === statusFilter.toLowerCase()
     // Add date filtering logic here if needed
     return statusMatch
@@ -380,11 +389,18 @@ export default function CashMovementPage() {
                   <TableHead className="font-semibold text-gray-900">Date & Time</TableHead>
                   <TableHead className="font-semibold text-gray-900">Received By</TableHead>
                   <TableHead className="font-semibold text-gray-900">Status</TableHead>
-                  <TableHead className="font-semibold text-gray-900">Action</TableHead>
+                  {/* Action column disabled */}
+                  {/** <TableHead className="font-semibold text-gray-900">Action</TableHead> **/}
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredTransactions.length === 0 ? (
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={9} className="text-center py-8 text-gray-500">
+                      Loading...
+                    </TableCell>
+                  </TableRow>
+                ) : filteredTransactions.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={9} className="text-center py-8 text-gray-500">
                       No transactions found
@@ -406,11 +422,14 @@ export default function CashMovementPage() {
                       <TableCell>{transaction.dateTime}</TableCell>
                       <TableCell>{transaction.receivedBy}</TableCell>
                       <TableCell>{getStatusBadge(transaction.status)}</TableCell>
+                      {/* Action cell disabled */}
+                      {/**
                       <TableCell>
                         <Button variant="ghost" size="sm">
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </TableCell>
+                      **/}
                     </TableRow>
                   ))
                 )}

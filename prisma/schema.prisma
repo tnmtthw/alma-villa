@@ -72,6 +72,7 @@ model Document {
   citizenship      String?  @default("N/A")
   proofOfPayment   String?  @default("N/A")
   paymentReference String?  @default("N/A")
+  paymentDate      String?  @default("N/A")
   pickupOption     String?  @default("online")
   user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

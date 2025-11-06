@@ -109,9 +109,11 @@ const PaymentPage: React.FC<PaymentProps> = ({ request }) => {
                 return;
             }
 
+            const paymentDate = new Date().toISOString();
+
             const response = await fetch(`/api/document/set-status?id=${request.id}`, {
                 method: "PATCH",
-                body: JSON.stringify({ status: "payment_sent", proofOfPayment: formData.image, paymentReference: formData.paymentReference }),
+                body: JSON.stringify({ status: "payment_sent", proofOfPayment: formData.image, paymentReference: formData.paymentReference, paymentDate }),
                 headers: { "Content-Type": "application/json" },
             });
 
