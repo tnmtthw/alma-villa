@@ -23,6 +23,13 @@ import {
   RefreshCw,
   Shield,
 } from "lucide-react"
+
+// Custom Peso Sign icon component
+const PesoSign = ({ className }: { className?: string }) => (
+  <span className={className} style={{ fontSize: '1em', lineHeight: '1', fontWeight: 'bold', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+    ₱
+  </span>
+)
 import { signOut } from "next-auth/react"
 import { useSession } from "next-auth/react"
 import useSWR, { mutate } from 'swr'
@@ -52,6 +59,12 @@ const getNavigationItems = (pendingRequests: number, upcomingEvents: number) => 
     label: "Events",
     href: "/admin/events",
     badge: upcomingEvents > 0 ? upcomingEvents : null,
+  },
+  {
+    icon: PesoSign,
+    label: "Cash Movement",
+    href: "/admin/cash-movement",
+    badge: null,
   },
   {
     icon: Shield,
