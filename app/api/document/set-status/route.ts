@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { prisma } from '@/lib/prisma';
 import { AuditLogger, getClientIP, getUserAgent } from '@/lib/audit';
+import { auth } from '@/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,17 +21,29 @@ export async function PATCH(request: Request) {
             );
         }
 
+        // Get the current session to identify who is approving the payment
+        const session = await auth();
+        const adminName = session?.user?.name || 'Admin';
+
         body = await request.json();
         console.log('Received request body:', body);
         
         // Extract only the fields that exist in the Document model
-        const { status, proofOfPayment, paymentReference, paymentDate,...otherFields } = body;
+        const { status, proofOfPayment, paymentReference, paymentDate, paymentReceived } = body;
         const updateData: any = {};
         
         if (status !== undefined) updateData.status = status;
         if (proofOfPayment !== undefined) updateData.proofOfPayment = proofOfPayment;
         if (paymentReference !== undefined) updateData.paymentReference = paymentReference;
         if (paymentDate !== undefined) updateData.paymentDate = paymentDate;
+        
+        // When approving payment (status = 'ready_to_claim'), save who approved it
+        if (status === 'ready_to_claim') {
+            updateData.paymentReceived = adminName;
+        } else if (paymentReceived !== undefined) {
+            // Allow explicit paymentReceived to be set for other cases
+            updateData.paymentReceived = paymentReceived;
+        }
      
         console.log('Filtered update data:', updateData);
 
@@ -51,7 +64,7 @@ export async function PATCH(request: Request) {
 
         // Log document status change
         if (status && updatedDocument.user) {
-            const adminUser = 'System Admin'; // You might want to get this from session
+            const adminUser = adminName;
             if (status === 'ready_to_claim') {
                 await AuditLogger.logDocumentApproval(
                     updatedDocument.user.id,

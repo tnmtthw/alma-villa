@@ -96,7 +96,7 @@ export default function CashMovementPage() {
             amount,
             modeOfPayment: "Gcash", // default
             dateTime,
-            receivedBy: "Admin", // default
+            receivedBy: d?.paymentReceived, // default
             status: (d?.status || "").toLowerCase(),
           }
         })
@@ -130,19 +130,19 @@ export default function CashMovementPage() {
   // Calculate trends and changes (mock data for demonstration)
   const previousTotalReceived = totalReceived * 0.85 // Example: 15% increase
   const totalReceivedChange = totalReceived - previousTotalReceived
-  const totalReceivedChangePercent = previousTotalReceived > 0 
+  const totalReceivedChangePercent = previousTotalReceived > 0
     ? ((totalReceivedChange / previousTotalReceived) * 100).toFixed(1)
     : "0.0"
 
   const previousPending = pendingPayment > 0 ? pendingPayment - 1 : 0
   const pendingChange = pendingPayment - previousPending
-  const pendingChangePercent = previousPending > 0 
+  const pendingChangePercent = previousPending > 0
     ? ((pendingChange / previousPending) * 100).toFixed(1)
     : "0.0"
 
   const previousSuccessful = successfulTransactions > 0 ? successfulTransactions - 2 : 0
   const successfulChange = successfulTransactions - previousSuccessful
-  const successfulChangePercent = previousSuccessful > 0 
+  const successfulChangePercent = previousSuccessful > 0
     ? ((successfulChange / previousSuccessful) * 100).toFixed(1)
     : "0.0"
 
@@ -167,10 +167,10 @@ export default function CashMovementPage() {
       rejected: { label: "Rejected", color: "bg-red-100 text-red-800", icon: XCircle }
     }
 
-    const config = configs[normalizedStatus] || { 
-      label: "Unknown", 
-      color: "bg-gray-100 text-gray-800", 
-      icon: FileText 
+    const config = configs[normalizedStatus] || {
+      label: "Unknown",
+      color: "bg-gray-100 text-gray-800",
+      icon: FileText
     }
 
     const Icon = config.icon
@@ -242,7 +242,7 @@ export default function CashMovementPage() {
               </div>
             )}
           </div>
-          
+
           <div className="space-y-2">
             <div className="flex items-end gap-2">
               <h3 className="text-3xl font-bold text-gray-900 leading-none">
@@ -254,7 +254,7 @@ export default function CashMovementPage() {
                 </span>
               )}
             </div>
-            
+
             <div>
               <p className="text-sm font-semibold text-gray-700 mb-1">
                 Total Received
@@ -279,7 +279,7 @@ export default function CashMovementPage() {
               </div>
             )}
           </div>
-          
+
           <div className="space-y-2">
             <div className="flex items-end gap-2">
               <h3 className="text-3xl font-bold text-gray-900 leading-none">
@@ -291,7 +291,7 @@ export default function CashMovementPage() {
                 </span>
               )}
             </div>
-            
+
             <div>
               <p className="text-sm font-semibold text-gray-700 mb-1">
                 Pending Payment
@@ -316,7 +316,7 @@ export default function CashMovementPage() {
               </div>
             )}
           </div>
-          
+
           <div className="space-y-2">
             <div className="flex items-end gap-2">
               <h3 className="text-3xl font-bold text-gray-900 leading-none">
@@ -328,7 +328,7 @@ export default function CashMovementPage() {
                 </span>
               )}
             </div>
-            
+
             <div>
               <p className="text-sm font-semibold text-gray-700 mb-1">
                 Successful Transaction

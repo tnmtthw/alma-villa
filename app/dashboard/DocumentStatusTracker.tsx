@@ -5,7 +5,8 @@ import { Eye, Clock, CheckCircle, AlertCircle, FileText, Calendar, Filter } from
 import Link from "next/link"
 import { useSession } from "next-auth/react"
 import useSWR from 'swr'
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
+import { createPortal } from "react-dom"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -20,6 +21,7 @@ import ClaimGoodMoralButton from './pdfgenerator/ClaimGoodMoral'
 import ClaimBusinessButton from './pdfgenerator/ClaimBusiness'
 import PaymentPage from './Payment'
 import QRVerification from '@/app/dashboard/pdfgenerator/QRVerification'
+import { InvoiceModal } from '@/components/invoicemodal'
 
 const fetcher = (...args: [input: RequestInfo | URL, init?: RequestInit]) =>
   fetch(...args).then((res) => res.json())
@@ -44,6 +46,9 @@ interface DocumentRequest {
   progress?: number
   rejectionReason?: string
   pickupOption: string
+  paymentDate?: string
+  paymentReference?: string
+  paymentReceived?: string
 
   // FOR BUSINESS PERMIT
   businessName?: string
@@ -51,6 +56,23 @@ interface DocumentRequest {
   operatorName?: string
   operatorAddress?: string
   updatedAt?: string
+}
+
+const getFeeByType = (type: string) => {
+  switch (type) {
+    case "Barangay Clearance":
+      return "₱50";
+    case "Certificate of Residency":
+      return "₱30";
+    case "Certificate of Indigency":
+      return "₱30";
+    case "Business Permit":
+      return "₱200";
+    case "Certificate of Good Moral Character":
+      return "₱120";
+    default:
+      return "₱0";
+  }
 }
 
 const getStatusConfig = (status: DocumentRequest["status"]) => {
@@ -129,6 +151,14 @@ interface DocumentStatusTrackerProps {
 const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrackerProps) => {
   const { data: session } = useSession()
   const [statusFilter, setStatusFilter] = useState("all")
+  const [isInvoiceOpen, setIsInvoiceOpen] = useState(false)
+  const [invoiceData, setInvoiceData] = useState<any | null>(null)
+  const [isMounted, setIsMounted] = useState(false)
+
+  // Ensure we're on the client side for portal
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   const { data, error, isLoading } = useSWR(
     session?.user?.id ? `/api/user/docs?userId=${session.user.id}` : null,
@@ -152,6 +182,15 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
       day: "numeric",
       year: "numeric"
     }),
+    paymentDate: doc.paymentDate && doc.paymentDate !== "N/A"
+      ? new Date(doc.paymentDate).toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric"
+      })
+      : undefined,
+    paymentReference: doc.paymentReference && doc.paymentReference !== "N/A" ? doc.paymentReference : undefined,
+    paymentReceived: doc.paymentReceived && doc.paymentReceived !== "N/A" ? doc.paymentReceived : undefined,
 
     // FOR BUSINESS PERMIT
     businessName: doc.businessName,
@@ -163,13 +202,15 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
     pickupOption: doc.pickupOption,
     status: doc.status,
     purpose: doc.purpose,
-    fee: "₱50.00", // Example: replace with real fee field if available
-    progress: doc.status === "pending" ? 25
-      : doc.status === "approved" ? 60
-        : doc.status === "processing" ? 40
-          : doc.status === "ready_for_claim" ? 100
-            : doc.status === "completed" ? 100
-              : 0
+    fee: getFeeByType(doc.type || ""),
+    progress: doc.status === "pending" ? 15
+      : doc.status === "approved" ? 35
+        : doc.status === "processing" ? 55
+          : doc.status === "payment_sent" ? 75
+            : doc.status === "ready_to_claim" ? 95
+              : doc.status === "completed" ? 100
+                : doc.status === "rejected" ? 100
+                  : 0
   })) || []
 
   // Filter documents based on selected status
@@ -186,7 +227,51 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
     return Array.from(statuses)
   }, [allDocuments])
 
+  // Handle view invoice/receipt
+  const handleViewInvoice = (request: DocumentRequest) => {
+    // Extract fee amount from string (e.g., "₱50" -> 50)
+    const feeAmount = parseFloat(request.fee?.replace('₱', '') || '0')
+    
+    const invoice = {
+      companyName: 'Alma Villa Barangay',
+      companyAddress: 'Alma Villa, Gloria, Oriental Mindoro 5209',
+      clientName: request.fullName || 'N/A',
+      clientAddress: {
+        street: request.street || request.purok || 'Alma Villa',
+        city: request.purok || 'Alma Villa',
+        postcode: '5209',
+        country: 'Philippines'
+      },
+      receiptNo: request.paymentReference || request.id?.slice(0, 8) || 'REC001',
+      invoiceNo: request.id?.slice(0, 6) || 'INV001',
+      issueDate: request.paymentDate || request.requestDate,
+      dueDate: request.paymentDate || request.requestDate,
+      reference: request.paymentReference || request.id,
+      referenceNo: request.paymentReference || request.id,
+      documentType: request.type,
+      document: request.type,
+      paymentMethod: 'GCash',
+      items: [
+        {
+          name: request.type,
+          description: request.purpose || 'Document request',
+          quantity: 1,
+          unitPrice: feeAmount,
+          amount: feeAmount,
+        },
+      ],
+      total: feeAmount,
+      totalDue: feeAmount,
+      signature: 'Barangay Alma Villa',
+      processedBy: request.paymentReceived || 'Admin',
+      dateApproved: request.paymentDate || request.requestDate
+    }
+    setInvoiceData(invoice)
+    setIsInvoiceOpen(true)
+  }
+
   return (
+    <>
     <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-lg">
       <CardHeader className="pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
@@ -379,22 +464,28 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
                         status: request.status,
                       }} />
                   )}
-                  {/* <Button variant="outline" size="sm" className="text-gray-600 hover:text-[#23479A]">
-                    <Eye className="h-3 w-3 mr-1" />
-                    View
-                  </Button> */}
+                  {/* INVOICE BUTTON - Only show for payment_sent, ready_to_claim, and completed */}
+                  {(request.status === "payment_sent" || request.status === "ready_to_claim" || request.status === "completed") && (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-gray-600 hover:text-[#23479A]"
+                      onClick={() => handleViewInvoice(request)}
+                    >
+                      <FileText className="h-3 w-3 mr-1" />
+                      Receipt
+                    </Button>
+                  )}
                 </div>
               </div>
 
-              {/* <div className="mb-4">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-medium text-gray-600">Progress</span>
-                  <span className="text-xs font-medium text-gray-900">{request.progress}%</span>
-                </div>
-                <Progress value={request.progress} className="h-2" />
-              </div> */}
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-xs font-medium text-gray-600">Progress</span>
+                <span className="text-xs font-medium text-gray-900">{request.progress}%</span>
+              </div>
+              <Progress value={request.progress} className="h-2" />
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div className={`grid gap-3 text-xs ${(request.status === "payment_sent" || request.status === "ready_to_claim" || request.status === "completed") && request.paymentDate ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 sm:grid-cols-1"}`}>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-3 w-3 text-gray-400" />
                   <div>
@@ -402,6 +493,15 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
                     <p className="font-medium text-gray-900">{request.requestDate}</p>
                   </div>
                 </div>
+                {(request.status === "payment_sent" || request.status === "ready_to_claim" || request.status === "completed") && request.paymentDate && (
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-3 w-3 text-gray-400" />
+                    <div>
+                      <p className="text-gray-500">Payment Date</p>
+                      <p className="font-medium text-gray-900">{request.paymentDate}</p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="mt-3 pt-3 border-t border-gray-100">
@@ -424,6 +524,18 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
 
       </CardContent>
     </Card>
+
+    {/* Invoice Modal - Rendered via portal for proper overlay */}
+    {isMounted && createPortal(
+      <InvoiceModal
+        isOpen={isInvoiceOpen}
+        onClose={() => setIsInvoiceOpen(false)}
+        invoice={invoiceData || {}}
+        previewMode={false}
+      />,
+      document.body
+    )}
+  </>
   )
 }
 
