@@ -39,7 +39,7 @@ interface DocumentRequest {
   purok: string
   type: string
   requestDate: string
-  status: "pending" | "processing" | "approved" | "payment_sent" | "ready_to_claim" | "completed" | "rejected"
+  status: "pending" | "processing" | "approved" | "payment_sent" | "payment_rejected" | "ready_to_claim" | "completed" | "rejected"
   estimatedCompletion?: string
   purpose: string
   fee?: string
@@ -108,6 +108,14 @@ const getStatusConfig = (status: DocumentRequest["status"]) => {
       borderColor: "border-orange-200",
       icon: Clock,
       description: "Your request is in queue for review"
+    },
+    payment_rejected: {
+      label: "Payment Rejected",
+      color: "text-orange-600",
+      bgColor: "bg-orange-50",
+      borderColor: "border-orange-200",
+      icon: Clock,
+      description: "Your payment couldn’t be processed. Please check your payment details and try again."
     },
     ready_to_claim: {
       label: "Ready to Claim",
@@ -207,10 +215,11 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
       : doc.status === "approved" ? 35
         : doc.status === "processing" ? 55
           : doc.status === "payment_sent" ? 75
-            : doc.status === "ready_to_claim" ? 95
-              : doc.status === "completed" ? 100
-                : doc.status === "rejected" ? 100
-                  : 0
+            : doc.status === "payment_rejected" ? 75
+              : doc.status === "ready_to_claim" ? 95
+                : doc.status === "completed" ? 100
+                  : doc.status === "rejected" ? 100
+                    : 0
   })) || []
 
   // Filter documents based on selected status
@@ -231,7 +240,7 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
   const handleViewInvoice = (request: DocumentRequest) => {
     // Extract fee amount from string (e.g., "₱50" -> 50)
     const feeAmount = parseFloat(request.fee?.replace('₱', '') || '0')
-    
+
     const invoice = {
       companyName: 'Alma Villa Barangay',
       companyAddress: 'Alma Villa, Gloria, Oriental Mindoro 5209',
@@ -272,270 +281,287 @@ const DocumentStatusTracker = ({ showViewAllButton = true }: DocumentStatusTrack
 
   return (
     <>
-    <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-lg">
-      <CardHeader className="pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
-          <div className="space-y-1">
-            <CardTitle className="text-lg sm:text-xl font-semibold flex items-center gap-2">
-              <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-[#23479A]" />
-              Document Requests
-            </CardTitle>
-            <CardDescription className="text-sm sm:text-base text-gray-600">
-              Track the status of your document requests
-            </CardDescription>
-          </div>
-          {showViewAllButton && (
-            <Button
-              asChild
-              variant="outline"
-              size="sm"
-              className="text-gray-500 hover:text-[#23479A] border-gray-200 hover:border-[#23479A]/20 hover:bg-[#23479A]/5 w-full sm:w-auto"
-            >
-              <Link href="/dashboard/track">View All Requests</Link>
-            </Button>
-          )}
-        </div>
-      </CardHeader>
-
-      {/* Filter Section */}
-      <div className="px-4 sm:px-6 pb-4">
-        <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-gray-500" />
-            <span className="text-sm font-medium text-gray-700">Filter by status:</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="All Statuses" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses ({allDocuments.length})</SelectItem>
-                {availableStatuses.map((statusValue) => {
-                  const count = allDocuments.filter(doc => doc.status === statusValue).length
-                  const statusConfig = getStatusConfig(statusValue)
-                  return (
-                    <SelectItem key={statusValue} value={statusValue}>
-                      <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${statusValue === 'pending' ? 'bg-orange-500' :
-                          statusValue === 'approved' ? 'bg-purple-500' :
-                            statusValue === 'processing' ? 'bg-blue-500' :
-                              statusValue === 'payment_sent' ? 'bg-yellow-500' :
-                                statusValue === 'ready_to_claim' ? 'bg-green-500' :
-                                  statusValue === 'completed' ? 'bg-gray-500' :
-                                    statusValue === 'rejected' ? 'bg-red-500' :
-                                      'bg-gray-400'
-                          }`} />
-                        {statusConfig.label} ({count})
-                      </div>
-                    </SelectItem>
-                  )
-                })}
-              </SelectContent>
-            </Select>
-            {statusFilter !== "all" && (
+      <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-lg">
+        <CardHeader className="pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0">
+            <div className="space-y-1">
+              <CardTitle className="text-lg sm:text-xl font-semibold flex items-center gap-2">
+                <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-[#23479A]" />
+                Document Requests
+              </CardTitle>
+              <CardDescription className="text-sm sm:text-base text-gray-600">
+                Track the status of your document requests
+              </CardDescription>
+            </div>
+            {showViewAllButton && (
               <Button
+                asChild
                 variant="outline"
                 size="sm"
-                onClick={() => setStatusFilter("all")}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 hover:text-[#23479A] border-gray-200 hover:border-[#23479A]/20 hover:bg-[#23479A]/5 w-full sm:w-auto"
               >
-                Clear Filter
+                <Link href="/dashboard/track">View All Requests</Link>
               </Button>
             )}
           </div>
+        </CardHeader>
+
+        {/* Filter Section */}
+        <div className="px-4 sm:px-6 pb-4">
+          <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">Filter by status:</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-48">
+                  <SelectValue placeholder="All Statuses" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses ({allDocuments.length})</SelectItem>
+                  {availableStatuses.map((statusValue) => {
+                    const count = allDocuments.filter(doc => doc.status === statusValue).length
+                    const statusConfig = getStatusConfig(statusValue)
+                    return (
+                      <SelectItem key={statusValue} value={statusValue}>
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${statusValue === 'pending' ? 'bg-orange-500' :
+                            statusValue === 'approved' ? 'bg-purple-500' :
+                              statusValue === 'processing' ? 'bg-blue-500' :
+                                statusValue === 'payment_sent' ? 'bg-yellow-500' :
+                                  statusValue === 'payment_rejected' ? 'bg-yellow-500' :
+                                    statusValue === 'ready_to_claim' ? 'bg-green-500' :
+                                      statusValue === 'completed' ? 'bg-gray-500' :
+                                        statusValue === 'rejected' ? 'bg-red-500' :
+                                          'bg-gray-400'
+                            }`} />
+                          {statusConfig.label} ({count})
+                        </div>
+                      </SelectItem>
+                    )
+                  })}
+                </SelectContent>
+              </Select>
+              {statusFilter !== "all" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setStatusFilter("all")}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  Clear Filter
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
 
-      <CardContent className="space-y-4 px-4 sm:px-6 pb-4 sm:pb-6">
+        <CardContent className="space-y-4 px-4 sm:px-6 pb-4 sm:pb-6">
 
-        {isLoading && <p className="text-sm text-gray-500">Loading...</p>}
-        {error && <p className="text-sm text-red-500">Failed to load document requests.</p>}
+          {isLoading && <p className="text-sm text-gray-500">Loading...</p>}
+          {error && <p className="text-sm text-red-500">Failed to load document requests.</p>}
 
-        {!isLoading && !error && documents.length === 0 && allDocuments.length > 0 && (
-          <div className="text-center py-8">
-            <div className="text-gray-400 mb-2">
-              <Filter className="h-12 w-12 mx-auto" />
+          {!isLoading && !error && documents.length === 0 && allDocuments.length > 0 && (
+            <div className="text-center py-8">
+              <div className="text-gray-400 mb-2">
+                <Filter className="h-12 w-12 mx-auto" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No requests found</h3>
+              <p className="text-gray-500 mb-4">
+                No document requests match the selected filter "{statusFilter}".
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => setStatusFilter("all")}
+                className="text-[#23479A] border-[#23479A] hover:bg-[#23479A]/5"
+              >
+                Show All Requests
+              </Button>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No requests found</h3>
-            <p className="text-gray-500 mb-4">
-              No document requests match the selected filter "{statusFilter}".
-            </p>
-            <Button
-              variant="outline"
-              onClick={() => setStatusFilter("all")}
-              className="text-[#23479A] border-[#23479A] hover:bg-[#23479A]/5"
-            >
-              Show All Requests
-            </Button>
-          </div>
-        )}
+          )}
 
-        {!isLoading && !error && allDocuments.length === 0 && (
-          <div className="text-center py-8">
-            <div className="text-gray-400 mb-2">
-              <FileText className="h-12 w-12 mx-auto" />
+          {!isLoading && !error && allDocuments.length === 0 && (
+            <div className="text-center py-8">
+              <div className="text-gray-400 mb-2">
+                <FileText className="h-12 w-12 mx-auto" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No document requests yet</h3>
+              <p className="text-gray-500">
+                You haven't submitted any document requests yet.
+              </p>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No document requests yet</h3>
-            <p className="text-gray-500">
-              You haven't submitted any document requests yet.
-            </p>
-          </div>
-        )}
+          )}
 
-        {documents.map((request) => {
-          const statusConfig = getStatusConfig(request.status)
-          const StatusIcon = statusConfig.icon
+          {documents.map((request) => {
+            const statusConfig = getStatusConfig(request.status)
+            const StatusIcon = statusConfig.icon
 
-          return (
-            <div
-              key={request.id}
-              className={`group relative bg-white border rounded-xl p-4 sm:p-5 hover:shadow-md transition-all duration-200 ${statusConfig.borderColor} border-l-4`}
-            >
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
-                      {request.type}
-                    </h3>
-                    <Badge
-                      variant="secondary"
-                      className={`text-xs ${statusConfig.bgColor} ${statusConfig.color} border-0 whitespace-nowrap cursor-default`}
-                    >
-                      <StatusIcon className="h-3 w-3 mr-1" />
-                      {statusConfig.label}
-                    </Badge>
-                    {request.pickupOption && (
+            return (
+              <div
+                key={request.id}
+                className={`group relative bg-white border rounded-xl p-4 sm:p-5 hover:shadow-md transition-all duration-200 ${statusConfig.borderColor} border-l-4`}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
+                        {request.type}
+                      </h3>
                       <Badge
-                        className={
-                          request.pickupOption === "online"
-                            ? "bg-blue-500 text-white  cursor-default"
-                            : "bg-green-500 text-white  cursor-default"
-                        }
+                        variant="secondary"
+                        className={`text-xs ${statusConfig.bgColor} ${statusConfig.color} border-0 whitespace-nowrap cursor-default`}
                       >
-                        {request.pickupOption === "online" ? "Online" : "Pickup"}
+                        <StatusIcon className="h-3 w-3 mr-1" />
+                        {statusConfig.label}
                       </Badge>
+                      {request.pickupOption && (
+                        <Badge
+                          className={
+                            request.pickupOption === "online"
+                              ? "bg-blue-500 text-white  cursor-default"
+                              : "bg-green-500 text-white  cursor-default"
+                          }
+                        >
+                          {request.pickupOption === "online" ? "Online" : "Pickup"}
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-600 mb-1">Request ID: {request.id}</p>
+                    <p className="text-xs text-gray-500">{statusConfig.description}</p>
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    {/* PAYMENT BUTTON */}
+
+                    {request.status === "approved" && request.pickupOption !== "pickup" && request.type === "Barangay Clearance" && (
+                      <PaymentPage request={request} />
+                    )}
+                    {request.status === "approved" && request.pickupOption !== "pickup" && request.type === "Certificate of Residency" && (
+                      <PaymentPage request={request} />
+                    )}
+                    {request.status === "approved" && request.pickupOption !== "pickup" && request.type === "Certificate of Indigency" && (
+                      <PaymentPage request={request} />
+                    )}
+                    {request.status === "approved" && request.pickupOption !== "pickup" && request.type === "Certificate of Good Moral Character" && (
+                      <PaymentPage request={request} />
+                    )}
+                    {request.status === "approved" && request.pickupOption !== "pickup" && request.type === "Business Permit" && (
+                      <PaymentPage request={request} />
+                    )}
+                    {/* PAYMENT BUTTON FOR REJECTED PAYMENT */}
+                    {request.status === "payment_rejected" && request.pickupOption !== "pickup" && request.type === "Barangay Clearance" && (
+                      <PaymentPage request={request} />
+                    )}
+                    {request.status === "payment_rejected" && request.pickupOption !== "pickup" && request.type === "Certificate of Residency" && (
+                      <PaymentPage request={request} />
+                    )}
+                    {request.status === "payment_rejected" && request.pickupOption !== "pickup" && request.type === "Certificate of Indigency" && (
+                      <PaymentPage request={request} />
+                    )}
+                    {request.status === "payment_rejected" && request.pickupOption !== "pickup" && request.type === "Certificate of Good Moral Character" && (
+                      <PaymentPage request={request} />
+                    )}
+                    {request.status === "payment_rejected" && request.pickupOption !== "pickup" && request.type === "Business Permit" && (
+                      <PaymentPage request={request} />
+                    )}
+                    {/* CLAIM BUTTON */}
+                    {request.pickupOption !== "pickup" && (request.status === "ready_to_claim" || request.status === "completed") && request.type === "Barangay Clearance" && (
+                      <ClaimClearanceButton request={request} />
+                    )}
+                    {request.pickupOption !== "pickup" && (request.status === "ready_to_claim" || request.status === "completed") && request.type === "Certificate of Residency" && (
+                      <ClaimResidencyButton request={request} />
+                    )}
+                    {request.pickupOption !== "pickup" && (request.status === "ready_to_claim" || request.status === "completed") && request.type === "Certificate of Indigency" && (
+                      <ClaimIndigencyButton request={request} />
+                    )}
+                    {request.pickupOption !== "pickup" && (request.status === "ready_to_claim" || request.status === "completed") && request.type === "Certificate of Good Moral Character" && (
+                      <ClaimGoodMoralButton request={request} />
+                    )}
+                    {request.pickupOption !== "pickup" && (request.status === "ready_to_claim" || request.status === "completed") && request.type === "Business Permit" && (
+                      <ClaimBusinessButton
+                        request={{
+                          id: request.id,
+                          businessName: request.businessName!,
+                          businessLocation: request.businessLocation!,
+                          operatorName: request.operatorName!,
+                          operatorAddress: request.operatorAddress!,
+                          updatedAt: request.updatedAt!,
+                          requestDate: request.requestDate,
+                          status: request.status,
+                        }} />
+                    )}
+                    {/* INVOICE BUTTON - Only show for payment_sent, ready_to_claim, and completed */}
+                    {(request.status === "payment_sent" || request.status === "ready_to_claim" || request.status === "completed") && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-gray-600 hover:text-[#23479A]"
+                        onClick={() => handleViewInvoice(request)}
+                      >
+                        <FileText className="h-3 w-3 mr-1" />
+                        Receipt
+                      </Button>
                     )}
                   </div>
-                  <p className="text-sm text-gray-600 mb-1">Request ID: {request.id}</p>
-                  <p className="text-xs text-gray-500">{statusConfig.description}</p>
                 </div>
-                <div className="flex gap-2 shrink-0">
-                  {/* PAYMENT BUTTON */}
 
-                  {request.status === "approved" && request.pickupOption !== "pickup" && request.type === "Barangay Clearance" && (
-                    <PaymentPage request={request} />
-                  )}
-                  {request.status === "approved" && request.pickupOption !== "pickup" && request.type === "Certificate of Residency" && (
-                    <PaymentPage request={request} />
-                  )}
-                  {request.status === "approved" && request.pickupOption !== "pickup" && request.type === "Certificate of Indigency" && (
-                    <PaymentPage request={request} />
-                  )}
-                  {request.status === "approved" && request.pickupOption !== "pickup" && request.type === "Certificate of Good Moral Character" && (
-                    <PaymentPage request={request} />
-                  )}
-                  {request.status === "approved" && request.pickupOption !== "pickup" && request.type === "Business Permit" && (
-                    <PaymentPage request={request} />
-                  )}
-                  {/* CLAIM BUTTON */}
-                  {request.pickupOption !== "pickup" && (request.status === "ready_to_claim" || request.status === "completed") && request.type === "Barangay Clearance" && (
-                    <ClaimClearanceButton request={request} />
-                  )}
-                  {request.pickupOption !== "pickup" && (request.status === "ready_to_claim" || request.status === "completed") && request.type === "Certificate of Residency" && (
-                    <ClaimResidencyButton request={request} />
-                  )}
-                  {request.pickupOption !== "pickup" && (request.status === "ready_to_claim" || request.status === "completed") && request.type === "Certificate of Indigency" && (
-                    <ClaimIndigencyButton request={request} />
-                  )}
-                  {request.pickupOption !== "pickup" && (request.status === "ready_to_claim" || request.status === "completed") && request.type === "Certificate of Good Moral Character" && (
-                    <ClaimGoodMoralButton request={request} />
-                  )}
-                  {request.pickupOption !== "pickup" && (request.status === "ready_to_claim" || request.status === "completed") && request.type === "Business Permit" && (
-                    <ClaimBusinessButton
-                      request={{
-                        id: request.id,
-                        businessName: request.businessName!,
-                        businessLocation: request.businessLocation!,
-                        operatorName: request.operatorName!,
-                        operatorAddress: request.operatorAddress!,
-                        updatedAt: request.updatedAt!,
-                        requestDate: request.requestDate,
-                        status: request.status,
-                      }} />
-                  )}
-                  {/* INVOICE BUTTON - Only show for payment_sent, ready_to_claim, and completed */}
-                  {(request.status === "payment_sent" || request.status === "ready_to_claim" || request.status === "completed") && (
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="text-gray-600 hover:text-[#23479A]"
-                      onClick={() => handleViewInvoice(request)}
-                    >
-                      <FileText className="h-3 w-3 mr-1" />
-                      Receipt
-                    </Button>
-                  )}
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs font-medium text-gray-600">Progress</span>
+                  <span className="text-xs font-medium text-gray-900">{request.progress}%</span>
                 </div>
-              </div>
+                <Progress value={request.progress} className="h-2" />
 
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-medium text-gray-600">Progress</span>
-                <span className="text-xs font-medium text-gray-900">{request.progress}%</span>
-              </div>
-              <Progress value={request.progress} className="h-2" />
-
-              <div className={`grid gap-3 text-xs ${(request.status === "payment_sent" || request.status === "ready_to_claim" || request.status === "completed") && request.paymentDate ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 sm:grid-cols-1"}`}>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-3 w-3 text-gray-400" />
-                  <div>
-                    <p className="text-gray-500">Requested</p>
-                    <p className="font-medium text-gray-900">{request.requestDate}</p>
-                  </div>
-                </div>
-                {(request.status === "payment_sent" || request.status === "ready_to_claim" || request.status === "completed") && request.paymentDate && (
+                <div className={`grid gap-3 text-xs ${(request.status === "payment_sent" || request.status === "ready_to_claim" || request.status === "completed") && request.paymentDate ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 sm:grid-cols-1"}`}>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-3 w-3 text-gray-400" />
                     <div>
-                      <p className="text-gray-500">Payment Date</p>
-                      <p className="font-medium text-gray-900">{request.paymentDate}</p>
+                      <p className="text-gray-500">Requested</p>
+                      <p className="font-medium text-gray-900">{request.requestDate}</p>
                     </div>
                   </div>
-                )}
-              </div>
+                  {(request.status === "payment_sent" || request.status === "ready_to_claim" || request.status === "completed") && request.paymentDate && (
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-3 w-3 text-gray-400" />
+                      <div>
+                        <p className="text-gray-500">Payment Date</p>
+                        <p className="font-medium text-gray-900">{request.paymentDate}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
-              <div className="mt-3 pt-3 border-t border-gray-100">
-                <p className="text-xs text-gray-500">Purpose: <span className="text-gray-700">{request.purpose}</span></p>
+                <div className="mt-3 pt-3 border-t border-gray-100">
+                  <p className="text-xs text-gray-500">Purpose: <span className="text-gray-700">{request.purpose}</span></p>
+                </div>
               </div>
+            )
+          })}
+
+          {!isLoading && documents.length === 0 && (
+            <div className="text-center py-8">
+              <FileText className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Document Requests</h3>
+              <p className="text-sm text-gray-500 mb-4">You haven't submitted any document requests yet.</p>
+              <Button className="bg-[#23479A] hover:bg-[#23479A]/90 text-white">
+                Request Document
+              </Button>
             </div>
-          )
-        })}
+          )}
 
-        {!isLoading && documents.length === 0 && (
-          <div className="text-center py-8">
-            <FileText className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No Document Requests</h3>
-            <p className="text-sm text-gray-500 mb-4">You haven't submitted any document requests yet.</p>
-            <Button className="bg-[#23479A] hover:bg-[#23479A]/90 text-white">
-              Request Document
-            </Button>
-          </div>
-        )}
+        </CardContent>
+      </Card>
 
-      </CardContent>
-    </Card>
-
-    {/* Invoice Modal - Rendered via portal for proper overlay */}
-    {isMounted && createPortal(
-      <InvoiceModal
-        isOpen={isInvoiceOpen}
-        onClose={() => setIsInvoiceOpen(false)}
-        invoice={invoiceData || {}}
-        previewMode={false}
-      />,
-      document.body
-    )}
-  </>
+      {/* Invoice Modal - Rendered via portal for proper overlay */}
+      {isMounted && createPortal(
+        <InvoiceModal
+          isOpen={isInvoiceOpen}
+          onClose={() => setIsInvoiceOpen(false)}
+          invoice={invoiceData || {}}
+          previewMode={false}
+        />,
+        document.body
+      )}
+    </>
   )
 }
 

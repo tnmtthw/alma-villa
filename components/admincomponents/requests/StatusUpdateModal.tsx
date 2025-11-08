@@ -66,6 +66,7 @@ export default function StatusUpdateModal({
                 <SelectItem value="processing">Processing</SelectItem>
                 <SelectItem value="approved">Approved</SelectItem>
                 <SelectItem value="payment_sent">Payment Sent</SelectItem>
+                <SelectItem value="payment_rejected">Payment Rejected</SelectItem>
                 <SelectItem value="ready_to_claim">Ready to Claim</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
                 <SelectItem value="rejected">Rejected</SelectItem>
@@ -83,20 +84,6 @@ export default function StatusUpdateModal({
               rows={3}
             />
           </div> */}
-
-          {updateStatusData.newStatus === "rejected" && (
-            <div>
-              <label className="text-sm font-medium text-gray-700">Rejection Reason</label>
-              <textarea
-                value={updateStatusData.rejectionReason}
-                onChange={(e) => setUpdateStatusData({ ...updateStatusData, rejectionReason: e.target.value })}
-                placeholder="Provide reason for rejection (will be sent to user)..."
-                className="mt-1 w-full p-3 border border-gray-300 rounded-md focus:ring-[#23479A] focus:border-[#23479A]"
-                rows={3}
-                required
-              />
-            </div>
-          )}
         </div>
 
         <DialogFooter>

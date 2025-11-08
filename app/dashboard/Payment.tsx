@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { validateImageFile, FILE_SIZE_LIMITS } from "@/lib/fileValidation";
-import { Download } from "lucide-react";
+import { Download, CreditCard } from "lucide-react";
 
 interface PaymentProps {
     request: {
@@ -200,7 +200,9 @@ const PaymentPage: React.FC<PaymentProps> = ({ request }) => {
             <DialogTrigger asChild>
                 <Button
                     size="sm"
+                    className="bg-[#23479A] hover:bg-[#23479A]/90 text-white"
                     onClick={() => setIsModalOpen(true)}>
+                    <CreditCard className="h-3 w-3 mr-1" />
                     Payment
                 </Button>
             </DialogTrigger>

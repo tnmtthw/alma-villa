@@ -10,30 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { FileText, Image as ImageIcon } from "lucide-react"
-
-// Import types
-interface DocumentRequest {
-  id: string
-  userId: string
-  userFullName: string
-  userEmail: string
-  userPhone: string
-  documentType: string
-  purpose: string
-  status: "pending" | "processing" | "approved" | "payment_sent" | "ready_to_claim" | "completed" | "rejected"
-  requestDate: string
-  estimatedCompletion: string
-  lastUpdated: string
-  fee?: string
-  paymentReference?: string
-  paymentProof?: string
-  rejectionReason?: string
-  adminNotes?: string
-  urgentRequest: boolean
-  formData: any
-  proofOfPayment?: string
-  attachments: string[]
-}
+import { DocumentRequest } from "./types"
 
 interface RequestDetailsModalProps {
   isOpen: boolean
@@ -207,7 +184,7 @@ export default function RequestDetailsModal({
                   <label className="text-sm font-medium text-gray-500">Payment Reference</label>
                   <p className="text-sm text-gray-900">{request.paymentReference}</p>
                 </div>
-                {request.paymentProof && (
+                {request.proofOfPayment && (
                   <div>
                     <label className="text-sm font-medium text-gray-500">Payment Proof</label>
                     <div className="mt-2">

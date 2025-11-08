@@ -6,7 +6,7 @@ export interface DocumentRequest {
   userPhone: string
   documentType: string
   purpose: string
-  status: "pending" | "processing" | "approved" | "payment_sent" | "ready_to_claim" | "completed" | "rejected"
+  status: "pending" | "processing" | "approved" | "payment_sent" | "payment_rejected" | "ready_to_claim" | "completed" | "rejected"
   requestDate: string
   estimatedCompletion: string
   lastUpdated: string
