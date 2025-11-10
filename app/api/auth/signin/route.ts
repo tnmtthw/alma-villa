@@ -101,18 +101,17 @@ export async function POST(req: Request) {
         }, { status: 401 });
       }
 
-    // Successful login - Reset all security counters
-    if (user.loginAttempts > 0 || user.lockedUntil || user.lastFailedLogin) {
-      await prisma.user.update({
-        where: { email },
-        data: {
-          loginAttempts: 0,
-          lastFailedLogin: null,
-          lockedUntil: null,
-        },
-      });
-      console.log(`Login successful - Security counters reset for: ${email}`);
-    }
+    // Successful login - Reset all security counters and update lastLogin
+    await prisma.user.update({
+      where: { email },
+      data: {
+        loginAttempts: 0,
+        lastFailedLogin: null,
+        lockedUntil: null,
+        lastLogin: now,
+      },
+    });
+    console.log(`Login successful - Security counters reset and lastLogin updated for: ${email}`);
 
     // Log successful login
     await AuditLogger.logUserLogin(
