@@ -18,6 +18,8 @@ import {
   Shield,
   User,
   Crown,
+  ToggleLeft,
+  ToggleRight,
 } from "lucide-react"
 import { Resident } from "./types"
 
@@ -25,13 +27,17 @@ interface ResidentActionsDropdownProps {
   resident: Resident
   onView: (resident: Resident) => void
   onSetRole: (resident: Resident, role: "Admin" | "Verified") => void
+  onToggleActive: (resident: Resident, nextActive: boolean) => void
 }
 
 export default function ResidentActionsDropdown({
   resident,
   onView,
-  onSetRole
+  onSetRole,
+  onToggleActive
 }: ResidentActionsDropdownProps) {
+  const isActive = resident.isActive !== false
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -53,6 +59,22 @@ export default function ResidentActionsDropdown({
         >
           <Eye className="h-4 w-4 mr-3 text-blue-500" />
           <span className="text-gray-700">View Details</span>
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator className="bg-gray-100" />
+
+        <DropdownMenuItem
+          onClick={() => onToggleActive(resident, !isActive)}
+          className="hover:bg-gray-50 cursor-pointer focus:bg-gray-50"
+        >
+          {isActive ? (
+            <ToggleLeft className="h-4 w-4 mr-3 text-red-500" />
+          ) : (
+            <ToggleRight className="h-4 w-4 mr-3 text-green-500" />
+          )}
+          <span className="text-gray-700">
+            {isActive ? "Mark as Inactive" : "Mark as Active"}
+          </span>
         </DropdownMenuItem>
 
         <DropdownMenuSeparator className="bg-gray-100" />

@@ -45,6 +45,9 @@ model User {
   placeOfBirth     String?
   document         Document[]
 
+  isActive         Boolean    @default(true)
+  lastLogin        DateTime?  @default(now())
+
   AuditLog AuditLog[]
 }
 

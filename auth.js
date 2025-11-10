@@ -55,7 +55,8 @@ export const { handlers, signIn, signOut, auth, update } = NextAuth({
               role: user.role,
               address: user.address,
               bio: user.bio,
-              mobileNumber: user.mobileNumber
+              mobileNumber: user.mobileNumber,
+              isActive: user.isActive
             };
           }
         
@@ -86,6 +87,7 @@ export const { handlers, signIn, signOut, auth, update } = NextAuth({
         token.address = user.address;
         token.bio = user.bio;
         token.mobileNumber = user.mobileNumber;
+        token.isActive = user.isActive;
       }
       
       // Update token if session was updated
@@ -94,6 +96,7 @@ export const { handlers, signIn, signOut, auth, update } = NextAuth({
         token.address = session.user.address;
         token.bio = session.user.bio;
         token.mobileNumber = session.user.mobileNumber;
+        token.isActive = session.user.isActive;
       }
       
       return token;
@@ -106,6 +109,7 @@ export const { handlers, signIn, signOut, auth, update } = NextAuth({
       session.user.address = token.address;
       session.user.bio = token.bio;
       session.user.mobileNumber = token.mobileNumber;
+      session.user.isActive = token.isActive;
       return session;
     },
   },

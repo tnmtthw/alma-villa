@@ -24,6 +24,12 @@ export async function POST(req: Request) {
       }, { status: 401 });
     }
 
+    if (!user.isActive) {
+      return NextResponse.json({
+        error: 'Account inactive'
+      }, { status: 403 });
+    }
+
     const now = new Date();
     
     // Check if account is currently locked
@@ -122,7 +128,8 @@ export async function POST(req: Request) {
       id: user.id, 
       email: user.email, 
       role: user.role,
-      name: `${user.firstName} ${user.lastName}`.trim() || user.email
+      name: `${user.firstName} ${user.lastName}`.trim() || user.email,
+      isActive: user.isActive
     }, { status: 200 });
 
   } catch (error) {

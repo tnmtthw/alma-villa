@@ -11,6 +11,7 @@ declare module "next-auth" {
     address?: string | null;
     bio?: string | null;
     mobileNumber?: string | null;
+    isActive?: boolean | null;
   }
 
   interface Session {

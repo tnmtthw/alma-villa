@@ -15,6 +15,10 @@ export default auth((req) => {
   const isAdminRoute = req.nextUrl.pathname.includes("/admin");
   const isDashboardRoute = req.nextUrl.pathname.includes("/dashboard");
 
+  if (isLoggedIn && user?.isActive === false) {
+    return Response.redirect(`${url}/account/login`);
+  }
+
   // Role-based redirects when user is logged in and trying to access auth routes
   if (isLoggedIn && isAuthRoute) {
     if (user?.role === "Admin") {

@@ -222,6 +222,35 @@ export default function ResidentsTable() {
     }
   }
 
+  const handleToggleResidentActive = async (resident: Resident, nextActive: boolean) => {
+    try {
+      const response = await fetch(`/api/user/set-active?id=${resident.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: nextActive })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update account status')
+      }
+
+      await fetchResidents()
+
+      addToast({
+        title: nextActive ? "Resident Activated" : "Resident Deactivated",
+        description: `${resident.firstName} ${resident.lastName} is now ${nextActive ? "active" : "inactive"}.`,
+        variant: nextActive ? "default" : "destructive"
+      })
+    } catch (error) {
+      console.error('Error updating resident status:', error)
+      addToast({
+        title: "Status Update Failed",
+        description: error instanceof Error ? error.message : "Failed to update resident status. Please try again.",
+        variant: "destructive"
+      })
+    }
+  }
+
   const handleArchiveResident = async (resident: Resident) => {
     try {
       // Update API - change role to Inactive
@@ -997,6 +1026,7 @@ export default function ResidentsTable() {
                         onSelect={handleSelectResident}
                         onView={(r) => handleViewResident((resident))}
                         onUpdate={handleUpdateResident}
+                        onToggleActive={handleToggleResidentActive}
                       />
                     ))}
                   </TableBody>

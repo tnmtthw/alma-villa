@@ -20,7 +20,7 @@ export default function LoginPage() {
   const [cooldownTime, setCooldownTime] = useState(0)
   const [attemptsLeft, setAttemptsLeft] = useState(3)
   const [isCheckingStatus, setIsCheckingStatus] = useState(false)
-  const [accountStatus, setAccountStatus] = useState<"checking" | "registered" | "unregistered" | "unverified" | null>(null)
+  const [accountStatus, setAccountStatus] = useState<"checking" | "registered" | "unregistered" | "unverified" | "inactive" | null>(null)
   const router = useRouter()
 
   // Reset state when email changes significantly
@@ -58,22 +58,29 @@ export default function LoginPage() {
         setCooldownTime(result.timeLeft || 0)
         setAttemptsLeft(0)
         setErrorMessage(result.error || "Account temporarily locked")
-        setAccountStatus("registered")
+        setAccountStatus(result.isActive === false ? "inactive" : "registered")
+        if (result.isActive === false) {
+          setErrorMessage("")
+        }
       } else if (response.ok) {
         // User is not locked
         setIsLocked(false)
         setCooldownTime(0)
         setAttemptsLeft(result.attemptsLeft || 3)
-        setAccountStatus("registered")
 
-        // Check if account is unverified
-        if (result.role === "Unverified") {
+        if (result.isActive === false) {
+          setAccountStatus("inactive")
+          setErrorMessage("")
+        } else if (result.role === "Unverified") {
           setAccountStatus("unverified")
           setErrorMessage("Your account is not verified. Please check your email to verify your account.")
-        } else if (result.loginAttempts > 0) {
-          setErrorMessage(`${result.loginAttempts} previous failed attempts. ${result.attemptsLeft} attempts remaining.`)
         } else {
-          setErrorMessage("")
+          setAccountStatus("registered")
+          if (result.loginAttempts > 0) {
+            setErrorMessage(`${result.loginAttempts} previous failed attempts. ${result.attemptsLeft} attempts remaining.`)
+          } else {
+            setErrorMessage("")
+          }
         }
       }
     } catch (error) {
@@ -137,6 +144,12 @@ export default function LoginPage() {
       return
     }
 
+    if (accountStatus === "inactive") {
+      setErrorMessage("This account is inactive. Please contact your administrator.")
+      setIsLoading(false)
+      return
+    }
+
     try {
       // Use NextAuth directly and handle the response
       const response = await signIn("credentials", {
@@ -176,6 +189,9 @@ export default function LoginPage() {
         } else if (response.error === "Unverified") {
           setAccountStatus("unverified")
           setErrorMessage("Your account is not verified. Please check your email to verify your account.")
+        } else if (response.error === "Account inactive") {
+          setAccountStatus("inactive")
+          setErrorMessage("")
         } else if (response.error === "CredentialsSignin") {
           setErrorMessage("Invalid email or password. Please try again.")
         } else {
@@ -309,6 +325,15 @@ export default function LoginPage() {
               </div>
             )}
 
+            {accountStatus === "inactive" && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-[2px] text-red-600 text-sm">
+                <div className="flex items-center gap-2">
+                  <Lock className="h-4 w-4" />
+                  <span>This account is inactive. Please contact your administrator.</span>
+                </div>
+              </div>
+            )}
+
             {accountStatus === "registered" && !isLocked && !errorMessage && !isCheckingStatus && (
               <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-[2px] text-green-600 text-sm">
                 <div className="flex items-center gap-2">
@@ -319,7 +344,7 @@ export default function LoginPage() {
             )}
 
             {/* Error Messages */}
-            {errorMessage && (
+            {errorMessage && accountStatus !== "inactive" && (
               <div className={`mb-4 p-3 rounded-[2px] text-sm ${isLocked
                   ? "bg-red-50 border border-red-200 text-red-600"
                   : attemptsLeft <= 1 && attemptsLeft > 0
@@ -448,7 +473,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 className="w-full bg-[#23479A] hover:bg-[#23479A]/90 text-white py-2 px-4 rounded-[2px] disabled:opacity-50 relative"
-                disabled={isLoading || isLocked || accountStatus === "unregistered" || isCheckingStatus}
+                disabled={isLoading || isLocked || accountStatus === "unregistered" || accountStatus === "inactive" || isCheckingStatus}
               >
                 {isLocked && cooldownTime > 0
                   ? `🔒 Locked (${cooldownTime}s)`

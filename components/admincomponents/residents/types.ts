@@ -31,6 +31,8 @@ export interface Resident {
   password: string
   role: "Unverified" | "Verified" | "Admin" | "Rejected" | "Inactive"
   createdAt: string
+  isActive?: boolean | null
+  lastLogin?: string | null
 }
 
 export interface ResidentStats {

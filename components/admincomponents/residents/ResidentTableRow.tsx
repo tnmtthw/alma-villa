@@ -12,6 +12,7 @@ import {
   Mail,
   Shield,
   Calendar,
+  Clock,
 } from "lucide-react"
 import { Resident } from "./types"
 import ResidentActionsDropdown from "./ResidentActionsDropdown"
@@ -23,6 +24,7 @@ interface ResidentTableRowProps {
   onSelect: (id: string, checked: boolean) => void
   onView: (resident: Resident) => void
   onUpdate: (resident: Resident) => void
+  onToggleActive: (resident: Resident, nextActive: boolean) => void
 }
 
 export default function ResidentTableRow({
@@ -30,7 +32,8 @@ export default function ResidentTableRow({
   isSelected,
   onSelect,
   onView,
-  onUpdate
+  onUpdate,
+  onToggleActive
 }: ResidentTableRowProps) {
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean
@@ -44,7 +47,8 @@ export default function ResidentTableRow({
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
   }
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString?: string | null) => {
+    if (!dateString) return "N/A"
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -52,8 +56,20 @@ export default function ResidentTableRow({
     })
   }
 
-  // For demo purposes, assuming residents are active
-  const isActive = true
+  const formatDateTime = (dateString?: string | null) => {
+    if (!dateString) return null
+    const date = new Date(dateString)
+    if (Number.isNaN(date.getTime())) return null
+    return date.toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
+
+  const isActive = resident.isActive !== false
 
   const handleSetRole = (resident: Resident, role: "Admin" | "Verified") => {
     setConfirmModal({
@@ -106,10 +122,22 @@ export default function ResidentTableRow({
             </div>
             
             <div>
-              <p className="font-semibold text-gray-900">
-                {resident.firstName} {resident.middleName} {resident.lastName}
-                {resident.suffix && ` ${resident.suffix}`}
-              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-semibold text-gray-900">
+                  {resident.firstName} {resident.middleName} {resident.lastName}
+                  {resident.suffix && ` ${resident.suffix}`}
+                </p>
+                <Badge
+                  variant="outline"
+                  className={`text-xs ${
+                    isActive
+                      ? "bg-green-50 text-green-700 border-green-200"
+                      : "bg-red-50 text-red-700 border-red-200"
+                  }`}
+                >
+                  {isActive ? "Active" : "Inactive"}
+                </Badge>
+              </div>
               <div className="flex items-center gap-2 mt-1">
                 <p className="text-sm text-gray-500 font-mono">
                   ID: {resident.id.slice(0, 8)}...
@@ -139,6 +167,14 @@ export default function ResidentTableRow({
                 Born {formatDate(resident.birthDate)}
               </span>
             </div>
+            {formatDateTime(resident.lastLogin) && (
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-gray-400" />
+                <span className="text-sm text-gray-600">
+                  Last login {formatDateTime(resident.lastLogin)}
+                </span>
+              </div>
+            )}
             <div className="text-sm text-gray-600 capitalize">
               {resident.civilStatus} • {resident.religion}
             </div>
@@ -206,6 +242,7 @@ export default function ResidentTableRow({
               resident={resident}
               onView={onView}
               onSetRole={handleSetRole}
+              onToggleActive={onToggleActive}
             />
           </div>
         </td>

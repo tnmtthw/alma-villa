@@ -38,10 +38,12 @@ export async function GET(request: NextRequest) {
         }
       }),
       
-      // Payment pending requests
+      // Payment pending requests (includes payment_pending and payment_rejected)
       prisma.document.count({
         where: {
-          status: 'payment_pending'
+          status: {
+            in: ['payment_pending', 'payment_rejected']
+          }
         }
       }),
       
@@ -113,7 +115,9 @@ export async function GET(request: NextRequest) {
       
       prisma.document.count({
         where: {
-          status: 'payment_pending',
+          status: {
+            in: ['payment_pending', 'payment_rejected']
+          },
           updatedAt: {
             lt: weekAgo
           }
