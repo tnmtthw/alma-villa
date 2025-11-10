@@ -90,19 +90,19 @@ const getStatusConfig = (status: string) => {
       dotColor: "bg-blue-500",
       icon: Activity,
     },
-    payment_pending: {
-      label: "Payment Pending",
-      color: "text-yellow-700",
-      bgColor: "bg-yellow-100",
-      dotColor: "bg-yellow-500",
-      icon: TrendingUp,
-    },
     payment_sent: {
       label: "Payment Sent",
       color: "text-yellow-700",
       bgColor: "bg-yellow-100",
       dotColor: "bg-yellow-500",
       icon: TrendingUp,
+    },
+    payment_rejected: {
+      label: "Payment Rejected",
+      color: "text-red-700",
+      bgColor: "bg-red-100",
+      dotColor: "bg-red-500",
+      icon: AlertCircle,
     },
     ready_to_claim: {
       label: "Ready to Claim",
@@ -146,7 +146,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchDashboardData()
-    
+
     // Set up auto-refresh every 30 seconds
     const interval = setInterval(() => {
       fetchDashboardData()
@@ -218,12 +218,12 @@ export default function AdminDashboard() {
       } else {
         setLoading(true)
       }
-      
+
       // Set default stats first only on initial load
       if (!isManualRefresh) {
         setStats(getDefaultStats())
       }
-      
+
       // Fetch stats and recent requests in parallel
       const [statsResponse, requestsResponse] = await Promise.all([
         fetch('/api/admin/dashboard/stats'),
@@ -282,7 +282,7 @@ export default function AdminDashboard() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <button 
+          <button
             onClick={handleManualRefresh}
             disabled={refreshing}
             className="flex items-center gap-2 px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
@@ -320,7 +320,7 @@ export default function AdminDashboard() {
             const Icon = stat.icon
             const trendIcon = stat.trend === 'up' ? ArrowUpRight : ArrowDownRight
             const trendColor = stat.trend === 'up' ? 'text-emerald-600' : 'text-red-600'
-            
+
             return (
               <div key={stat.title} className={`bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-200 ${refreshing ? 'opacity-70' : ''}`}>
                 <div className="flex items-center justify-between mb-4">
@@ -334,7 +334,7 @@ export default function AdminDashboard() {
                     </div>
                   )}
                 </div>
-                
+
                 <div className="space-y-2">
                   <div className="flex items-end gap-2">
                     <h3 className="text-3xl font-bold text-gray-900 leading-none">{stat.value}</h3>
@@ -344,7 +344,7 @@ export default function AdminDashboard() {
                       </span>
                     )}
                   </div>
-                  
+
                   <div>
                     <p className="text-sm font-semibold text-gray-700 mb-1">
                       {stat.title}
@@ -397,7 +397,7 @@ export default function AdminDashboard() {
               ) : recentRequests.length > 0 ? (
                 recentRequests.map((request: any) => {
                   const statusConfig = getStatusConfig(request.status)
-                  
+
                   return (
                     <div
                       key={request.id}
