@@ -136,10 +136,13 @@ export default function ResidentsTable() {
       return createdDate.getMonth() === currentMonth && createdDate.getFullYear() === currentYear
     }).length
 
+    const activeCount = residents.filter(resident => resident.isActive !== false).length
+    const inactiveCount = residents.filter(resident => resident.isActive === false).length + archivedResidents.length
+
     return {
       total: residents.length,
-      active: residents.filter(r => r.role === "Verified").length,
-      inactive: archivedResidents.length,
+      active: activeCount,
+      inactive: inactiveCount,
       newThisMonth,
       maleCount: residents.filter(r => (r.gender || "").toLowerCase() === "male").length,
       femaleCount: residents.filter(r => (r.gender || "").toLowerCase() === "female").length,
@@ -253,8 +256,7 @@ export default function ResidentsTable() {
 
   const handleArchiveResident = async (resident: Resident) => {
     try {
-      // Update API - change role to Inactive
-      const response = await fetch(`http://localhost:3000/api/user/${resident.id}`, {
+      const response = await fetch(`/api/user/${resident.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -305,7 +307,7 @@ export default function ResidentsTable() {
     setDeleteModalState(prev => ({ ...prev, isDeleting: true, error: "" }))
 
     try {
-      const response = await fetch(`http://localhost:3000/api/user/${deleteModalState.resident.id}`, {
+      const response = await fetch(`/api/user/${deleteModalState.resident.id}`, {
         method: 'DELETE'
       })
 
@@ -376,7 +378,7 @@ export default function ResidentsTable() {
 
     try {
       await Promise.all(selectedResidents.map(id =>
-        fetch(`http://localhost:3000/api/user/${id}`, { method: 'DELETE' })
+        fetch(`/api/user/${id}`, { method: 'DELETE' })
       ))
 
       // Refresh data from API
@@ -413,7 +415,7 @@ export default function ResidentsTable() {
         await Promise.all(selectedResidents.map(id => {
           const resident = allResidents.find(r => r.id === id)
           if (resident) {
-            return fetch(`http://localhost:3000/api/user/${id}`, {
+            return fetch(`/api/user/${id}`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
